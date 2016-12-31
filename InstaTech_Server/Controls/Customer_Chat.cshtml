@@ -1,0 +1,84 @@
+﻿<div id="divCustomerChat" hidden>
+    <div class="portal-content-frame">
+        <form id="formCustomerChat">
+            <table>
+                <tr>
+                    <td>
+                        <label for="inputName">Name:</label>
+                    </td>
+                    <td>
+                        <input required id="inputName" type="text" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="inputUserID">User ID:</label>
+                    </td>
+                    <td>
+                        <input id="inputUserID" type="text" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="inputComputerID">Computer ID:</label>
+                    </td>
+                    <td>
+                        <input id="inputComputerID" type="text" />
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <label for="inputPhone">Phone:</label>
+                    </td>
+                    <td>
+                        <input required id="inputPhone" type="tel" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="inputEmail">Email:</label>
+                    </td>
+                    <td>
+                        <input required id="inputEmail" type="email" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="selectCategory">Category:</label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("selectCategory", "", InstaTech.App_Code.Config.Support_Categories)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="selectType">Type:</label>
+                    </td>
+                    <td>
+                        <select id="selectType"></select>
+                    </td>
+                </tr>
+            </table>
+            <br />
+            <table>
+                <tr>
+                    <td>
+                        <label for="textDescription">Description of Problem or Request:</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <textarea id="textDescription"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <button type="button">Submit</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+<script src="~/Scripts/Customer_Chat.js"></script>

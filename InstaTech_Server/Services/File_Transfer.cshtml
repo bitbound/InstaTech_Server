@@ -1,0 +1,28 @@
+﻿@{
+    var strRequest = new StreamReader(Request.InputStream).ReadToEnd();
+    var jsonRequest = Json.Decode(strRequest);
+    var di = Directory.CreateDirectory(Server.MapPath("/App_Data/FileTransfers/"));
+
+
+    if (jsonRequest.Type.ToString() == "Upload")
+    {
+        var strName = Guid.NewGuid().ToString().Replace("-", "");
+        var strData = jsonRequest.File.ToString().Split(",".ToCharArray())[1];
+        File.WriteAllBytes(di.FullName + strName, Convert.FromBase64String(strData));
+        Response.Write(strName);
+    }
+    else if (jsonRequest.Type.ToString() == "Download")
+    {
+        var strName = jsonRequest.RetrievalCode.ToString();
+        Response.Write(Convert.ToBase64String(File.ReadAllBytes(di.FullName + strName)));
+        File.Delete(di.FullName + strName);
+    }
+    // Delete files older than a day.
+    foreach (var file in di.GetFiles())
+    {
+        if (DateTime.Now - file.CreationTime > TimeSpan.FromDays(1))
+        {
+            file.Delete();
+        }
+    }
+}

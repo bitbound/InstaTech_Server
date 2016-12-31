@@ -1,0 +1,7 @@
+@{
+    if (Context.IsWebSocketRequest)
+    {
+        Microsoft.Web.WebSockets.WebSocketExtensions.AcceptWebSocketRequest(Context, new InstaTech.App_Code.SocketHandlers.Remote_Control());
+        return;
+    }
+}

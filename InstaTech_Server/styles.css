@@ -1,0 +1,147 @@
+body {
+    text-align: center;
+    background-color: black;
+}
+
+button {
+    border: .1vw solid lightgray;
+    background: radial-gradient(rgb(75,75,75) 0%, rgb(35,35,35) 100%);
+    cursor: pointer;
+    color: white;
+    padding: 10px 15px;
+}
+
+#divBackground {
+    position:fixed;
+    top: 0;
+    bottom: 0;
+    left:0;
+    right:0;
+    z-index: -3;
+    min-height:99vh;
+    background: linear-gradient(to bottom left, rgb(20,20,20), rgb(100,100,100), rgb(50,50,50), rgb(100,100,100), rgb(20,20,20));
+}
+
+.portal-title {
+    display: inline-block;
+    margin-top: 2vw;
+    min-width: 60vw;
+    padding-top: 1vw;
+    padding-bottom: 1vw;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 5vw;
+    font-weight: bold;
+    text-align: center;
+    color: white;
+    border-radius: 10px;
+    border: .5vw solid white;
+    background: linear-gradient(to right, rgb(25,25,25), rgb(75,75,75), rgb(25,25,25));
+}
+.portal-button-frame {
+    margin-top: 5vw;
+    display: inline-block;
+}
+.portal-option-button {
+    position: relative;
+    display: inline-block;
+    height: 15vw;
+    width: 15vw;
+    background: radial-gradient(rgb(100,100,100) 0%, rgb(50,50,50) 100%);
+    border-radius: 100%;
+    border: .75vw outset white;
+    margin: 1vw 2vw 1vw 2vw;
+    cursor: pointer;
+    user-select: none;
+    transition-duration: 0.5s;
+    transition-timing-function: ease;
+}
+
+.portal-option-button:hover {
+    transform: scale(1.25, 1.25);
+    transition-duration: .5s;
+    transition-timing-function: ease;
+    z-index: 2;
+}
+
+.portal-option-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 12vw;
+    transform: translate(-50%, -50%);
+    font-family: "Segoe UI",Tahoma,Geneva,Verdana,sans-serif;
+    font-size: 1.5vw;
+    font-weight: bold;
+    color: white;
+}
+.portal-option-text img {
+    width: 5vw;
+    height: 5vw;
+}
+
+.switch-portal {
+    position: absolute;
+    overflow: visible;
+    left: 2vw;
+    font-size: 1vw;
+    width: 6vw;
+    height: 4vw;
+    padding: 0;
+}
+
+button:hover {
+    border: .1vw solid white;
+    background: radial-gradient(rgb(200,200,200) 0%, rgb(100,100,100) 100%);
+}
+
+.arrow-left {
+    display: inline-block;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: -1vw;
+    width: 0;
+    height: 0;
+    border-top: 1vw solid transparent;
+    border-bottom: 1vw solid transparent;
+    border-right: 1vw solid lightgray;
+}
+
+.portal-content-frame {
+    display: inline-block;
+    overflow: auto;
+    background: radial-gradient(rgb(225,225,225) 0%, rgb(175,175,175) 100%);
+    border-radius: 10px;
+    border: .2vw solid white;
+    margin: 1vw 2vw 1vw 2vw;
+    padding: 10px 5px;
+    box-shadow: rgba(255,255,255,.1) 10px 10px 5px;
+    width: 60vw;
+}
+.error-frame {
+    color: red;
+    font-weight: bold;
+}
+.portal-content-frame table {
+    width: 100%;
+}
+form {
+    display: inline-block;
+    text-align: left;
+}
+
+form label {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+form button[type="button"] {
+    float: right;
+}
+
+#textDescription {
+    width: 100%;
+    min-height: 150px;
+}
+
+td label {
+    padding-right: 10px;
+}

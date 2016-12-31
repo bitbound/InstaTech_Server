@@ -1,0 +1,73 @@
+@{}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>@InstaTech.App_Code.Config.Company_Name</title>
+        <meta name="keywords" content="Tech Support, Computer Support, Computer Help, Remote Support, Remote Tools, Remote Control, Support Chat, Live Chat" />
+        <meta name="viewport" content="width=500" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <link href="~/styles.css" rel="stylesheet" />
+        <link href="~/favicon.ico" rel="icon" />
+        <script src="~/Scripts/jquery-3.1.1.min.js"></script>
+        <script src="~/Scripts/Main_Model.js"></script>
+        <script src="~/Scripts/Default.js"></script>
+    </head>
+    <body>
+        <div id="divCustomerPortal">
+            <button id="buttonToTechPortal" class="switch-portal" onclick="switchToTechPortal()">
+                <div class="arrow-left"></div>Tech Portal
+            </button>
+            <div class="portal-title">
+                @InstaTech.App_Code.Config.Company_Name
+                <br />
+                Support Portal
+            </div>
+            <br />
+            <div class="portal-button-frame">
+                <div class="portal-option-button" opens="#divCustomerChat" opens-file="Customer_Chat.cshtml">
+                    <div class="portal-option-text">
+                        <img src="~/Assets/Images/Message_16x.svg" />
+                        <br />
+                        Support Chat
+                    </div>
+                </div>
+                <div class="portal-option-button" opens="#divCustomerRemote" opens-file="Customer_Remote.cshtml">
+                    <div class="portal-option-text">
+                        <img src="~/Assets/Images/RemoteDesktop_64x.png" />
+                        <br />
+                        Remote Session
+                    </div>
+                </div>
+                
+            </div>
+            <br />
+            <div id="divCustomerContent">
+
+            </div>
+        </div>
+
+        <div id="divTechPortal" hidden>
+            <button id="buttonToTechPortal" class="switch-portal" onclick="switchToCustomerPortal()">
+                <div class="arrow-left"></div>Customer Portal
+            </button>
+            <div class="portal-title">
+                @InstaTech.App_Code.Config.Company_Name
+                <br />
+                Tech Portal
+            </div>
+        </div>
+        <div id="divWebSocketUnavailable" hidden>
+            <div class="portal-content-frame error-frame">
+                Your browser doesn't support the features used on this website.  Please try using the latest version of Firefox, Chrome, or Edge.
+            </div>
+        </div>
+        <div id="divWebSocketError" hidden>
+            <div class="portal-content-frame error-frame">
+                There was a problem connecting.  Try closing and reopening your browser.  If the issue persists, please call your help desk.
+            </div>
+        </div>
+        <div id="divBackground"></div>
+    </body>
+</html>
