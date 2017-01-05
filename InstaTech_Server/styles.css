@@ -1,6 +1,7 @@
+/*** General Elements ***/
 body {
-    text-align: center;
     background-color: black;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 button {
@@ -8,9 +9,66 @@ button {
     background: radial-gradient(rgb(75,75,75) 0%, rgb(35,35,35) 100%);
     cursor: pointer;
     color: white;
-    padding: 10px 15px;
+    padding: 5px 10px;
 }
 
+button:hover {
+    border: .1vw solid white;
+    background: radial-gradient(rgb(200,200,200) 0%, rgb(100,100,100) 100%);
+}
+.tooltip-anchor {
+    padding: .5px 2px !important;
+    cursor: pointer
+}
+
+td textarea {
+    width: 100%;
+    min-height: 150px;
+}
+td select {
+    width: 100%;
+}
+td label {
+    margin-right: 10px;
+}
+
+form {
+    display: inline-block;
+    text-align: left;
+}
+
+form button[type="submit"] {
+    float: right;
+}
+
+/** Site-Wide Elements ***/
+#divLoading {
+    position: fixed;
+    top:0;
+    left: 0;
+    bottom:0;
+    right: 0;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255,255,255,.25);
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    color: white;
+}
+#divLoading div {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.link {
+    font-size: .8em;
+    color: steelblue;
+    cursor: pointer;
+}
 #divBackground {
     position:fixed;
     top: 0;
@@ -21,14 +79,63 @@ button {
     min-height:99vh;
     background: linear-gradient(to bottom left, rgb(20,20,20), rgb(100,100,100), rgb(50,50,50), rgb(100,100,100), rgb(20,20,20));
 }
+.left-aligned {
+    text-align: left;
+}
 
+.center-aligned {
+    text-align: center;
+}
+
+.right-aligned {
+    text-align: right;
+}
+.arrow-left {
+    display: inline-block;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: -1vw;
+    width: 0;
+    height: 0;
+    border-top: 1vw solid transparent;
+    border-bottom: 1vw solid transparent;
+    border-right: 1vw solid lightgray;
+}
+
+.arrow-down {
+    display: inline-block;
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid lightgray;
+}
+.arrow-right {
+    display: inline-block;
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid lightgray;
+    border-bottom: 10px solid transparent;
+    border-top: 10px solid transparent;
+}
+
+
+/*** Main Portal Elements ***/
 .portal-title {
     display: inline-block;
     margin-top: 2vw;
     min-width: 60vw;
     padding-top: 1vw;
     padding-bottom: 1vw;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 5vw;
     font-weight: bold;
     text-align: center;
@@ -69,10 +176,13 @@ button {
     left: 50%;
     width: 12vw;
     transform: translate(-50%, -50%);
-    font-family: "Segoe UI",Tahoma,Geneva,Verdana,sans-serif;
     font-size: 1.5vw;
     font-weight: bold;
     color: white;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 .portal-option-text img {
     width: 5vw;
@@ -89,24 +199,6 @@ button {
     padding: 0;
 }
 
-button:hover {
-    border: .1vw solid white;
-    background: radial-gradient(rgb(200,200,200) 0%, rgb(100,100,100) 100%);
-}
-
-.arrow-left {
-    display: inline-block;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    left: -1vw;
-    width: 0;
-    height: 0;
-    border-top: 1vw solid transparent;
-    border-bottom: 1vw solid transparent;
-    border-right: 1vw solid lightgray;
-}
-
 .portal-content-frame {
     display: inline-block;
     overflow: auto;
@@ -117,6 +209,7 @@ button:hover {
     padding: 10px 5px;
     box-shadow: rgba(255,255,255,.1) 10px 10px 5px;
     width: 60vw;
+    text-align: center;
 }
 .error-frame {
     color: red;
@@ -125,23 +218,151 @@ button:hover {
 .portal-content-frame table {
     width: 100%;
 }
-form {
+
+/*** Chat Elements ***/
+#divTechLoginFrame {
     display: inline-block;
-    text-align: left;
+    max-width: 350px;
 }
-
-form label {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-form button[type="button"] {
-    float: right;
-}
-
 #textDescription {
     width: 100%;
     min-height: 150px;
 }
 
-td label {
-    padding-right: 10px;
+.chat-messages {
+    border: 1px solid dimgray;
+    border-radius: 5px;
+    background-color: whitesmoke;
+    height: 300px;
+    margin: 10px;
+    overflow: auto;
+    padding: 5px;
+}
+.chat-input-frame {
+    text-align: left;
+    margin: 5px 10px;
+}
+.chat-input-frame textarea {
+    width: calc(100% - 80px);
+    margin-right: 10px;
+}
+.chat-input-frame button {
+    padding: 5px 10px;
+}
+#divWaitMessage {
+    background-color: lightgreen;
+    padding: 5px;
+    border: 1px solid dimgray;
+}
+
+/*** Tech Queue Table ***/
+#divQueueTable {
+    border: 1px solid dimgray;
+    background-color: whitesmoke;
+    min-height: 300px;
+    border-radius: 5px;
+    text-align: left;
+    white-space: nowrap;
+    overflow-y: auto;
+}
+
+
+#divQueueTable>div {
+    display: inline-block;
+    min-height: 300px;
+    text-align: center;
+    overflow: hidden;
+    vertical-align: top;
+}
+
+#divQueueTable>div:nth-child(odd){
+    background-color: aliceblue;
+}
+
+#divQueueTable .col1 {
+    max-width: 20%;
+}
+
+#divQueueTable .col2 {
+    max-width: 30%;
+    transition-timing-function: ease;
+    transition-duration: 1s;
+}
+#divQueueTable .col2.closed {
+    max-width: 0;
+    transition-timing-function: ease;
+    transition-duration: 1s;
+}
+
+#divQueueTable .col3 {
+    max-width: 45%;
+    transition-timing-function: ease;
+    transition-duration: 1s;
+}
+#divQueueTable .col3.closed {
+    max-width: 0;
+    transition-timing-function: ease;
+    transition-duration: 1s;
+}
+.queue-title {
+    margin: 15px;
+    border: 2px solid dimgray;
+    border-radius: 5px;
+    padding: 10px;
+    position: relative;
+    font-weight: bold;
+}
+.col1 .queue-title {
+    background-color: lightgreen;
+}
+.col1 .queue-title>.arrow-down{
+    border-top: 10px solid lightgreen;
+    transform: translate(-50%, 2px);
+}
+.col2 .queue-title {
+    background-color: rgb(220, 220, 120);
+}
+.col2 .queue-title > .arrow-down {
+    border-top: 10px solid rgb(220, 220, 120);
+    transform: translate(-50%, 2px);
+}
+
+.queue-block {
+    border: 2px solid dimgray;
+    border-radius: 5px;
+    margin: 15px;
+    padding: 10px;
+    white-space: initial;
+    cursor: pointer;
+    position: relative;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+.queue-block:hover {
+    background-color: lightsteelblue;
+}
+.col1 .queue-block.selected {
+    background-color: lightgreen;
+}
+.col1 .arrow-right {
+    border-left: 10px solid lightgreen;
+    transform: translate(2px, -50%);
+}
+.col2 .queue-block.selected {
+    background-color: rgb(220, 220, 120);
+}
+
+.col2 .arrow-right {
+    border-left: 10px solid rgb(220, 220, 120);
+    transform: translate(2px, -50%);
+}
+.col3 .queue-block.selected {
+    background-color: rgb(220, 220, 120);
+}
+
+.col3 .arrow-right {
+    border-left: 10px solid rgb(220, 220, 120);
+    transform: translate(2px, -50%);
 }

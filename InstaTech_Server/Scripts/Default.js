@@ -3,7 +3,13 @@
         $(".portal-button-frame").remove();
         return;
     }
-    setPortalButtonHandlers(); 
+    $(document).ajaxStart(function () {
+        $("#divLoading").show();
+    });
+    $(document).ajaxStop(function () {
+        $("#divLoading").hide();
+    })
+    setPortalButtonHandlers();
 });
 
 function init() {
@@ -15,12 +21,13 @@ function init() {
     try
     {
         var protocol = location.protocol.replace("http:", "ws:").replace("https:", "wss:") + "//";
-        InstaTech.ChatSocket = new WebSocket(protocol + location.host + "/Services/Chat_Socket.cshtml");
+        InstaTech.Socket_Chat = new WebSocket(protocol + location.host + location.pathname + "/Services/Chat_Socket.cshtml");
         setChatSocketHandlers();
         return true;
     }
     catch (ex)
     {
+        console.log("Error initiating websocket connection: " + ex);
         $("#divWebSocketError").show();
         return false;
     }
@@ -54,8 +61,8 @@ function setPortalButtonHandlers() {
         var strOpens = $(this).attr("opens");
         if ($(strOpens).length == 0) {
             var strFile = $(this).attr("opens-file");
-            $.get("/Controls/" + strFile, function (data) {
-                $("#divCustomerContent").append(data);
+            $.get(location.href + "/Controls/" + strFile, function (data) {
+                $("#divTechContent:visible, #divCustomerContent:visible").append(data);
                 slideToggleContent(strOpens);
             });
         }
@@ -78,22 +85,30 @@ function slideToggleContent(strElementName) {
     else {
         opens.slideDown(function () {
             window.scroll(0, document.body.scrollHeight);
-            opens.find("input").first().select();
+            opens.find("input[type=text]").first().select();
         });
-    }
+    };
 }
 
 function setChatSocketHandlers() {
-    InstaTech.ChatSocket.onopen = function () {
+    InstaTech.Socket_Chat.onopen = function () {
 
     }
-    InstaTech.ChatSocket.onmessage = function () {
-
+    InstaTech.Socket_Chat.onmessage = function (e) {
+        var jsonData = JSON.parse(e.data);
+        eval("handle" + jsonData.Type + "(jsonData)");
     }
-    InstaTech.ChatSocket.onclose = function () {
-
+    InstaTech.Socket_Chat.onclose = function () {
+        $("#divCustomerContent").hide();
+        $("#divTechContent").hide();
+        $(".portal-button-frame").hide();
+        $("#divWebSocketClosed").show();
     }
-    InstaTech.ChatSocket.onerror = function () {
-        
+    InstaTech.Socket_Chat.onerror = function (ex) {
+        console.log("WebSocket Error: " + ex);
+        $("#divCustomerContent").hide();
+        $("#divTechContent").hide();
+        $(".portal-button-frame").hide();
+        $("#divWebSocketError").show();
     }
 }

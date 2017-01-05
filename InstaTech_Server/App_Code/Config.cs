@@ -13,24 +13,28 @@ namespace InstaTech.App_Code
         // Replace with your company name.
         public static string Company_Name { get; } = "InstaTech";
 
-        // URL to company logo (relative or absolute).
-        public static string Company_Logo_URL { get; } =  "~/Assets/Images/Logo.png";
+        // Enable demo accounts.
+        public static bool Demo_Mode { get; } = true;
 
         // Whether to enable Active Directory tools and features.
-        public static bool Active_Directory_Enabled { get; } = true;
+        public static bool Active_Directory_Enabled { get; } = false;
 
-        // Major categories of support.  Users will select this from a drop-down list.
-        public static List<SelectListItem> Support_Categories { get; } = new List<SelectListItem>()
-        {
-            new SelectListItem() { Text = "Account/Password", Value = "Account/Password" },
-            new SelectListItem() { Text = "Application Slowness/Crashing", Value = "Application Slowness/Crashing" }
-        };
+        // If Active Directory features are enabled, techs must be in this AD group in order to log in.
+        public static string Active_Directory_Tech_Group { get; } = "";
 
-        // Sub-categories of support that fall within a major category.
-        public static List<Tuple<string, SelectListItem>> Support_Types { get; } = new List<Tuple<string, SelectListItem>>()
+        // Categories of support.  The first value is major category, second is sub-category, and third is the support queue it falls under.
+        public static List<Tuple<string, string, string>> Support_Categories { get; } = new List<Tuple<string, string, string>>()
         {
-            Tuple.Create<string, SelectListItem>("Account/Password", new SelectListItem(){ Text = "Account Locked", Value="Account Locked" }),
-            Tuple.Create<string, SelectListItem>("Account/Password", new SelectListItem(){ Text = "Password Reset", Value="Password Reset" })
+            Tuple.Create<string, string, string>("Account/Password", "Account Locked", "General"),
+            Tuple.Create<string, string, string>("Account/Password", "Password Reset", "General"),
+            Tuple.Create<string, string, string>("Account/Password", "Other", "General"),
+            Tuple.Create<string, string, string>("Slowness", "Microsoft Office", "Technical"),
+            Tuple.Create<string, string, string>("Slowness", "Internet", "Technical"),
+            Tuple.Create<string, string, string>("Slowness", "Everything", "Technical"),
+            Tuple.Create<string, string, string>("Slowness", "Other", "Technical"),
+            Tuple.Create<string, string, string>("Crashes", "Microsoft Office", "Technical"),
+            Tuple.Create<string, string, string>("Crashes", "Other", "Technical"),
+            Tuple.Create<string, string, string>("Other", "", "Other")
         };
         
     }

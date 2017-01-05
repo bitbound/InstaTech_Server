@@ -5,7 +5,7 @@ using System.Web;
 using Microsoft.Web.WebSockets;
 using System.Web.Helpers;
 
-namespace InstaTech.App_Code.SocketHandlers
+namespace InstaTech.App_Code.Socket_Handlers
 {
     public class Remote_Control : WebSocketHandler
     {
@@ -64,7 +64,7 @@ namespace InstaTech.App_Code.SocketHandlers
                             SessionID = sessionID
                         };
                         Send(Json.Encode(request));
-                        logConnection();
+                        LogConnection();
                         break;
                     }
                 case "Connect":
@@ -86,7 +86,7 @@ namespace InstaTech.App_Code.SocketHandlers
                                 this.Partner = (Remote_Control)client;
                                 ((Remote_Control)client).Partner = this;
                                 client.Send(message);
-                                logSession();
+                                LogSession();
                             }
                         }
                         else
@@ -138,7 +138,7 @@ namespace InstaTech.App_Code.SocketHandlers
             }
             SocketCollection.Remove(this);
         }
-        private void logConnection()
+        private void LogConnection()
         {
             if (!System.IO.Directory.Exists(WebSocketContext.Server.MapPath("/App_Data/Logs/")))
             {
@@ -147,7 +147,7 @@ namespace InstaTech.App_Code.SocketHandlers
             var strLogPath = WebSocketContext.Server.MapPath("/App_Data/Logs/Connections-") + DateTime.Now.ToString("yyyy-MM-dd") + ".txt";
             System.IO.File.AppendAllText(strLogPath, DateTime.Now.ToString() + "\t" + WebSocketContext.UserHostAddress + "\t" + WebSocketContext.UserAgent + "\t" + SessionID);
         }
-        private void logSession()
+        private void LogSession()
         {
             if (!System.IO.Directory.Exists(WebSocketContext.Server.MapPath("/App_Data/Logs/")))
             {

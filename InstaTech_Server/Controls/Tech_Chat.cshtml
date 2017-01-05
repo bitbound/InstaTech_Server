@@ -1,0 +1,107 @@
+﻿@{ }
+<div id="divTechChat" hidden>
+    <div class="portal-content-frame">
+        <div id="divTechLoginFrame">
+            <strong>Tech Login</strong>
+            <br />
+            @{
+                if (InstaTech.App_Code.Config.Active_Directory_Enabled)
+                {
+                    @Html.Raw("<span>Use your Active Directory credentials to log in.</span>");
+                }
+                else
+                {
+                    @Html.Raw("<span>Use your Tech Portal credentials to log in.</span>");
+                }
+                if (InstaTech.App_Code.Config.Demo_Mode)
+                {
+                    @Html.Raw("<br/><br/><span>(Note: Demo mode is enabled.  You can log in with user ID \"Demo\" and password \"tech\".)</span>");
+                }
+            }
+            <br />
+            <br />
+            <form id="formTechLogin" onsubmit="submitTechLogin(event)">
+                <input type="hidden" name="Type" value="TechLogin" />
+                <table>
+                    <tr>
+                        <td>
+                            <label for="inputTechUserID">User ID:</label>
+                        </td>
+                        <td>
+                            <input type="text" id="inputTechUserID" name="UserID" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="inputTechPassword">Password:</label>
+                        </td>
+                        <td>
+                            <input type="password" id="inputTechPassword" name="Password" required />
+                        </td>
+                    </tr>
+                    <tr hidden>
+                        <td>
+                            <label for="inputTechNewPassword">New Password:</label>
+                        </td>
+                        <td>
+                            <input type="password" id="inputTechNewPassword" name="NewPassword" min="8" max="20" />
+                        </td>
+                    </tr>
+                    <tr hidden>
+                        <td>
+                            <label for="inputTechConfirmNewPassword">Confirm New Password:</label>
+                        </td>
+                        <td>
+                            <input type="password" id="inputTechConfirmNewPassword" name="ConfirmNewPassword" min="8" max="20" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <button type="submit">Submit</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="right-aligned">
+                            <a class="link" onclick="forgotPassword(event)">Forgot password?</a>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+        <div id="divQueueFrame" hidden>
+            <div id="divQueueTable">
+                <div class="col1">
+                    <div class="queue-title">
+                        Queues
+                        <div class="arrow-down"></div>
+                    </div>
+                    <div class="queue-list">
+                        <div class="queue-block">All</div>
+                    </div>
+                </div>
+                <div class="col2 closed">
+                    <div class="queue-title">
+                        Cases
+                        <div class="arrow-down"></div>
+                    </div>
+                    <div class="queue-list"></div>
+                </div>
+                <div class="col3 closed">
+                    <div class="queue-title">Details</div>
+                    <div class="queue-list"></div>
+                </div>
+            </div>
+        </div>
+        <div id="divChatBoxTech" class="left-aligned" hidden>
+            <div id="divTechMessages" class="chat-messages">
+                
+            </div>
+            <div id="divTechInput" class="chat-input-frame">
+                <textarea id="textTechInput" placeholder="Type your message here." disabled />
+                <button id="buttonTechSend">Send</button>
+            </div>
+            <div id="divCustomerStatusBar"></div>
+        </div>
+    </div>
+    <script defer src="~/scripts/Tech_Chat.js"></script>
+</div>

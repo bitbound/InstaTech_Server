@@ -1,84 +1,104 @@
 ﻿<div id="divCustomerChat" hidden>
     <div class="portal-content-frame">
-        <form id="formCustomerChat">
+        <form id="formCustomerChat" onsubmit="submitCustomerChat(event)">
+            <input type="hidden" name="Type" value="CustomerLogin" />
             <table>
                 <tr>
                     <td>
-                        <label for="inputName">Name:</label>
+                        <label for="FirstName">First Name:</label>
                     </td>
                     <td>
-                        <input required id="inputName" type="text" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for="inputUserID">User ID:</label>
-                    </td>
-                    <td>
-                        <input id="inputUserID" type="text" />
+                        <input required name="FirstName" type="text" />
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <label for="inputComputerID">Computer ID:</label>
+                        <label for="LastName">Last Name:</label>
                     </td>
                     <td>
-                        <input id="inputComputerID" type="text" />
+                        <input required name="LastName" type="text" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="UserID">User ID:</label>
+                    </td>
+                    <td>
+                        <input required name="UserID" type="text" />
+                        <a class="tooltip-anchor" title="This is typically the user ID that you use to log into your computer.">?</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="ComputerID">Computer ID:</label>
+                    </td>
+                    <td>
+                        <input name="ComputerID" type="text" />
+                        <a class="tooltip-anchor" title='The unique name for your computer, which can be found by clicking Start, typing "System", and clicking the first match.'>?</a>
                     </td>
                 </tr>
 
                 <tr>
                     <td>
-                        <label for="inputPhone">Phone:</label>
+                        <label for="Phone">Phone:</label>
                     </td>
                     <td>
-                        <input required id="inputPhone" type="tel" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for="inputEmail">Email:</label>
-                    </td>
-                    <td>
-                        <input required id="inputEmail" type="email" />
+                        <input required name="Phone" type="tel" />
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <label for="selectCategory">Category:</label>
+                        <label for="Email">Email:</label>
                     </td>
                     <td>
-                        @Html.DropDownList("selectCategory", "", InstaTech.App_Code.Config.Support_Categories)
+                        <input required name="Email" type="email" />
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <label for="selectType">Type:</label>
+                        <label for="SupportCategory">Category:</label>
                     </td>
                     <td>
-                        <select id="selectType"></select>
+                        <select name="SupportCategory" id="selectSupportCategory" required onchange="changeSupportCategory(event)"></select>
+                    </td>
+                </tr>
+                <tr hidden>
+                    <td>
+                        <label for="SupportType">Type:</label>
+                    </td>
+                    <td>
+                        <select name="SupportType" id="selectSupportType"></select>
+                    </td>
+                </tr>
+                <tr><td><br /></td></tr>
+                <tr>
+                    <td colspan="2">
+                        <label for="textDescription">Details of Problem or Request:</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <textarea required name="Details" placeholder="Describe the issue or request in detail."></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <button type="submit">Submit</button>
                     </td>
                 </tr>
             </table>
-            <br />
-            <table>
-                <tr>
-                    <td>
-                        <label for="textDescription">Description of Problem or Request:</label>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <textarea id="textDescription"></textarea>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <button type="button">Submit</button>
-                    </td>
-                </tr>
-            </table>
+
         </form>
+        <div id="divChatBoxCustomer" class="left-aligned" hidden>
+            <div id="divCustomerMessages" class="chat-messages">
+                <div id="divWaitMessage">Waiting for an agent.  Place in queue: <span id="spanWaitQueue">Unknown</span></div>
+            </div>
+            <div id="divCustomerInput" class="chat-input-frame">
+                <textarea id="textCustomerInput" placeholder="Type your message here." disabled />
+                <button id="buttonCustomerSend">Send</button>
+            </div>
+            <div id="divCustomerStatusBar"></div>
+        </div>
     </div>
 </div>
-<script src="~/Scripts/Customer_Chat.js"></script>
+<script defer src="~/scripts/Customer_Chat.js"></script>

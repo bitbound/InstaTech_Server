@@ -1,4 +1,6 @@
-@{}
+@{
+    
+}
 
 <!DOCTYPE html>
 <html>
@@ -9,13 +11,18 @@
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
         <link href="~/styles.css" rel="stylesheet" />
+        <link href="~/scripts/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+        <link href="~/scripts/jquery-ui/jquery-ui.theme.min.css" rel="stylesheet" />
+        <link href="~/scripts/jquery-ui/jquery-ui.structure.min.css" rel="stylesheet" />
         <link href="~/favicon.ico" rel="icon" />
-        <script src="~/Scripts/jquery-3.1.1.min.js"></script>
-        <script src="~/Scripts/Main_Model.js"></script>
-        <script src="~/Scripts/Default.js"></script>
+        <script src="~/scripts/jquery/jquery-3.1.1.min.js"></script>
+        <script src="~/scripts/jquery-ui/jquery-ui.min.js"></script>
+        <script src="~/scripts/Main_Model.js"></script>
+        <script src="~/scripts/Utilities.js"></script>
+        <script src="~/scripts/Default.js"></script>
     </head>
     <body>
-        <div id="divCustomerPortal">
+        <div id="divCustomerPortal" class="center-aligned">
             <button id="buttonToTechPortal" class="switch-portal" onclick="switchToTechPortal()">
                 <div class="arrow-left"></div>Tech Portal
             </button>
@@ -40,7 +47,6 @@
                         Remote Session
                     </div>
                 </div>
-                
             </div>
             <br />
             <div id="divCustomerContent">
@@ -48,7 +54,7 @@
             </div>
         </div>
 
-        <div id="divTechPortal" hidden>
+        <div id="divTechPortal" class="center-aligned" hidden>
             <button id="buttonToTechPortal" class="switch-portal" onclick="switchToCustomerPortal()">
                 <div class="arrow-left"></div>Customer Portal
             </button>
@@ -57,15 +63,48 @@
                 <br />
                 Tech Portal
             </div>
+            <br />
+            <div class="portal-button-frame">
+                <div class="portal-option-button" opens="#divTechChat" opens-file="Tech_Chat.cshtml">
+                    <div class="portal-option-text">
+                        <img src="~/Assets/Images/Message_16x.svg" />
+                        <br />
+                        Support Chat
+                    </div>
+                </div>
+                <div class="portal-option-button" opens="#divTechRemote" opens-file="Tech_Remote.cshtml">
+                    <div class="portal-option-text">
+                        <img src="~/Assets/Images/RemoteDesktop_64x.png" />
+                        <br />
+                        Remote Session
+                    </div>
+                </div>
+            </div>
+            <br />
+            <div id="divTechContent">
+
+            </div>
         </div>
-        <div id="divWebSocketUnavailable" hidden>
+        <div id="divWebSocketUnavailable" class="center-aligned"  hidden>
             <div class="portal-content-frame error-frame">
                 Your browser doesn't support the features used on this website.  Please try using the latest version of Firefox, Chrome, or Edge.
             </div>
         </div>
-        <div id="divWebSocketError" hidden>
+        <div id="divWebSocketError" class="center-aligned"  hidden>
             <div class="portal-content-frame error-frame">
-                There was a problem connecting.  Try closing and reopening your browser.  If the issue persists, please call your help desk.
+                There was a problem with the connection.  Try closing and reopening your browser.  If the issue persists, please call your IT support department.
+            </div>
+        </div>
+        <div id="divWebSocketClosed" class="center-aligned" hidden>
+            <div class="portal-content-frame error-frame">
+                Your session has ended.
+            </div>
+        </div>
+        <div id="divLoading" hidden>
+            <div>
+                Loading...
+                <br />
+                <progress title="Loading..."></progress>
             </div>
         </div>
         <div id="divBackground"></div>
