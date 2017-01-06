@@ -7,7 +7,7 @@
     CustomerFirstName: String;
     CustomerLastName: String;
     CustomerUserID: String;
-    CustomerComputerID: String;
+    CustomerComputerName: String;
     CustomerPhone: String;
     CustomerEmail: String;
     SupportCategory: String;

@@ -15,6 +15,12 @@ namespace InstaTech.App_Code.Models
     {
         public Case()
         {
+            var dirs = Directory.GetDirectories(Utilities.App_Data + "Cases\\")?.ToList();
+            if (dirs != null)
+            {
+                dirs.Sort();
+                CaseID = int.Parse(new DirectoryInfo(dirs.Last()).Name.Split('-')[0]);
+            }
             while (Directory.GetFiles(CaseDir).Length == 999)
             {
                 CaseID += 1000;
@@ -33,7 +39,7 @@ namespace InstaTech.App_Code.Models
         public string CustomerFirstName { get; set; }
         public string CustomerLastName { get; set; }
         public string CustomerUserID { get; set; }
-        public string CustomerComputerID { get; set; }
+        public string CustomerComputerName { get; set; }
         public string CustomerPhone { get; set; }
         public string CustomerEmail { get; set; }
         public string SupportCategory { get; set; }

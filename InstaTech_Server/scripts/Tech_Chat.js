@@ -39,14 +39,60 @@ function queueBlockClicked(e) {
     if ($(this).hasClass("selected")) {
         return;
     }
-    $(".col2").addClass("closed");
     $(".queue-block").removeClass("selected");
     $(".queue-block .arrow-right").remove();
-    $(this).addClass("selected");
+    $(e.currentTarget).addClass("selected");
     var arrowRight = document.createElement("div");
     arrowRight.classList.add("arrow-right");
-    $(this).append(arrowRight);
-    $(".col2").removeClass("closed");
+    $(e.currentTarget).append(arrowRight);
+    $(".col3").height(0);
+    $(".col3").animate({ "width": 0 });
+    $(".col2").animate({ "width": 0 }, function () {
+        $(".col2 .queue-list").html("");
+        var filteredCases;
+        if ($(e.currentTarget).attr("queue") == "All") {
+            filteredCases = InstaTech.Cases;
+        }
+        else {
+            filteredCases = InstaTech.Cases.filter(function (value, index) {
+                return value.SupportQueue == $(e.currentTarget).attr("queue");
+            });
+        }
+        for (var i = 0; i < filteredCases.length; i++) {
+            var fc = filteredCases[i];
+            var caseBlock = document.createElement("div");
+            caseBlock.id = "divCase" + fc.CaseID;
+            caseBlock.classList.add("case-block");
+            caseBlock.innerHTML = fc.CustomerFirstName + " " + fc.CustomerLastName + "<br/><hr/>" + '<span class="case-block-category">' + fc.SupportCategory + '</span><br/><hr/><span class="case-block-type">' + fc.SupportType + '</span><br/><hr/><span class="case-block-wait">Wait Time: <span class="wait-time">' + (new Date() - new Date(parseInt(fc.DTCreated.replace("/Date(", "").replace(")/", ""))) ) / 1000 +'s</span></span>';
+            caseBlock.setAttribute("case-id", fc.CaseID);
+            $(".col2 .queue-list").append(caseBlock);
+        };
+        $(".col2 .queue-list .case-block").click(caseBlockClicked);
+        $(".col2").animate({ "width": "200px" });
+    });
+}
+function caseBlockClicked(e) {
+    $(".col2 .queue-list .case-block").removeClass("selected");
+    $(".col2 .queue-list .case-block .arrow-right").remove();
+    e.currentTarget.classList.add("selected");
+    var arrowRight = document.createElement("div");
+    arrowRight.classList.add("arrow-right");
+    $(e.currentTarget).append(arrowRight);
+    $(".col3").animate({ "width": 0 }, function () {
+        var caseInfo = InstaTech.Cases.filter(function (item) { return item.CaseID == e.currentTarget.getAttribute("case-id"); })[0];
+        $("#inputTechQueueCaseID").val(caseInfo.CaseID);
+        $("#inputTechQueueFirstName").val(caseInfo.CustomerFirstName);
+        $("#inputTechQueueLastName").val(caseInfo.CustomerLastName);
+        $("#inputTechQueueUserID").val(caseInfo.CustomerUserID);
+        $("#inputTechQueueComputerName").val(caseInfo.CustomerComputerName);
+        $("#inputTechQueuePhone").val(caseInfo.CustomerPhone);
+        $("#inputTechQueueEmail").val(caseInfo.CustomerEmail);
+        $("#inputTechQueueCategory").val(caseInfo.SupportCategory);
+        $("#inputTechQueueType").val(caseInfo.SupportType);
+        $("#textTechQueueDetails").val(caseInfo.Details);
+        $(".col3").height("");
+        $(".col3").animate({ "width": "450px" });
+    });
 }
 function handleTechLogin(e) {
     if (e.Status == "new required") {
@@ -60,6 +106,8 @@ function handleTechLogin(e) {
             $("#divQueueFrame").fadeIn(750, function () {
                 $("#divTechChat .portal-content-frame").animate({
                     "width": "90vw"
+                }, function () {
+                    window.scroll(0, document.getElementById("divQueueFrame").offsetTop);
                 });
                 $(".queue-block").off("click").on("click", queueBlockClicked);
                 var request = {
@@ -99,8 +147,9 @@ function handleGetQueues(e) {
         }
         var queueBlock = document.createElement("div");
         queueBlock.classList.add("queue-block");
-        queueBlock.innerHTML = e.Queues[i];
+        queueBlock.innerHTML = e.Queues[i] + ' (<span class="queue-volume"></span>)';
         queueBlock.id = "divQueue" + e.Queues[i];
+        queueBlock.setAttribute("queue", e.Queues[i]);
         $(".col1 .queue-list").append(queueBlock);
     }
     $(".queue-block").off("click").on("click", queueBlockClicked);
@@ -115,11 +164,14 @@ function handleGetCases(e) {
     {
         return;
     }
-    for (var i = 0; i < e.Cases.length; i++)
-    {
-        console.log(e.Cases[i].CaseID);
-        InstaTech.Cases[e.Cases[i].CaseID] = e.Cases[i];
-    }
+    InstaTech.Cases = e.Cases;
+    $(".queue-block").each(function (index, elem) {
+        var numCases = InstaTech.Cases.filter(function (value, index) {
+            return value.SupportQueue == $(elem).attr("queue");
+        }).length;
+        $(elem).find(".queue-volume").html(numCases);
+    });
+    $("#divQueueAll .queue-volume").html(InstaTech.Cases.length);
 }
 function handleKicked(e) {
     showDialog("Session Ended", "Your session has been terminated by the server for the following reason: " + e.Reason + "<br/><br/>If you believe this was in error, please contact your system administrator.");

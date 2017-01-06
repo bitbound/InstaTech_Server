@@ -1,4 +1,4 @@
-﻿<div id="divCustomerChat" hidden>
+﻿<div id="divCustomerChat" hidden onload="initCustomerChat()">
     <div class="portal-content-frame">
         <form id="formCustomerChat" onsubmit="submitCustomerChat(event)">
             <input type="hidden" name="Type" value="CustomerLogin" />
@@ -30,11 +30,11 @@
                 </tr>
                 <tr>
                     <td>
-                        <label for="ComputerID">Computer ID:</label>
+                        <label for="ComputerName">Computer Name:</label>
                     </td>
                     <td>
-                        <input name="ComputerID" type="text" />
-                        <a class="tooltip-anchor" title='The unique name for your computer, which can be found by clicking Start, typing "System", and clicking the first match.'>?</a>
+                        <input name="ComputerName" type="text" />
+                        <a class="tooltip-anchor" title='The unique name for your computer.  You can find this by clicking Start, typing "PC Name", and clicking the "best match" at the top".'>?</a>
                     </td>
                 </tr>
 
@@ -101,4 +101,3 @@
         </div>
     </div>
 </div>
-<script defer src="~/scripts/Customer_Chat.js"></script>

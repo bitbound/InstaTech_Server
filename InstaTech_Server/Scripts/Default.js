@@ -45,6 +45,11 @@ function switchToCustomerPortal() {
     });
 }
 
+// Sets the onclick event handler for .portal-option-button elements.  The element
+// must have attributes "opens" and "opens-file".  "Opens-file" must be the name of the file
+// that's in /Controls/ that contains the HTML for the content to be loaded.  "Opens" must
+// be the ID of the first element in the content, which will be given a slideDown opening effect.
+// If the "opens" element has an onload event, it will be fired.
 function setPortalButtonHandlers() {
     $(".portal-option-button").click(function () {
         $(this).addClass("remove-css");
@@ -59,11 +64,18 @@ function setPortalButtonHandlers() {
             $(".remove-css").removeClass("remove-css");
         }, 500);
         var strOpens = $(this).attr("opens");
+        if (strOpens.search("#") != 0) {
+            strOpens = "#" + strOpens;
+        }
         if ($(strOpens).length == 0) {
             var strFile = $(this).attr("opens-file");
             $.get(location.href + "/Controls/" + strFile, function (data) {
                 $("#divTechContent:visible, #divCustomerContent:visible").append(data);
                 slideToggleContent(strOpens);
+                if ($(strOpens)[0].onload)
+                {
+                    $(strOpens)[0].onload();
+                }
             });
         }
         else
@@ -72,19 +84,14 @@ function setPortalButtonHandlers() {
         }
     })
 }
-function slideToggleContent(strElementName) {
-    var strOpens = strElementName;
-    if (strOpens.search("#") != 0)
-    {
-        strOpens = "#" + strOpens;
-    }
-    var opens = $(strOpens);
+function slideToggleContent(strElementIDSelector) {
+    var opens = $(strElementIDSelector);
     if (opens.is(":visible")) {
         opens.slideUp();
     }
     else {
         opens.slideDown(function () {
-            window.scroll(0, document.body.scrollHeight);
+            window.scroll(0, opens.offset().top);
             opens.find("input[type=text]").first().select();
         });
     };

@@ -7,7 +7,7 @@
     <head>
         <title>@InstaTech.App_Code.Config.Company_Name</title>
         <meta name="keywords" content="Tech Support, Computer Support, Computer Help, Remote Support, Remote Tools, Remote Control, Support Chat, Live Chat" />
-        <meta name="viewport" content="width=500" />
+        <meta name="viewport" content="width=600" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
         <link href="~/styles.css" rel="stylesheet" />
@@ -20,6 +20,8 @@
         <script src="~/scripts/Main_Model.js"></script>
         <script src="~/scripts/Utilities.js"></script>
         <script src="~/scripts/Default.js"></script>
+        <script src="~/scripts/Customer_Chat.js"></script>
+        <script src="~/scripts/Tech_Chat.js"></script>
     </head>
     <body>
         <div id="divCustomerPortal" class="center-aligned">
@@ -65,6 +67,8 @@
             </div>
             <br />
             <div class="portal-button-frame">
+                @* Portal buttons must have "opens-file" and "opens" attribute that tells it the file
+                    in /Controls/ from which to load content and the element to show with the slideDown effect.*@
                 <div class="portal-option-button" opens="#divTechChat" opens-file="Tech_Chat.cshtml">
                     <div class="portal-option-text">
                         <img src="~/Assets/Images/Message_16x.svg" />

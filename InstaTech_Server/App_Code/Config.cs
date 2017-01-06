@@ -25,9 +25,8 @@ namespace InstaTech.App_Code
         // Categories of support.  The first value is major category, second is sub-category, and third is the support queue it falls under.
         public static List<Tuple<string, string, string>> Support_Categories { get; } = new List<Tuple<string, string, string>>()
         {
-            Tuple.Create<string, string, string>("Account/Password", "Account Locked", "General"),
-            Tuple.Create<string, string, string>("Account/Password", "Password Reset", "General"),
-            Tuple.Create<string, string, string>("Account/Password", "Other", "General"),
+            Tuple.Create<string, string, string>("Account Locked/Password Reset", "Network Account", "General"),
+            Tuple.Create<string, string, string>("Account Locked/Password Reset", "Other", "General"),
             Tuple.Create<string, string, string>("Slowness", "Microsoft Office", "Technical"),
             Tuple.Create<string, string, string>("Slowness", "Internet", "Technical"),
             Tuple.Create<string, string, string>("Slowness", "Everything", "Technical"),

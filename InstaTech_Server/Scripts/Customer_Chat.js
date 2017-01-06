@@ -1,4 +1,4 @@
-$(document).ready(function () {
+function initCustomerChat() {
     var request = {
         "Type": "GetSupportCategories"
     };
@@ -8,7 +8,7 @@ $(document).ready(function () {
         showLabel: false
     });
     $("a.tooltip-anchor").tooltip();
-});
+};
 function submitCustomerChat(e) {
     e.preventDefault();
     var formData = {};

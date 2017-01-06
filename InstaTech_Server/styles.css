@@ -257,12 +257,13 @@ form button[type="submit"] {
 
 /*** Tech Queue Table ***/
 #divQueueTable {
-    border: 1px solid dimgray;
+    border: 2px solid dimgray;
     background-color: whitesmoke;
     min-height: 300px;
+    /*max-height: 90vh;*/
     border-radius: 5px;
     text-align: left;
-    white-space: nowrap;
+    /*white-space: nowrap;*/
     overflow-y: auto;
 }
 
@@ -274,40 +275,31 @@ form button[type="submit"] {
     overflow: hidden;
     vertical-align: top;
 }
-
-#divQueueTable>div:nth-child(odd){
-    background-color: aliceblue;
+#divQueueTable table {
+	text-align: left;
+    width: 90%;
+    display:inline-table;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    table-layout: fixed;
+}
+#divQueueTable table input {
+    width: 90%;
+}
+#divQueueTable .col3 .queue-list {
+background-color: rgb(215, 215, 215);
+margin: 30px 15px;
+border-radius: 5px;
+border: 1px solid gray;
+text-align: center;
+}
+.queue-list {
+    overflow: hidden;
 }
 
-#divQueueTable .col1 {
-    max-width: 20%;
-}
-
-#divQueueTable .col2 {
-    max-width: 30%;
-    transition-timing-function: ease;
-    transition-duration: 1s;
-}
-#divQueueTable .col2.closed {
-    max-width: 0;
-    transition-timing-function: ease;
-    transition-duration: 1s;
-}
-
-#divQueueTable .col3 {
-    max-width: 45%;
-    transition-timing-function: ease;
-    transition-duration: 1s;
-}
-#divQueueTable .col3.closed {
-    max-width: 0;
-    transition-timing-function: ease;
-    transition-duration: 1s;
-}
 .queue-title {
     margin: 15px;
     border: 2px solid dimgray;
-    border-radius: 5px;
     padding: 10px;
     position: relative;
     font-weight: bold;
@@ -324,6 +316,13 @@ form button[type="submit"] {
 }
 .col2 .queue-title > .arrow-down {
     border-top: 10px solid rgb(220, 220, 120);
+    transform: translate(-50%, 2px);
+}
+.col3 .queue-title {
+    background-color: aquamarine;
+}
+.col3 .queue-title > .arrow-down {
+    border-top: 10px solid aquamarine;
     transform: translate(-50%, 2px);
 }
 
@@ -350,7 +349,7 @@ form button[type="submit"] {
     border-left: 10px solid lightgreen;
     transform: translate(2px, -50%);
 }
-.col2 .queue-block.selected {
+.col2 .case-block.selected {
     background-color: rgb(220, 220, 120);
 }
 
@@ -358,11 +357,40 @@ form button[type="submit"] {
     border-left: 10px solid rgb(220, 220, 120);
     transform: translate(2px, -50%);
 }
-.col3 .queue-block.selected {
+
+
+.case-block {
+    border: 2px solid dimgray;
+    border-radius: 5px;
+    margin: 15px;
+    padding: 10px;
+    white-space: initial;
+    cursor: pointer;
+    position: relative;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+.col1 .case-block.selected {
     background-color: rgb(220, 220, 120);
 }
-
-.col3 .arrow-right {
-    border-left: 10px solid rgb(220, 220, 120);
-    transform: translate(2px, -50%);
+.case-block:hover {
+    background-color: lightsteelblue;
+}
+.case-block br {
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+.case-block hr {
+    width: 80%;
+}
+.case-block-category {
+    font-size: .8em;
+}
+.case-block-type {
+    font-size: .8em;
+}
+.case-block-wait {
+    font-size: .8em;
 }

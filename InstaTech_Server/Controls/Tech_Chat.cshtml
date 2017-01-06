@@ -70,25 +70,126 @@
         </div>
         <div id="divQueueFrame" hidden>
             <div id="divQueueTable">
-                <div class="col1">
+                <div class="col1" style="width:150px">
                     <div class="queue-title">
                         Queues
                         <div class="arrow-down"></div>
                     </div>
                     <div class="queue-list">
-                        <div class="queue-block">All</div>
+                        <div id="divQueueAll" class="queue-block" queue="All">All (<span class="queue-volume"></span>)</div>
                     </div>
                 </div>
-                <div class="col2 closed">
+                <div class="col2" style="width:0">
                     <div class="queue-title">
                         Cases
                         <div class="arrow-down"></div>
                     </div>
                     <div class="queue-list"></div>
                 </div>
-                <div class="col3 closed">
-                    <div class="queue-title">Details</div>
-                    <div class="queue-list"></div>
+                <div class="col3" style="width:0; height:0;">
+                    <div class="queue-title">
+                        Details
+                        <div class="arrow-down"></div>
+                    </div>
+                    <div class="queue-list">
+                        <table>
+                            <tr>
+                                <td>
+                                    <label>Case ID:</label>
+                                </td>
+                                <td>
+                                    <input id="inputTechQueueCaseID" readonly type="text" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>First Name:</label>
+                                </td>
+                                <td colspan="2">
+                                    <input id="inputTechQueueFirstName" readonly type="text" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>Last Name:</label>
+                                </td>
+                                <td colspan="2">
+                                    <input id="inputTechQueueLastName" readonly type="text" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>User ID:</label>
+                                </td>
+                                <td colspan="2">
+                                    <input id="inputTechQueueUserID" readonly type="text" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>Computer Name:</label>
+                                </td>
+                                <td colspan="2">
+                                    <input id="inputTechQueueComputerName" readonly type="text" />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <label>Phone:</label>
+                                </td>
+                                <td colspan="2">
+                                    <input id="inputTechQueuePhone" readonly type="tel" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>Email:</label>
+                                </td>
+                                <td colspan="2">
+                                    <input id="inputTechQueueEmail" readonly type="email" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>Category:</label>
+                                </td>
+                                <td colspan="2">
+                                    <input id="inputTechQueueCategory" readonly />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>Type:</label>
+                                </td>
+                                <td colspan="2">
+                                    <input id="inputTechQueueType" readonly />
+                                </td>
+                            </tr>
+                            <tr><td><br /></td></tr>
+                            <tr>
+                                <td colspan="3">
+                                    <label>Details of Problem or Request:</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="3">
+                                    <textarea  id="textTechQueueDetails" readonly ></textarea>
+                                </td>
+                            </tr>
+                                <tr>
+                                    <td class="left-aligned">
+                                        <button onclick='alert("(TODO) When completed, this will let you move cases to another queue.")'>Move</button>
+                                    </td>
+                                    <td class="center-aligned">
+                                        <button onclick='alert("(TODO) When completed, this will let you temporarily lock a case so no one else can grab it, giving you time to read it.")'>Lock</button>
+                                    </td>
+                                    <td class="right-aligned">
+                                        <button>Take</button>
+                                    </td>
+                                </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -103,5 +204,4 @@
             <div id="divCustomerStatusBar"></div>
         </div>
     </div>
-    <script defer src="~/scripts/Tech_Chat.js"></script>
 </div>

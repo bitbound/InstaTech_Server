@@ -30,12 +30,12 @@ namespace InstaTech.App_Code {
                         CustomerFirstName = "Demo",
                         CustomerLastName = "Customer",
                         CustomerEmail = "demo@instatech.org",
-                        CustomerComputerID = "MyFirstPC",
+                        CustomerComputerName = "MyFirstPC",
                         CustomerPhone = "555-555-5555",
                         CustomerUserID = "ABCT1000",
-                        SupportCategory = "Other",
-                        SupportType = "",
-                        Details = "My computer keeps saying I have a virus!  HELP!"
+                        SupportCategory = "Account Locked/Password Reset",
+                        SupportType = "Network Account",
+                        Details = "It says my account is locked out and cannot be logged into."
                     });
                 }
                 return cases;

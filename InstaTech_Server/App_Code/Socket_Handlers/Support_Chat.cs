@@ -89,7 +89,7 @@ namespace InstaTech.App_Code.Socket_Handlers
         public Tech_Account Tech { get; set; }
         public string AuthenticationToken { get; set; }
         public int BadLoginAttempts { get; set; } = 0;
-        public ConnectionTypes ConnectionType { get; set; }
+        public ConnectionTypes? ConnectionType { get; set; }
         public enum ConnectionTypes
         {
             Customer,
@@ -129,12 +129,16 @@ namespace InstaTech.App_Code.Socket_Handlers
         }
         public void HandleCustomerLogin(dynamic JsonData)
         {
+            if (ConnectionType != null)
+            {
+                return;
+            }
             SupportCase = new Case()
             {
                 CustomerFirstName = JsonData.FirstName,
                 CustomerLastName = JsonData.LastName,
                 CustomerUserID = JsonData.UserID,
-                CustomerComputerID = JsonData.ComputerID,
+                CustomerComputerName = JsonData.ComputerName,
                 CustomerPhone = JsonData.Phone,
                 CustomerEmail = JsonData.Email,
                 SupportCategory = JsonData.SupportCategory,
@@ -170,6 +174,10 @@ namespace InstaTech.App_Code.Socket_Handlers
         }
         public void HandleTechLogin(dynamic JsonData)
         {
+            if (ConnectionType != null)
+            {
+                return;
+            }
             if (BadLoginAttempts >= 3)
             {
                 JsonData.Status = "temp ban";
