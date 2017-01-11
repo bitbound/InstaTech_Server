@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web;
 using InstaTech.App_Code;
 using System.Web.Helpers;
+using System.Timers;
 
 namespace InstaTech.App_Code.Models
 {
@@ -16,7 +17,7 @@ namespace InstaTech.App_Code.Models
         public Case()
         {
             var dirs = Directory.GetDirectories(Utilities.App_Data + "Cases\\")?.ToList();
-            if (dirs != null)
+            if (dirs.Count > 0)
             {
                 dirs.Sort();
                 CaseID = int.Parse(new DirectoryInfo(dirs.Last()).Name.Split('-')[0]);
@@ -35,7 +36,7 @@ namespace InstaTech.App_Code.Models
         public DateTime? DTCreated { get; set; }
         public DateTime? DTReceived { get; set; }
         public DateTime? DTClosed { get; set; }
-        public DateTime? DTAbandoned { get; set; }
+        public CaseStatus Status { get; set; } = CaseStatus.Open;
         public string CustomerFirstName { get; set; }
         public string CustomerLastName { get; set; }
         public string CustomerUserID { get; set; }
@@ -53,7 +54,9 @@ namespace InstaTech.App_Code.Models
         }
         public string Details { get; set; }
         public string TechUserID { get; set; }
-        public List<Message> Messages { get; set; } = new List<Message>();
+        public bool Locked { get; set; }
+        public string LockedBy { get; set; }
+        public List<ChatMessage> Messages { get; set; } = new List<ChatMessage>();
         private string CaseDir
         {
             get
@@ -65,6 +68,13 @@ namespace InstaTech.App_Code.Models
                 }
                 return Utilities.App_Data + "Cases\\" + String.Format("{0}-{1}", floored + 1, floored + 1000) + "\\";
             }
+        }
+        public enum CaseStatus
+        {
+            Open,
+            Resolved,
+            Abandoned,
+            Unresolved
         }
         public void Save()
         {

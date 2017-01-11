@@ -10,7 +10,7 @@
         <meta name="viewport" content="width=600" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <link href="~/styles.css" rel="stylesheet" />
+        <link href="~/Default.css" rel="stylesheet" />
         <link href="~/scripts/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
         <link href="~/scripts/jquery-ui/jquery-ui.theme.min.css" rel="stylesheet" />
         <link href="~/scripts/jquery-ui/jquery-ui.structure.min.css" rel="stylesheet" />
@@ -20,8 +20,11 @@
         <script src="~/scripts/Main_Model.js"></script>
         <script src="~/scripts/Utilities.js"></script>
         <script src="~/scripts/Default.js"></script>
+        <script src="~/scripts/Socket_Message_Handlers.js"></script>
         <script src="~/scripts/Customer_Chat.js"></script>
         <script src="~/scripts/Tech_Chat.js"></script>
+        <script src="~/scripts/Customer_Remote.js"></script>
+        <script src="~/scripts/Tech_Remote.js"></script>
     </head>
     <body>
         <div id="divCustomerPortal" class="center-aligned">
@@ -60,7 +63,7 @@
             <button id="buttonToTechPortal" class="switch-portal" onclick="switchToCustomerPortal()">
                 <div class="arrow-left"></div>Customer Portal
             </button>
-            <div class="portal-title">
+            <div class="portal-title tech-portal-title">
                 @InstaTech.App_Code.Config.Company_Name
                 <br />
                 Tech Portal
@@ -100,7 +103,7 @@
             </div>
         </div>
         <div id="divWebSocketClosed" class="center-aligned" hidden>
-            <div class="portal-content-frame error-frame">
+            <div class="portal-content-frame">
                 Your session has ended.
             </div>
         </div>

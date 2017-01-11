@@ -3,6 +3,11 @@ var Case = (function () {
     }
     return Case;
 }());
+var ConnectionType;
+(function (ConnectionType) {
+    ConnectionType[ConnectionType["Customer"] = 0] = "Customer";
+    ConnectionType[ConnectionType["Technician"] = 1] = "Technician";
+})(ConnectionType || (ConnectionType = {}));
 var Main_Model = (function () {
     function Main_Model() {
         this.Cases = [];
@@ -10,4 +15,3 @@ var Main_Model = (function () {
     return Main_Model;
 }());
 var InstaTech = new Main_Model();
-//# sourceMappingURL=Main_Model.js.map

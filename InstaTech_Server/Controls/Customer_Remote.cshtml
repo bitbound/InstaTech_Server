@@ -1,10 +1,39 @@
-﻿<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title></title>
-</head>
-<body>
-
-</body>
-</html>
+﻿@{
+    var clientList = new List<SelectListItem>()
+    {
+        new SelectListItem() { Value = "Windows 8+", Text = "Windows 8+"},
+        new SelectListItem() { Value = "Windows 7", Text = "Windows 7"},
+        new SelectListItem() { Value = "Mac", Text = "Mac"},
+        new SelectListItem() { Value = "Linux", Text = "Linux"},
+    };
+    var defaultItem = clientList.Find(sli => sli.Value == InstaTech.App_Code.Config.Default_RC_Download);
+    if (defaultItem != null)
+    {
+        defaultItem.Selected = true;
+    }
+ }
+<div id="divCustomerRemote" onload="initCustomerRemote()" class="remote-frame-div" style="display: none;">
+    <div class="draggable-title">
+        <small>Hint: This window is draggable!</small>
+        <button onclick='$("#divCustomerRemote").remove()'>X</button>
+    </div>
+    <div>
+        <strong>Step 1: </strong>Click the download button to start the client download.  (Only change versions if asked to do so.)
+    </div>
+    <br />
+    <div class="right-aligned">
+        <button onclick="downloadCustomerClient(event, @Json.Encode(InstaTech.App_Code.Config.RC_Download_Paths))">Download</button>
+        <br />
+        @Html.DropDownList("selectCustomerClientVersion", clientList)
+    </div>
+    <br />
+    <div>
+        <strong>Step 2: </strong>Save and run the file.  This process varies based on your browser.
+    </div>
+    <br />
+    <div>
+        <strong>Step 3: </strong>Click the session ID box to copy it.  Send it in the chat window to your technician.
+        <br />
+        <img src="~/Assets/Images/ClientScreenshot.png" />
+    </div>
+</div>

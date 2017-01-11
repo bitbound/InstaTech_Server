@@ -5,7 +5,6 @@
     void Application_Start(object sender, EventArgs e)
     {
         // Code that runs on application startup
-
     }
 
     void Application_End(object sender, EventArgs e)
@@ -17,9 +16,9 @@
     void Application_Error(object sender, EventArgs e)
     {
         // Code that runs when an unhandled error occurs
-        if (!System.IO.Directory.Exists(Server.MapPath("/App_Data/GlobalErrors")))
+        if (!System.IO.Directory.Exists(Server.MapPath("~/App_Data/GlobalErrors")))
         {
-            System.IO.Directory.CreateDirectory(Server.MapPath("/App_Data/GlobalErrors/"));
+            System.IO.Directory.CreateDirectory(Server.MapPath("~/App_Data/GlobalErrors/"));
         }
         var exError = Server.GetLastError();
         var jsonError = new
@@ -31,7 +30,7 @@
             StackTrace = exError.StackTrace,
         };
         var error = System.Web.Helpers.Json.Encode(jsonError) + Environment.NewLine;
-        System.IO.File.AppendAllText(Server.MapPath("/App_Data/GlobalErrors/" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt"), error);
+        System.IO.File.AppendAllText(Server.MapPath("~/App_Data/GlobalErrors/" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt"), error);
         throw exError;
     }
 

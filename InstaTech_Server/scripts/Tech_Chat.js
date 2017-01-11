@@ -1,5 +1,3 @@
-$(document).ready(function () {
-});
 function submitTechLogin(e) {
     e.preventDefault();
     var formData = {};
@@ -23,7 +21,12 @@ function forgotPassword(e) {
             {
                 text: "Yes",
                 click: function () {
-                    // TODO.
+                    var request = {
+                        "Type": "ForgotPassword",
+                        "UserID": $("#inputTechUserID").val()
+                    };
+                    InstaTech.Socket_Chat.send(JSON.stringify(request));
+                    $(this).dialog("close");
                 }
             },
             {
@@ -32,19 +35,29 @@ function forgotPassword(e) {
                     $(this).dialog("close");
                 }
             }
-        ]
+        ],
+        close: function () {
+            $(this).dialog('destroy').remove();
+        }
     });
 }
 function queueBlockClicked(e) {
-    if ($(this).hasClass("selected")) {
+    if ($(e.currentTarget).hasClass("selected")) {
         return;
     }
+    var request = {
+        "Type": "GetCases",
+        "AuthToken": InstaTech.AuthToken
+    };
+    InstaTech.Socket_Chat.send(JSON.stringify(request));
     $(".queue-block").removeClass("selected");
     $(".queue-block .arrow-right").remove();
     $(e.currentTarget).addClass("selected");
     var arrowRight = document.createElement("div");
     arrowRight.classList.add("arrow-right");
     $(e.currentTarget).append(arrowRight);
+    $("#divChatBoxTech").slideUp();
+    $("#divTechMessages").html("");
     $(".col3").height(0);
     $(".col3").animate({ "width": 0 });
     $(".col2").animate({ "width": 0 }, function () {
@@ -58,16 +71,20 @@ function queueBlockClicked(e) {
                 return value.SupportQueue == $(e.currentTarget).attr("queue");
             });
         }
+        filteredCases.sort(function (a, b) {
+            if (parseNETDate(a.DTCreated) < parseNETDate(b.DTCreated)) {
+                return -1;
+            }
+            else if (parseNETDate(b.DTCreated) < parseNETDate(a.DTCreated)) {
+                return 1;
+            }
+            else {
+                return 0;
+            }
+        });
         for (var i = 0; i < filteredCases.length; i++) {
-            var fc = filteredCases[i];
-            var caseBlock = document.createElement("div");
-            caseBlock.id = "divCase" + fc.CaseID;
-            caseBlock.classList.add("case-block");
-            caseBlock.innerHTML = fc.CustomerFirstName + " " + fc.CustomerLastName + "<br/><hr/>" + '<span class="case-block-category">' + fc.SupportCategory + '</span><br/><hr/><span class="case-block-type">' + fc.SupportType + '</span><br/><hr/><span class="case-block-wait">Wait Time: <span class="wait-time">' + (new Date() - new Date(parseInt(fc.DTCreated.replace("/Date(", "").replace(")/", ""))) ) / 1000 +'s</span></span>';
-            caseBlock.setAttribute("case-id", fc.CaseID);
-            $(".col2 .queue-list").append(caseBlock);
-        };
-        $(".col2 .queue-list .case-block").click(caseBlockClicked);
+            addCaseBlock(filteredCases[i]);
+        }
         $(".col2").animate({ "width": "200px" });
     });
 }
@@ -78,6 +95,8 @@ function caseBlockClicked(e) {
     var arrowRight = document.createElement("div");
     arrowRight.classList.add("arrow-right");
     $(e.currentTarget).append(arrowRight);
+    $("#divChatBoxTech").slideUp();
+    $("#divTechMessages").html("");
     $(".col3").animate({ "width": 0 }, function () {
         var caseInfo = InstaTech.Cases.filter(function (item) { return item.CaseID == e.currentTarget.getAttribute("case-id"); })[0];
         $("#inputTechQueueCaseID").val(caseInfo.CaseID);
@@ -91,88 +110,245 @@ function caseBlockClicked(e) {
         $("#inputTechQueueType").val(caseInfo.SupportType);
         $("#textTechQueueDetails").val(caseInfo.Details);
         $(".col3").height("");
-        $(".col3").animate({ "width": "450px" });
+        $(".col3").animate({ "width": "500px" }, function () {
+            window.scroll(0, $(".col3").offset().top);
+        });
     });
 }
-function handleTechLogin(e) {
-    if (e.Status == "new required") {
-        $("#inputTechConfirmNewPassword, #inputTechNewPassword").attr("required", true);
-        $("#inputTechConfirmNewPassword, #inputTechNewPassword").parent("td").parent("tr").show();
-        return;
+function addCaseBlock(objCase) {
+    var caseBlock = document.createElement("div");
+    caseBlock.id = "divCase" + objCase.CaseID;
+    caseBlock.classList.add("case-block");
+    if (objCase.Locked) {
+        caseBlock.classList.add("case-locked");
     }
-    else if (e.Status == "ok") {
-        sessionStorage["AuthToken"] = e.AuthenticationToken;
-        $("#divTechLoginFrame").fadeOut(750, function () {
-            $("#divQueueFrame").fadeIn(750, function () {
-                $("#divTechChat .portal-content-frame").animate({
-                    "width": "90vw"
-                }, function () {
-                    window.scroll(0, document.getElementById("divQueueFrame").offsetTop);
-                });
-                $(".queue-block").off("click").on("click", queueBlockClicked);
-                var request = {
-                    "Type": "GetQueues",
-                    "AuthToken": sessionStorage["AuthToken"]
-                };
-                InstaTech.Socket_Chat.send(JSON.stringify(request));
-            });
-        });
-    }
-    else if (e.Status == "invalid") {
-        showDialog("Incorrect Credentials", "The user ID or password is incorrect.  Please try again.");
-        return;
-    }
-    else if (e.Status == "locked") {
-        showDialog("Account Locked", "Your account as been locked due to failed login attempts.  It will unlock automatically after 10 minutes.  Please try again later.");
-        return;
-    }
-    else if (e.Status == "temp ban") {
-        showDialog("Temporary Ban", "Due to failed login attempts, you must refresh your browser to try again.");
-        return;
-    }
-    else if (e.Status == "password mismatch") {
-        showDialog("Password Mismatch", "The passwords you entered don't match.  Please retype them.");
-        return;
-    }
-    else if (e.Status == "password length") {
-        showDialog("Password Length", "Your new password must be between 8 and 20 characters long.");
-        return;
-    }
+    caseBlock.innerHTML = objCase.CustomerFirstName + ' ' + objCase.CustomerLastName + '<br/><span class="case-block-wait">Wait Time: <span class="wait-time">' + getTimeSince(objCase.DTCreated) + '</span></span><br/><hr/><span class="case-block-category">' + objCase.SupportCategory + '</span> - <span class="case-block-type">' + objCase.SupportType + '</span>';
+    caseBlock.setAttribute("case-id", objCase.CaseID);
+    $(caseBlock).click(caseBlockClicked);
+    $(".col2 .queue-list").append(caseBlock);
 }
-function handleGetQueues(e) {
-    for (var i = 0; i < e.Queues.length; i++) {
-        if ($("#divQueue" + e.Queues[i]).length > 0)
-        {
-            continue;
-        }
-        var queueBlock = document.createElement("div");
-        queueBlock.classList.add("queue-block");
-        queueBlock.innerHTML = e.Queues[i] + ' (<span class="queue-volume"></span>)';
-        queueBlock.id = "divQueue" + e.Queues[i];
-        queueBlock.setAttribute("queue", e.Queues[i]);
-        $(".col1 .queue-list").append(queueBlock);
+function takeCase(e) {
+    var caseID = $("#inputTechQueueCaseID").val();
+    if ($.isEmptyObject(caseID)) {
+        sendClientError("Case ID is empty in takeCase().");
+        return;
     }
-    $(".queue-block").off("click").on("click", queueBlockClicked);
     var request = {
-        "Type": "GetCases",
-        "AuthToken": sessionStorage["AuthToken"]
+        "Type": "TakeCase",
+        "CaseID": caseID,
+        "AuthToken": InstaTech.AuthToken
     };
     InstaTech.Socket_Chat.send(JSON.stringify(request));
 }
-function handleGetCases(e) {
-    if (e.Cases.length == 0)
-    {
+function techKeyDown(e) {
+    if (e.key.toLowerCase() == "enter" && e.shiftKey == false) {
+        e.preventDefault();
+        $("#buttonTechSend").click();
+    }
+    ;
+    var request = {
+        "AuthToken": InstaTech.AuthToken,
+        "Type": "Typing"
+    };
+    InstaTech.Socket_Chat.send(JSON.stringify(request));
+}
+function submitTechMessage(e) {
+    if ($("#textTechInput").val() == "") {
         return;
     }
-    InstaTech.Cases = e.Cases;
-    $(".queue-block").each(function (index, elem) {
-        var numCases = InstaTech.Cases.filter(function (value, index) {
-            return value.SupportQueue == $(elem).attr("queue");
-        }).length;
-        $(elem).find(".queue-volume").html(numCases);
-    });
-    $("#divQueueAll .queue-volume").html(InstaTech.Cases.length);
+    var message = $("#textTechInput").val().replace("\n", "<br/>");
+    $("#textTechInput").val("");
+    var divMessage = document.createElement("div");
+    divMessage.classList.add("sent-chat");
+    divMessage.innerHTML = '<div class="arrow-right"></div><div class="chat-message-header">You at ' + new Date().toLocaleTimeString() + "</div>" + message;
+    $("#divTechMessages").append(divMessage);
+    $("#divTechMessages")[0].scrollTop = $("#divTechMessages")[0].scrollHeight;
+    var encoded = btoa(message);
+    var request = {
+        "AuthToken": InstaTech.AuthToken,
+        "Type": "ChatMessage",
+        "Message": encoded
+    };
+    InstaTech.Socket_Chat.send(JSON.stringify(request));
 }
-function handleKicked(e) {
-    showDialog("Session Ended", "Your session has been terminated by the server for the following reason: " + e.Reason + "<br/><br/>If you believe this was in error, please contact your system administrator.");
+function updateQueueVolumes(e) {
+    if (InstaTech.Socket_Chat.readyState != 1) {
+        window.clearInterval(InstaTech.QueueWaitTimer);
+        return;
+    }
+    $("#divQueueAll .queue-volume").html(InstaTech.Cases.length);
+    $(".queue-block").each(function (index, elem) {
+        if (elem.getAttribute("queue") != "All") {
+            $("#" + elem.id + " .queue-volume").html(InstaTech.Cases.filter(function (value, ind) {
+                return value.SupportQueue == elem.getAttribute("queue");
+            }).length);
+        }
+    });
+    $(".case-block-wait .wait-time").each(function (index, elem) {
+        var caseID = $(elem).parent().parent().attr("id").replace("divCase", "");
+        var created = InstaTech.Cases.filter(function (value, index) {
+            return value.CaseID == caseID;
+        })[0].DTCreated;
+        elem.innerHTML = getTimeSince(created);
+    });
+}
+function closeTechSession(e) {
+    var dialog = document.createElement("div");
+    dialog.innerHTML = "Are you sure you want to close this session as resolved?";
+    $(dialog).dialog({
+        width: document.body.clientWidth * .5,
+        title: "Confirm Session Closure",
+        classes: { "ui-dialog-title": "center-aligned" },
+        buttons: [
+            {
+                text: "Close",
+                click: function () {
+                    var request = {
+                        "Type": "SessionEnded",
+                        "Details": "Thank you for contacting us!"
+                    };
+                    InstaTech.Socket_Chat.send(JSON.stringify(request));
+                    $(this).dialog("close");
+                    $("#divChatBoxTech").slideUp();
+                }
+            },
+            {
+                text: "Cancel",
+                click: function () {
+                    $(this).dialog("close");
+                }
+            }
+        ],
+        close: function () {
+            $(this).dialog('destroy').remove();
+        }
+    });
+}
+function dragOverTechChat(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+}
+;
+function dropOnTechChat(e) {
+    e.preventDefault();
+    if (e.dataTransfer.files.length < 1) {
+        return;
+    }
+    if (InstaTech.Socket_Chat.readyState != WebSocket.OPEN) {
+        return;
+    }
+    transferFileTech(e.dataTransfer.files);
+}
+;
+function transferFileTech(e) {
+    for (var i = 0; i < e.length; i++) {
+        var file = e[i];
+        var strPath = "/Services/File_Transfer_Chat.cshtml";
+        var fd = new FormData();
+        fd.append('fileUpload', file);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', strPath, true);
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                var fileName = xhr.responseText;
+                var url = location.href + "Services/File_Transfer_Chat.cshtml?file=" + fileName;
+                $("#textTechInput").val('File Sharing Link: <a target="_blank" href="' + url + '">' + fileName + '</a>');
+                submitTechMessage();
+            }
+            else {
+                showDialog("Upload Failed", "File upload failed.");
+            }
+        };
+        xhr.onprogress = function (e) {
+            $("#divTechStatus").html("File Upload: " + Math.round(e.loaded / e.total * 100) + "%");
+        };
+        xhr.send(fd);
+    }
+}
+function sendToQueue(e) {
+    var request = {
+        "Type": "SendToQueue",
+    };
+    InstaTech.Socket_Chat.send(JSON.stringify(request));
+    $("#divChatBoxTech").slideUp();
+    $(".col3").animate({ "width": 0 });
+}
+function moveCase(e) {
+    if ($("#divChatBoxTech").is(":visible")) {
+        return;
+    }
+    var dialog = document.createElement("div");
+    var divInnerDial = document.createElement("div");
+    divInnerDial.style.textAlign = "center";
+    divInnerDial.innerHTML = "<div>Select the new category and type for this case.</div><br/>";
+    var selectCategory = document.createElement("select");
+    selectCategory.id = "selectMoveCaseCategory";
+    var selectType = document.createElement("select");
+    selectType.id = "selectMoveCaseType";
+    divInnerDial.appendChild(selectCategory);
+    divInnerDial.innerHTML += "<br/>";
+    divInnerDial.appendChild(selectType);
+    dialog.appendChild(divInnerDial);
+    $(dialog).dialog({
+        width: document.body.clientWidth * .5,
+        title: "Case Transfer",
+        classes: { "ui-dialog-title": "center-aligned" },
+        buttons: [
+            {
+                text: "Transfer",
+                click: function () {
+                    if ($("#selectMoveCaseCategory").val() != "Other") {
+                        if (!$("#selectMoveCaseCategory").val() || !$("#selectMoveCaseType").val()) {
+                            showDialog("Selections Required", "You must select a category and type.  If category is Other, type may be ommitted.");
+                            return;
+                        }
+                    }
+                    var request = {
+                        "Type": "CaseUpdate",
+                        "CaseID": $("#inputTechQueueCaseID").val(),
+                        "Status": "Transfer",
+                        "SupportCategory": $("#selectMoveCaseCategory").val(),
+                        "SupportType": $("#selectMoveCaseType").val()
+                    };
+                    InstaTech.Socket_Chat.send(JSON.stringify(request));
+                    $(this).dialog("close");
+                    $("#divChatBoxTech").slideUp();
+                }
+            },
+            {
+                text: "Cancel",
+                click: function () {
+                    $(this).dialog("close");
+                }
+            }
+        ],
+        open: function () {
+            $(this).find("select").selectmenu();
+            InstaTech.Socket_Chat.send(JSON.stringify({ "Type": "GetSupportCategories" }));
+            $("#selectMoveCaseCategory").on("selectmenuchange", function (e) {
+                var category = $("#selectMoveCaseCategory").val();
+                if (category == "Other") {
+                    $("#selectMoveCaseType").selectmenu("disable");
+                }
+                else {
+                    $("#selectMoveCaseType").selectmenu("enable");
+                    var request = {
+                        "Type": "GetSupportTypes",
+                        "SupportCategory": category
+                    };
+                    InstaTech.Socket_Chat.send(JSON.stringify(request));
+                }
+            });
+        },
+        close: function () {
+            $(this).dialog('destroy').remove();
+        }
+    });
+}
+function lockCase(e) {
+    var request = {
+        "Type": "LockCase",
+        "CaseID": $("#inputTechQueueCaseID").val(),
+    };
+    InstaTech.Socket_Chat.send(JSON.stringify(request));
 }

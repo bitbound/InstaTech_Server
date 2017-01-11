@@ -177,29 +177,40 @@
                                     <textarea  id="textTechQueueDetails" readonly ></textarea>
                                 </td>
                             </tr>
-                                <tr>
-                                    <td class="left-aligned">
-                                        <button onclick='alert("(TODO) When completed, this will let you move cases to another queue.")'>Move</button>
-                                    </td>
-                                    <td class="center-aligned">
-                                        <button onclick='alert("(TODO) When completed, this will let you temporarily lock a case so no one else can grab it, giving you time to read it.")'>Lock</button>
-                                    </td>
-                                    <td class="right-aligned">
-                                        <button>Take</button>
-                                    </td>
-                                </tr>
+                            <tr>
+                                <td class="left-aligned">
+                                    <button title="Transfer the case to another queue by reassigning the category and type." onclick='moveCase(event)'>Move</button>
+                                </td>
+                                <td class="center-aligned">
+                                    <button title="Lock the case for 20 seconds so no one else can take it, giving you time to prep." onclick='lockCase(event)'>Lock</button>
+                                </td>
+                                <td class="right-aligned">
+                                    <button title="Take the case and begin chatting with the customer." onclick="takeCase(event)">Take</button>
+                                </td>
+                            </tr>
                         </table>
                     </div>
                 </div>
             </div>
         </div>
-        <div id="divChatBoxTech" class="left-aligned" hidden>
-            <div id="divTechMessages" class="chat-messages">
-                
+        <div id="divChatBoxTech" class="left-aligned chat-frame" ondragover="dragOverTechChat(event)" ondrop="dropOnTechChat(event)" hidden>
+            <div>
+                <div id="divTechMessages" class="chat-messages">
+                </div>
+                <div id="divTechChatSidebar" class="chat-sidebar">
+                    <button onclick='$("#inputTechFile").click()'>Transfer File</button>
+                    <br />
+                    <button onclick="sendToQueue(event)">Send to Queue</button>
+                    <br />
+                    <button onclick="closeTechSession(event)">Close Session</button>
+                    <br />
+                    <input id="inputTechFile" type="file" hidden multiple onchange='transferFileTech(this.files);' />
+                </div>
             </div>
+            <div id="divTechStatus" class="chat-status"> </div>
             <div id="divTechInput" class="chat-input-frame">
-                <textarea id="textTechInput" placeholder="Type your message here." disabled />
-                <button id="buttonTechSend">Send</button>
+                <textarea id="textTechInput" placeholder="Type your message here." onkeydown='techKeyDown(event)' />
+                <button id="buttonTechSend" onclick="submitTechMessage(event)">Send</button>
             </div>
             <div id="divCustomerStatusBar"></div>
         </div>

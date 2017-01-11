@@ -1,6 +1,6 @@
 ﻿<div id="divCustomerChat" hidden onload="initCustomerChat()">
     <div class="portal-content-frame">
-        <form id="formCustomerChat" onsubmit="submitCustomerChat(event)">
+        <form id="formCustomerChat" onsubmit="submitCustomerLogin(event)">
             <input type="hidden" name="Type" value="CustomerLogin" />
             <table>
                 <tr>
@@ -21,20 +21,20 @@
                 </tr>
                 <tr>
                     <td>
-                        <label for="UserID">User ID:</label>
+                        <label for="UserID">User ID (optional):</label>
                     </td>
                     <td>
-                        <input required name="UserID" type="text" />
+                        <input id="inputCustomerUserID" name="UserID" type="text" />
                         <a class="tooltip-anchor" title="This is typically the user ID that you use to log into your computer.">?</a>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <label for="ComputerName">Computer Name:</label>
+                        <label for="ComputerName">PC Name (optional):</label>
                     </td>
                     <td>
-                        <input name="ComputerName" type="text" />
-                        <a class="tooltip-anchor" title='The unique name for your computer.  You can find this by clicking Start, typing "PC Name", and clicking the "best match" at the top".'>?</a>
+                        <input id="inputCustomerComputerName" name="ComputerName" type="text" />
+                        <a class="tooltip-anchor" title='The unique name for your computer.  You can find this by clicking Start, typing "PC Name", and clicking the "best match" at the top.'>?</a>
                     </td>
                 </tr>
 
@@ -73,7 +73,7 @@
                 <tr><td><br /></td></tr>
                 <tr>
                     <td colspan="2">
-                        <label for="textDescription">Details of Problem or Request:</label>
+                        <label for="Details">Details of Problem or Request:</label>
                     </td>
                 </tr>
                 <tr>
@@ -89,13 +89,22 @@
             </table>
 
         </form>
-        <div id="divChatBoxCustomer" class="left-aligned" hidden>
-            <div id="divCustomerMessages" class="chat-messages">
-                <div id="divWaitMessage">Waiting for an agent.  Place in queue: <span id="spanWaitQueue">Unknown</span></div>
+        <div id="divChatBoxCustomer" class="left-aligned chat-frame" ondragover="dragOverCustomerChat(event)" ondrop="dropOnCustomerChat(event)" hidden>
+            <div>
+                <div id="divCustomerMessages" class="chat-messages">
+                    <div id="divWaitMessage">Waiting for an agent.  Place in queue: <span id="spanWaitQueue">Unknown</span></div>
+                </div>
+                <div id="divCustomerChatSidebar" class="chat-sidebar">
+                    <button onclick='$("#inputCustomerFile").click()'>Transfer File</button>
+                    <br />
+                    <button onclick="closeCustomerSession(event)">Close Session</button>
+                    <input id="inputCustomerFile" type="file" hidden multiple onchange='transferFileCustomer(this.files);' />
+                </div>
             </div>
+            <div id="divCustomerStatus" class="chat-status"> </div>
             <div id="divCustomerInput" class="chat-input-frame">
-                <textarea id="textCustomerInput" placeholder="Type your message here." disabled />
-                <button id="buttonCustomerSend">Send</button>
+                <textarea id="textCustomerInput" placeholder="Type your message here." disabled onkeydown='customerKeyDown(event)' />
+                <button id="buttonCustomerSend" onclick="submitCustomerMessage(event)">Send</button>
             </div>
             <div id="divCustomerStatusBar"></div>
         </div>

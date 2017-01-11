@@ -1,7 +1,7 @@
 ﻿@{
     var strRequest = new StreamReader(Request.InputStream).ReadToEnd();
     var jsonRequest = Json.Decode(strRequest);
-    var di = Directory.CreateDirectory(Server.MapPath("/App_Data/FileTransfers/"));
+    var di = Directory.CreateDirectory(Server.MapPath("~/App_Data/FileTransfers/"));
 
 
     if (jsonRequest.Type.ToString() == "Upload")

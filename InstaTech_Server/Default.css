@@ -5,7 +5,7 @@ body {
 }
 
 button {
-    border: .1vw solid lightgray;
+    border: 2px solid lightgray;
     background: radial-gradient(rgb(75,75,75) 0%, rgb(35,35,35) 100%);
     cursor: pointer;
     color: white;
@@ -13,8 +13,12 @@ button {
 }
 
 button:hover {
-    border: .1vw solid white;
+    border: 2px solid white;
     background: radial-gradient(rgb(200,200,200) 0%, rgb(100,100,100) 100%);
+}
+button:active {
+    border: 2px solid gray;
+    background: radial-gradient(rgb(100,100,100) 0%, rgb(50,50,50) 100%);
 }
 .tooltip-anchor {
     padding: .5px 2px !important;
@@ -144,6 +148,10 @@ form button[type="submit"] {
     border: .5vw solid white;
     background: linear-gradient(to right, rgb(25,25,25), rgb(75,75,75), rgb(25,25,25));
 }
+.portal-title.tech-portal-title {
+    color: lightsteelblue;
+    border: .5vw solid lightsteelblue;
+}
 .portal-button-frame {
     margin-top: 5vw;
     display: inline-block;
@@ -189,7 +197,8 @@ form button[type="submit"] {
     height: 5vw;
 }
 
-.switch-portal {
+button.switch-portal {
+    border: .1vw solid lightgray;
     position: absolute;
     overflow: visible;
     left: 2vw;
@@ -197,6 +206,19 @@ form button[type="submit"] {
     width: 6vw;
     height: 4vw;
     padding: 0;
+}
+button.switch-portal:hover {
+    border: .1vw solid white;
+    background: radial-gradient(rgb(200,200,200) 0%, rgb(100,100,100) 100%);
+}
+button.switch-portal:active {
+    border: .1vw solid gray;
+    background: radial-gradient(rgb(100,100,100) 0%, rgb(50,50,50) 100%);
+}
+
+.tooltip-anchor {
+    padding: .5px 2px !important;
+    cursor: pointer;
 }
 
 .portal-content-frame {
@@ -224,36 +246,95 @@ form button[type="submit"] {
     display: inline-block;
     max-width: 350px;
 }
-#textDescription {
-    width: 100%;
-    min-height: 150px;
+
+.chat-frame {
+
 }
 
 .chat-messages {
+    display: inline-block;
     border: 1px solid dimgray;
     border-radius: 5px;
     background-color: whitesmoke;
     height: 300px;
-    margin: 10px;
+    margin: 10px 10px 0 10px;
     overflow: auto;
     padding: 5px;
+    width: calc(100% - 120px);
+}
+.chat-sidebar {
+    display: inline-block;
+    margin: 10px 0 5px 0;
+    vertical-align: top;
+    width: 80px;
+    text-align: center;
+}
+.chat-sidebar button {
+    margin: 5px 0;
 }
 .chat-input-frame {
     text-align: left;
     margin: 5px 10px;
 }
 .chat-input-frame textarea {
-    width: calc(100% - 80px);
+    width: calc(100% - 90px);
     margin-right: 10px;
+    margin-bottom: 0;
 }
 .chat-input-frame button {
     padding: 5px 10px;
+}
+.chat-status {
+    margin-left: 15px;
+    font-size: .8em;
+    height: 1.4em;
+}
+.chat-message-header {
+    font-size: .8em;
+    font-family: monospace;
+    margin-bottom: 5px;
+}
+.received-chat {
+    float: left;
+    position: relative;
+    clear: both;
+    border-radius: 5px;
+    background-color: lightskyblue;
+    margin: 5px 10px;
+    padding: 10px 20px 20px 20px;
+}
+
+.received-chat .arrow-left {
+    border-right: 10px solid lightskyblue;
+    top: 0;
+    transform: translate(-10px, 5px);
+    left: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+}
+
+.sent-chat {
+    position: relative;
+    float: right;
+    clear: both;
+    border-radius: 5px;
+    background-color: lightgreen;
+    margin: 5px 10px;
+    padding: 10px 20px 20px 20px;
+}
+
+.sent-chat .arrow-right {
+    border-left: 10px solid lightgreen;
+    top: 0;
+    transform: translate(0, 5px);
 }
 #divWaitMessage {
     background-color: lightgreen;
     padding: 5px;
     border: 1px solid dimgray;
 }
+
+
 
 /*** Tech Queue Table ***/
 #divQueueTable {
@@ -305,24 +386,24 @@ text-align: center;
     font-weight: bold;
 }
 .col1 .queue-title {
-    background-color: lightgreen;
+    background-color: rgb(180, 220, 180);
 }
-.col1 .queue-title>.arrow-down{
-    border-top: 10px solid lightgreen;
+.col1 .queue-title > .arrow-down {
+    border-top: 10px solid rgb(180, 220, 180);
     transform: translate(-50%, 2px);
 }
 .col2 .queue-title {
-    background-color: rgb(220, 220, 120);
+    background-color: rgb(215, 215, 135);
 }
 .col2 .queue-title > .arrow-down {
-    border-top: 10px solid rgb(220, 220, 120);
+    border-top: 10px solid rgb(215, 215, 135);
     transform: translate(-50%, 2px);
 }
 .col3 .queue-title {
-    background-color: aquamarine;
+    background-color: lightsteelblue;
 }
 .col3 .queue-title > .arrow-down {
-    border-top: 10px solid aquamarine;
+    border-top: 10px solid lightsteelblue;
     transform: translate(-50%, 2px);
 }
 
@@ -343,18 +424,18 @@ text-align: center;
     background-color: lightsteelblue;
 }
 .col1 .queue-block.selected {
-    background-color: lightgreen;
+    background-color: rgb(180, 220, 180);
 }
 .col1 .arrow-right {
-    border-left: 10px solid lightgreen;
+    border-left: 10px solid rgb(180, 220, 180);
     transform: translate(2px, -50%);
 }
 .col2 .case-block.selected {
-    background-color: rgb(220, 220, 120);
+    background-color: rgb(215, 215, 135);
 }
 
 .col2 .arrow-right {
-    border-left: 10px solid rgb(220, 220, 120);
+    border-left: 10px solid rgb(215, 215, 135);
     transform: translate(2px, -50%);
 }
 
@@ -372,18 +453,22 @@ text-align: center;
     -webkit-user-select: none;
     user-select: none;
 }
-.col1 .case-block.selected {
+.case-block.selected {
     background-color: rgb(220, 220, 120);
+}
+.case-block.case-locked {
+    border: 2px solid red;
 }
 .case-block:hover {
     background-color: lightsteelblue;
 }
 .case-block br {
-    margin-top: 2px;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
 }
 .case-block hr {
     width: 80%;
+    margin-top: 2px;
+    margin-bottom: 0;
 }
 .case-block-category {
     font-size: .8em;
@@ -393,4 +478,39 @@ text-align: center;
 }
 .case-block-wait {
     font-size: .8em;
+}
+
+/*** Remote Control Elements ***/
+.remote-frame-div {
+    display: inline-block;
+    position: absolute;
+    background: transparent radial-gradient(rgb(225, 225, 225) 0%, rgb(175, 175, 175) 100%) repeat scroll 0% 0%;
+    border-radius: 10px;
+    border: 5px solid white;
+    padding: 10px;
+    box-shadow: 10px 10px 5px rgba(255, 255, 255, 0.1);
+    width: 250px;
+    text-align: justify;
+    z-index: 2;
+}
+.draggable-title {
+    background: white;
+    margin: -12px -10px 10px -10px;
+    height: 30px;
+    cursor: grab;
+}
+.remote-frame-div img {
+    width: 100%;
+    margin-top: 5px;
+}
+.remote-frame-div hr {
+    width:70%;
+}
+.remote-frame-div a img {
+    width: 50%;
+}
+.draggable-title button {
+    float: right;
+    font-size: 10px;
+    padding: 3px 8px;
 }

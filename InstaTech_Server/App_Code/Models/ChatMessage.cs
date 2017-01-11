@@ -8,9 +8,9 @@ namespace InstaTech.App_Code.Models
     /// <summary>
     /// Summary description for Message
     /// </summary>
-    public class Message
+    public class ChatMessage
     {
-        public Message()
+        public ChatMessage()
         {
             DTSent = DateTime.Now;
         }

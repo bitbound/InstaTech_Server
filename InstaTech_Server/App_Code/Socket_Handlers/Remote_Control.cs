@@ -140,20 +140,20 @@ namespace InstaTech.App_Code.Socket_Handlers
         }
         private void LogConnection()
         {
-            if (!System.IO.Directory.Exists(WebSocketContext.Server.MapPath("/App_Data/Logs/")))
+            if (!System.IO.Directory.Exists(Utilities.App_Data + "Logs"))
             {
-                System.IO.Directory.CreateDirectory(WebSocketContext.Server.MapPath("/App_Data/Logs/"));
+                System.IO.Directory.CreateDirectory(Utilities.App_Data + "Logs");
             }
-            var strLogPath = WebSocketContext.Server.MapPath("/App_Data/Logs/Connections-") + DateTime.Now.ToString("yyyy-MM-dd") + ".txt";
+            var strLogPath = Utilities.App_Data + "Logs\\Connections-" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt";
             System.IO.File.AppendAllText(strLogPath, DateTime.Now.ToString() + "\t" + WebSocketContext.UserHostAddress + "\t" + WebSocketContext.UserAgent + "\t" + SessionID);
         }
         private void LogSession()
         {
-            if (!System.IO.Directory.Exists(WebSocketContext.Server.MapPath("/App_Data/Logs/")))
+            if (!System.IO.Directory.Exists(Utilities.App_Data + "Logs"))
             {
-                System.IO.Directory.CreateDirectory(WebSocketContext.Server.MapPath("/App_Data/Logs/"));
+                System.IO.Directory.CreateDirectory(Utilities.App_Data + "Logs");
             }
-            var strLogPath = WebSocketContext.Server.MapPath("/App_Data/Logs/Sessions-") + DateTime.Now.ToString("yyyy-MM-dd") + ".txt";
+            var strLogPath = Utilities.App_Data + "Logs\\Sessions-" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt";
             System.IO.File.AppendAllText(strLogPath, DateTime.Now.ToString() + "\t" + SessionID + "\t" + Partner.SessionID);
         }
         public string SessionID { get; set; }
