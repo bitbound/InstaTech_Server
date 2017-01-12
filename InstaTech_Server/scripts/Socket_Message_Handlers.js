@@ -316,14 +316,14 @@ function handleSendToQueue(e) {
 function handleLockCase(e) {
     if (e.Status == "ok") {
         $("#divCase" + e.CaseID).addClass("case-locked");
-        window.setTimeout(function () {
-            $("#divCase" + e.CaseID).removeClass("case-locked");
-        }, 20000);
     }
     else if (e.Status == "taken") {
         showDialog("Case Taken", "The case has already been taken.");
     }
     else if (e.Status == "already locked") {
-        showDialog("Case Locked", "The case is temporarily locked by another tech.");
+        showDialog("Case Locked", "The case is already locked.");
     }
+}
+function handleUnlockCase(e) {
+    $("#divCase" + e.CaseID).removeClass("case-locked");
 }

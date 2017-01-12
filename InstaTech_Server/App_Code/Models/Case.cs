@@ -54,8 +54,34 @@ namespace InstaTech.App_Code.Models
         }
         public string Details { get; set; }
         public string TechUserID { get; set; }
-        public bool Locked { get; set; }
+        public bool Locked
+        {
+            get
+            {
+                if (LockedAt == null || DateTime.Now - LockedAt > TimeSpan.FromSeconds(20))
+                {
+                    LockedAt = null;
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            set
+            {
+                if (value == true)
+                {
+                    LockedAt = DateTime.Now;
+                }
+                else
+                {
+                    LockedAt = null;
+                }
+            }
+        }
         public string LockedBy { get; set; }
+        private DateTime? LockedAt { get; set; }
         public List<ChatMessage> Messages { get; set; } = new List<ChatMessage>();
         private string CaseDir
         {

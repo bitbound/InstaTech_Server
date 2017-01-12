@@ -697,6 +697,15 @@ namespace InstaTech.App_Code.Socket_Handlers
                 (lockedCase as Case).Locked = false;
                 (lockedCase as Case).LockedBy = null;
                 (lockedCase as Case).Save();
+                var request = new
+                {
+                    Type = "UnlockCase",
+                    CaseID = (lockedCase as Case).CaseID
+                };
+                Techs.ForEach((sc) =>
+                {
+                    sc.Send(Json.Encode(request));
+                });
             }, lockCase, 20000, Timeout.Infinite);
             JsonData.Status = "ok";
             Techs.ForEach((sc) =>
