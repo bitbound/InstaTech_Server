@@ -216,11 +216,6 @@ button.switch-portal:active {
     background: radial-gradient(rgb(100,100,100) 0%, rgb(50,50,50) 100%);
 }
 
-.tooltip-anchor {
-    padding: .5px 2px !important;
-    cursor: pointer;
-}
-
 .portal-content-frame {
     display: inline-block;
     overflow: auto;
@@ -480,6 +475,13 @@ text-align: center;
     font-size: .8em;
 }
 
+#buttonTake {
+    width: 75px;
+    height: 45px;
+    color: limegreen;
+    font-weight: bold;
+    font-size: 16px;
+}
 /*** Remote Control Elements ***/
 .remote-frame-div {
     display: inline-block;

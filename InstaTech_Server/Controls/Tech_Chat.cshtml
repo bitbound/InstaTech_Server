@@ -185,7 +185,7 @@
                                     <button title="Lock the case for 20 seconds so no one else can take it, giving you time to prep." onclick='lockCase(event)'>Lock</button>
                                 </td>
                                 <td class="right-aligned">
-                                    <button title="Take the case and begin chatting with the customer." onclick="takeCase(event)">Take</button>
+                                    <button id="buttonTake" title="Take the case and begin chatting with the customer." onclick="takeCase(event)">Take</button>
                                 </td>
                             </tr>
                         </table>
@@ -198,11 +198,11 @@
                 <div id="divTechMessages" class="chat-messages">
                 </div>
                 <div id="divTechChatSidebar" class="chat-sidebar">
-                    <button onclick='$("#inputTechFile").click()'>Transfer File</button>
+                    <button title="Transfer files.  You can also drag-and-drop files onto the chat window." onclick='$("#inputTechFile").click()'>Transfer File</button>
                     <br />
-                    <button onclick="sendToQueue(event)">Send to Queue</button>
+                    <button title="Send the case back to the queue." onclick="sendToQueue(event)">Send to Queue</button>
                     <br />
-                    <button onclick="closeTechSession(event)">Close Session</button>
+                    <button title="Close this session and mark it as resolved." onclick="closeTechSession(event)">Close Session</button>
                     <br />
                     <input id="inputTechFile" type="file" hidden multiple onchange='transferFileTech(this.files);' />
                 </div>
