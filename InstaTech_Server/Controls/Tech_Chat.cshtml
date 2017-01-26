@@ -1,7 +1,7 @@
 ﻿@{ }
-<div id="divTechChat" hidden>
+<div id="divTechChat" hidden onload="initTechChat()">
     <div class="portal-content-frame">
-        <div id="divTechLoginFrame">
+        <div id="divTechChatLoginFrame">
             <strong>Tech Login</strong>
             <br />
             @{
@@ -20,39 +20,47 @@
             }
             <br />
             <br />
-            <form id="formTechLogin" onsubmit="submitTechLogin(event)">
-                <input type="hidden" name="Type" value="TechLogin" />
+            <form id="formTechChatLogin" onsubmit="submitTechChatLogin(event)">
+                <input type="hidden" name="Type" value="TechChatLogin" />
                 <table>
                     <tr>
                         <td>
-                            <label for="inputTechUserID">User ID:</label>
+                            <label for="inputTechChatUserID">User ID:</label>
                         </td>
                         <td>
-                            <input type="text" id="inputTechUserID" name="UserID" required />
+                            <input type="text" id="inputTechChatUserID" name="UserID" required />
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <label for="inputTechPassword">Password:</label>
+                            <label for="inputTechChatPassword">Password:</label>
                         </td>
                         <td>
-                            <input type="password" id="inputTechPassword" name="Password" required />
-                        </td>
-                    </tr>
-                    <tr hidden>
-                        <td>
-                            <label for="inputTechNewPassword">New Password:</label>
-                        </td>
-                        <td>
-                            <input type="password" id="inputTechNewPassword" name="NewPassword" min="8" max="20" />
+                            <input type="password" id="inputTechChatPassword" name="Password" required />
                         </td>
                     </tr>
                     <tr hidden>
                         <td>
-                            <label for="inputTechConfirmNewPassword">Confirm New Password:</label>
+                            <label for="inputTechChatNewPassword">New Password:</label>
                         </td>
                         <td>
-                            <input type="password" id="inputTechConfirmNewPassword" name="ConfirmNewPassword" min="8" max="20" />
+                            <input type="password" id="inputTechChatNewPassword" name="NewPassword" min="8" max="20" />
+                        </td>
+                    </tr>
+                    <tr hidden>
+                        <td>
+                            <label for="inputTechChatConfirmNewPassword">Confirm New Password:</label>
+                        </td>
+                        <td>
+                            <input type="password" id="inputTechChatConfirmNewPassword" name="ConfirmNewPassword" min="8" max="20" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="inputTechChatRememberMe"><small>Remeber Me:</small></label>
+                        </td>
+                        <td>
+                            <input type="checkbox" id="inputTechChatRememberMe" name="RememberMe" />
                         </td>
                     </tr>
                     <tr>
@@ -62,7 +70,7 @@
                     </tr>
                     <tr>
                         <td colspan="2" class="right-aligned">
-                            <a class="link" onclick="forgotPassword(event)">Forgot password?</a>
+                            <a class="link" onclick="forgotPasswordChat(event)">Forgot password?</a>
                         </td>
                     </tr>
                 </table>

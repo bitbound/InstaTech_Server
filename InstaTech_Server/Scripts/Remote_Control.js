@@ -1,7 +1,6 @@
 var context = {};
 var socket = {};
 var rtcConnection;
-var connected = false;
 var img;
 var byteArray;
 var imageData;
@@ -20,127 +19,338 @@ var doubleTapped;
 var touchDragging;
 var lastTouchPointX;
 var lastTouchPointY;
-function connectToClient() {
-    if (!connected) {
-        if (window.location.href.search("localhost") > -1) {
-            socket = new WebSocket("ws://" + location.host + location.pathname.toLowerCase().split("/remote_control")[0] + "/Services/Remote_Control_Socket.cshtml");
+function submitTechMainLogin(e) {
+    if (e) {
+        e.preventDefault();
+    }
+    var formData = {};
+    $("#formTechMainLogin").find("input").each(function (index, item) {
+        if (item.type == "checkbox") {
+            formData[item.name] = item.checked;
         }
         else {
-            socket = new WebSocket("wss://" + location.host + location.pathname.toLowerCase().split("/remote_control")[0] + "/Services/Remote_Control_Socket.cshtml");
+            formData[item.name] = item.value;
         }
-        ;
-        context.canvas.width = 1;
-        context.canvas.height = 1;
-        socket.binaryType = "arraybuffer";
-        connected = true;
-        $("#divStatus").text("Connecting...");
-        socket.onopen = function (e) {
-            var request = {
-                "Type": "ConnectionType",
-                "ConnectionType": "ViewerApp"
-            };
-            socket.send(JSON.stringify(request));
-            var sessionID = $("#inputSessionID").val();
-            request = {
-                "Type": "Connect",
-                "SessionID": sessionID
-            };
-            socket.send(JSON.stringify(request));
-            // Initialize RTC and attempt to connect.
-            initRTC();
-            $("#divConnect").hide();
-            $("#divMain").show();
-        };
-        socket.onclose = function (e) {
-            $("#divMain").hide();
-            $("#canvasRemoteControl").hide();
-            $("#videoRemoteControl").hide();
-            $("#divConnect").show();
-            connected = false;
-            $("#divStatus").text("Session closed.");
-        };
-        socket.onerror = function (e) {
-            $("#divMain").hide();
-            $("#canvasRemoteControl").hide();
-            $("#videoRemoteControl").hide();
-            $("#divConnect").show();
-            connected = false;
-            $("#divStatus").text("Session closed due to error.");
-        };
-        socket.onmessage = function (e) {
-            if (e.data instanceof ArrayBuffer) {
-                if ($("#canvasRemoteControl").is(":hidden")) {
-                    $("#canvasRemoteControl").show();
-                }
-                byteArray = new Uint8Array(e.data);
-                var length = byteArray.length;
-                imgX = Number(byteArray[length - 4] * 100 + byteArray[length - 3]);
-                imgY = Number(byteArray[length - 2] * 100 + byteArray[length - 1]);
-                url = window.URL.createObjectURL(new Blob([byteArray.subarray(0, length - 4)]));
-                img = document.createElement("img");
-                img.onload = function () {
-                    context.drawImage(img, imgX, imgY, img.width, img.height);
-                    window.URL.revokeObjectURL(url);
-                };
-                img.src = url;
-            }
-            else {
-                var jsonMessage = JSON.parse(e.data);
-                switch (jsonMessage.Type) {
-                    case "Connect":
-                        if (jsonMessage.Status == "InvalidID") {
-                            $("#divMain").hide();
-                            $("#divConnect").show();
-                            socket.close();
-                            showTooltip($("#inputSessionID"), "bottom", "red", "Session ID not found.");
-                        }
-                        else if (jsonMessage.Status == "AlreadyHasPartner") {
-                            $("#divMain").hide();
-                            $("#divConnect").show();
-                            socket.close();
-                            showTooltip($("#inputSessionID"), "bottom", "red", "That client already has a partner connected.");
-                        }
-                        break;
-                    case "Bounds":
-                        context.canvas.height = jsonMessage.Height;
-                        context.canvas.width = jsonMessage.Width;
-                        break;
-                    case "RTCCandidate":
-                        rtcConnection.addIceCandidate(new RTCIceCandidate(jsonMessage.Candidate));
-                        break;
-                    case "RTCOffer":
-                        if (jsonMessage.Status = "Denied") {
-                            var request = {
-                                "Type": "CaptureScreen",
-                                "Source": "WebSocket"
-                            };
-                            console.log("RTC unsupported by client.  Falling back to websocket communication.");
-                            socket.send(JSON.stringify(request));
-                        }
-                        break;
-                    case "RTCAnswer":
-                        var answer = JSON.parse(atob(jsonMessage.Answer));
-                        rtcConnection.setRemoteDescription(answer, function () {
-                            var request = {
-                                "Type": "CaptureScreen",
-                            };
-                            console.log("RTC descriptions set successfully.  Requesting video via RTC.");
-                            socket.send(JSON.stringify(request));
-                        }, function (error) {
-                            var request = {
-                                "Type": "CaptureScreen",
-                                "Source": "WebSocket"
-                            };
-                            console.log("RTC connection failed.  Falling back to websocket communication.");
-                            socket.send(JSON.stringify(request));
-                        });
-                    default:
-                        break;
-                }
-                ;
-            }
-        };
+    });
+    if (InstaTech.AuthenticationToken) {
+        formData["AuthenticationToken"] = InstaTech.AuthenticationToken;
     }
+    socket.send(JSON.stringify(formData));
+}
+function logOutTech(e) {
+    clearCachedCreds();
+    socket.close();
+    $("#spanMainLoginStatus").html("<small>Not logged in.</small>");
+    $("#aMainTechLogOut").hide();
+    $("#aMainTechLogIn").show();
+}
+function clearCachedCreds() {
+    InstaTech.UserID = null;
+    InstaTech.AuthenticationToken = null;
+    localStorage.removeItem("RememberMe");
+    localStorage.removeItem("UserID");
+    localStorage.removeItem("AuthenticationToken");
+}
+function setMainLoginFrame() {
+    $("#spanMainLoginStatus").html("<small>Logged in as: " + InstaTech.UserID + "</small>");
+    $("#aMainTechLogIn").hide();
+    $("#aMainTechLogOut").show();
+}
+function forgotPasswordMain(e) {
+    if ($("#inputTechMainUserID").val().length == 0) {
+        showDialog("User ID Required", "You must first enter a user ID into the form before you can reset the password.");
+        return;
+    }
+    var dialog = document.createElement("div");
+    dialog.innerHTML = "This will reset your password and send a temporary password to your email.<br/><br/>Proceed?";
+    $(dialog).dialog({
+        width: document.body.clientWidth * .5,
+        title: "Confirm Password Reset",
+        classes: { "ui-dialog-title": "center-aligned" },
+        buttons: [
+            {
+                text: "Yes",
+                click: function () {
+                    var request = {
+                        "Type": "ForgotPassword",
+                        "UserID": $("#inputTechMainUserID").val()
+                    };
+                    socket.send(JSON.stringify(request));
+                    $(this).dialog("close");
+                }
+            },
+            {
+                text: "No",
+                click: function () {
+                    $(this).dialog("close");
+                }
+            }
+        ],
+        close: function () {
+            $(this).dialog('destroy').remove();
+        }
+    });
+}
+function switchToCustomerPortal() {
+    $("#divTechPortal").fadeOut(function () {
+        $("#divCustomerPortal").fadeIn();
+    });
+}
+function connectToClient() {
+    if (socket.readyState == WebSocket.CLOSED || socket.readyState == WebSocket.CLOSING)
+    {
+        $("#divStatus").text("Reconnecting...");
+        initWebSocket();
+        window.setTimeout(connectToClient, 1000);
+        return;
+    }
+    context.canvas.width = 1;
+    context.canvas.height = 1;
+    connected = true;
+    $("#divStatus").text("Connecting...");
+
+    var request = {
+        "Type": "ConnectionType",
+        "ConnectionType": "ViewerApp"
+    };
+    socket.send(JSON.stringify(request));
+    if ($(".toggle-box.selected").attr("id") == "divInteractive") {
+        var sessionID = $("#inputSessionID").val();
+        request = {
+            "Type": "Connect",
+            "SessionID": sessionID
+        };
+        socket.send(JSON.stringify(request));
+    }
+    else {
+        var computerName = $("#inputSessionID").val();
+        request = {
+            "Type": "ConnectUnattended",
+            "ComputerName": computerName
+        };
+        socket.send(JSON.stringify(request));
+    }
+}
+function searchComputers(e) {
+    if ($("#divSearchComputers > div").is(":visible"))
+    {
+        $("#divSearchComputers > div").slideUp();
+    }
+    else
+    {
+        var request = {
+            "Type": "SearchComputers",
+            "AuthenticationToken": InstaTech.AuthenticationToken
+        };
+        socket.send(JSON.stringify(request));
+    }
+}
+function filterComputers() {
+    var searchStr = $("#inputFilterComputers").val();
+    $("#selectComputers").children().each(function (index, elem) {
+        if (elem.innerHTML.search(searchStr) == -1)
+        {
+            elem.setAttribute("hidden", true);
+        }
+        else
+        {
+            elem.removeAttribute("hidden");
+        }
+    })
+}
+function selectComputer() {
+    $("#inputSessionID").val($("#selectComputers").val());
+    $("#divSearchComputers > div").slideUp();
+}
+
+function initWebSocket() {
+    if (window.location.href.search("localhost") > -1) {
+        socket = new WebSocket("ws://" + location.host + location.pathname.toLowerCase().split("/remote_control")[0] + "/Services/Remote_Control_Socket.cshtml");
+    }
+    else {
+        socket = new WebSocket("wss://" + location.host + location.pathname.toLowerCase().split("/remote_control")[0] + "/Services/Remote_Control_Socket.cshtml");
+    }
+    socket.binaryType = "arraybuffer";
+    socket.onopen = function (e) {
+        if (localStorage["RememberMe"]) {
+            InstaTech.UserID = localStorage["UserID"];
+            InstaTech.AuthenticationToken = localStorage["AuthenticationToken"];
+            $("#inputTechMainUserID").val(InstaTech.UserID);
+            $("#inputTechMainPassword").val("**********");
+            document.getElementById("inputTechMainRememberMe").checked = true;
+            submitTechMainLogin();
+        }
+    };
+    socket.onclose = function (e) {
+        $("#divMain").hide();
+        $("#canvasRemoteControl").hide();
+        $("#videoRemoteControl").hide();
+        $("#divConnect").show();
+        $("#divStatus").text("Session closed.");
+        initWebSocket();
+    };
+    socket.onerror = function (e) {
+        $("#divMain").hide();
+        $("#canvasRemoteControl").hide();
+        $("#videoRemoteControl").hide();
+        $("#divConnect").show();
+        $("#divStatus").text("Session closed due to an error.");
+        initWebSocket();
+    };
+    socket.onmessage = function (e) {
+        if (e.data instanceof ArrayBuffer) {
+            if ($("#canvasRemoteControl").is(":hidden")) {
+                $("#canvasRemoteControl").show();
+            }
+            byteArray = new Uint8Array(e.data);
+            var length = byteArray.length;
+            imgX = Number(byteArray[length - 4] * 100 + byteArray[length - 3]);
+            imgY = Number(byteArray[length - 2] * 100 + byteArray[length - 1]);
+            url = window.URL.createObjectURL(new Blob([byteArray.subarray(0, length - 4)]));
+            img = document.createElement("img");
+            img.onload = function () {
+                context.drawImage(img, imgX, imgY, img.width, img.height);
+                window.URL.revokeObjectURL(url);
+            };
+            img.src = url;
+        }
+        else {
+            var jsonMessage = JSON.parse(e.data);
+            switch (jsonMessage.Type) {
+                case "TechMainLogin":
+                    if (jsonMessage.Status == "new required") {
+                        $("#inputTechMainConfirmNewPassword, #inputTechMainNewPassword").attr("required", true);
+                        $("#inputTechMainConfirmNewPassword, #inputTechMainNewPassword").parent("td").parent("tr").show();
+                        return;
+                    }
+                    else if (jsonMessage.Status == "ok") {
+                        clearCachedCreds();
+                        InstaTech.Context = "Technician";
+                        InstaTech.UserID = $("#inputTechMainUserID").val();
+                        InstaTech.AuthenticationToken = jsonMessage.AuthenticationToken;
+                        if (document.getElementById("inputTechMainRememberMe").checked) {
+                            localStorage["RememberMe"] = true;
+                            localStorage["UserID"] = InstaTech.UserID;
+                            localStorage["AuthenticationToken"] = InstaTech.AuthenticationToken;
+                        }
+                        $("#divMainTechLoginForm").slideUp();
+                        setMainLoginFrame();
+                    }
+                    else if (jsonMessage.Status == "invalid") {
+                        showDialog("Incorrect Credentials", "The user ID or password is incorrect.  Please try again.");
+                        return;
+                    }
+                    else if (jsonMessage.Status == "locked") {
+                        showDialog("Account Locked", "Your account as been locked due to failed login attempts.  It will unlock automatically after 10 minutes.  Please try again later.");
+                        return;
+                    }
+                    else if (jsonMessage.Status == "temp ban") {
+                        showDialog("Temporary Ban", "Due to failed login attempts, you must refresh your browser to try again.");
+                        return;
+                    }
+                    else if (jsonMessage.Status == "password mismatch") {
+                        showDialog("Password Mismatch", "The passwords you entered don't match.  Please retype them.");
+                        return;
+                    }
+                    else if (jsonMessage.Status == "password length") {
+                        showDialog("Password Length", "Your new password must be between 8 and 20 characters long.");
+                        return;
+                    }
+                    break;
+                case "Unauthorized":
+                    $("#divStatus").text("");
+                    showDialog("Access Denied", jsonMessage.Reason);
+                    break;
+                case "Connect":
+                    $("#divStatus").text("");
+                    if (jsonMessage.Status == "ok") {
+                        // Initialize RTC and attempt to connect.
+                        initRTC();
+                        $("#divConnect").hide();
+                        $("#divMain").show();
+                    }
+                    else if (jsonMessage.Status == "InvalidID") {
+                        $("#divMain").hide();
+                        $("#divConnect").show();
+                        showTooltip($("#inputSessionID"), "bottom", "red", "Session ID not found.");
+
+                    }
+                    else if (jsonMessage.Status == "AlreadyHasPartner") {
+                        $("#divMain").hide();
+                        $("#divConnect").show();
+                        showTooltip($("#inputSessionID"), "bottom", "red", "That client already has a partner connected.");
+                    }
+                    break;
+                case "ConnectUnattended":
+                    $("#divStatus").text("");
+                    if (jsonMessage.Status == "ok") {
+                        // Initialize RTC and attempt to connect.
+                        initRTC();
+                        $("#divConnect").hide();
+                        $("#divMain").show();
+                    }
+                    if (jsonMessage.Status == "UnknownComputer") {
+                        $("#divMain").hide();
+                        $("#divConnect").show();
+                        showTooltip($("#inputSessionID"), "bottom", "red", "Computer name not found.");
+                    }
+                    if (jsonMessage.Status == "AlreadyHasPartner") {
+                        $("#divMain").hide();
+                        $("#divConnect").show();
+                        showTooltip($("#inputSessionID"), "bottom", "red", "That client already has a partner connected.");
+                    }
+                    break;
+                case "SearchComputers":
+                    var selectEle = document.getElementById("selectComputers");
+                    selectEle.innerHTML = "";
+                    jsonMessage.Computers.forEach(function (value, index) {
+                        var option = document.createElement("option");
+                        option.value = value;
+                        option.innerHTML = value;
+                        selectEle.options.add(option);
+                    });
+                    $("#inputFilterComputers").val("");
+                    $("#divSearchComputers > div").slideDown();
+                    break;
+                case "Bounds":
+                    context.canvas.height = jsonMessage.Height;
+                    context.canvas.width = jsonMessage.Width;
+                    break;
+                case "RTCCandidate":
+                    rtcConnection.addIceCandidate(new RTCIceCandidate(jsonMessage.Candidate));
+                    break;
+                case "RTCOffer":
+                    if (jsonMessage.Status = "Denied") {
+                        var request = {
+                            "Type": "CaptureScreen",
+                            "Source": "WebSocket"
+                        };
+                        console.log("RTC unsupported by client.  Falling back to websocket communication.");
+                        socket.send(JSON.stringify(request));
+                    }
+                    break;
+                case "RTCAnswer":
+                    var answer = JSON.parse(atob(jsonMessage.Answer));
+                    rtcConnection.setRemoteDescription(answer, function () {
+                        var request = {
+                            "Type": "CaptureScreen",
+                        };
+                        console.log("RTC descriptions set successfully.  Requesting video via RTC.");
+                        socket.send(JSON.stringify(request));
+                    }, function (error) {
+                        var request = {
+                            "Type": "CaptureScreen",
+                            "Source": "WebSocket"
+                        };
+                        console.log("RTC connection failed.  Falling back to websocket communication.");
+                        socket.send(JSON.stringify(request));
+                    });
+                default:
+                    break;
+            }
+            ;
+        }
+    };
 }
 function disconnect() {
     socket.close();
@@ -222,37 +432,6 @@ function toggleScaleToFit() {
         $("#divScaleToFit").attr("status", "off");
         $(".input-surface").css("width", "auto");
     }
-}
-function changeResolution(e) {
-    var request = {
-        "Type": "ChangeResolution",
-        "Value": e.target.value
-    };
-    socket.send(JSON.stringify(request));
-}
-function changeImageQuality(e) {
-    var request = {
-        "Type": "ChangeImageQuality",
-        "Value": e.target.value
-    };
-    socket.send(JSON.stringify(request));
-}
-function copyClientLink() {
-    $("#inputClientLink").select();
-    try {
-        var result = document.execCommand("copy");
-    }
-    catch (ex) {
-        showTooltip($("#inputClientLink"), "bottom", "red", "Failed to copy to clipboard.");
-    }
-    ;
-    if (result) {
-        showTooltip($("#inputClientLink"), "bottom", "seagreen", "Link copied to clipboard.");
-    }
-    else {
-        showTooltip($("#inputClientLink"), "bottom", "red", "Failed to copy to clipboard.");
-    }
-    ;
 }
 function sendClipboard(e) {
     // Do nothing if input is empty.
@@ -357,6 +536,26 @@ function transferFiles(fileList) {
 }
 $(document).ready(function () {
     context = document.getElementById("canvasRemoteControl").getContext("2d");
+    $(".toggle-box").on("click", function (e) {
+        if (e.currentTarget.id == "divInteractive") {
+            document.getElementById("inputSessionID").setAttribute("placeholder", "Enter client's session ID.");
+            document.getElementById("inputSessionID").setAttribute("pattern", "[0-9 ]*");
+            $("#imgSearchComputers").hide();
+        }
+        else
+        {
+            if (InstaTech.UserID == undefined || InstaTech.AuthenticationToken == undefined)
+            {
+                showDialog("Login Required", "You must be logged in to start an unattended access sessions.");
+                return;
+            }
+            $("#imgSearchComputers").show();
+            document.getElementById("inputSessionID").setAttribute("placeholder", "Enter client's computer name.");
+            document.getElementById("inputSessionID").removeAttribute("pattern");
+        }
+        $(".toggle-box").removeClass("selected");
+        e.currentTarget.classList.add("selected");
+    });
     $(".input-surface").on("mousemove", function (e) {
         e.preventDefault();
         if (socket.readyState == WebSocket.OPEN) {
@@ -574,4 +773,5 @@ $(document).ready(function () {
         transferFiles(e.dataTransfer.files);
         showTooltip($(document.body), "center", "seagreen", "File(s) uploaded successfully.");
     };
+    initWebSocket();
 });

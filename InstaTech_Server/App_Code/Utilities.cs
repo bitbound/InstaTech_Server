@@ -18,11 +18,11 @@ namespace InstaTech.App_Code {
         {
             get
             {
-                if (Config.Demo_Mode && Support_Chat.Customers.Where(sc=>sc.Partner == null).Count() == 0)
+                if (Config.Demo_Mode && Socket_Main.Customers?.Where(sc=>sc.Partner == null)?.Count() == 0)
                 {
                     for (int i = 0; i < 5; i++)
                     {
-                        var newSC = new Support_Chat()
+                        var newSC = new Socket_Main()
                         {
                             SupportCase = new Case()
                             {
@@ -37,13 +37,13 @@ namespace InstaTech.App_Code {
                                 SupportType = "Network Account",
                                 Details = "It says my account is locked out and cannot be logged into.",
                             },
-                            ConnectionType = Support_Chat.ConnectionTypes.Customer,
+                            ConnectionType = Socket_Main.ConnectionTypes.Customer,
                         };
-                        Support_Chat.SocketCollection.Add(newSC);
+                        Socket_Main.SocketCollection.Add(newSC);
                     }
                 }
                 var cases = new List<Case>();
-                foreach (Support_Chat sc in Support_Chat.SocketCollection.Where(sc=>(sc as Support_Chat).ConnectionType == Support_Chat.ConnectionTypes.Customer && (sc as Support_Chat).Partner == null))
+                foreach (Socket_Main sc in Socket_Main.SocketCollection.Where(sc=>(sc as Socket_Main).ConnectionType == Socket_Main.ConnectionTypes.Customer && (sc as Socket_Main).Partner == null))
                 {
                     cases.Add(sc.SupportCase);
                 }
@@ -63,10 +63,6 @@ namespace InstaTech.App_Code {
                 })));
                 return cases;
             }
-        }
-        private static int compare(Case a, Case b)
-        {
-            return 1;
         }
     }
 }

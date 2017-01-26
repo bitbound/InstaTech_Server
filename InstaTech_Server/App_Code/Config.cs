@@ -13,6 +13,11 @@ namespace InstaTech.App_Code
         // Replace with your company name.
         public static string Company_Name { get; } = "InstaTech";
 
+        // This is the single, default admin account that will be created on first start.
+        // The temporary password will be "password".  You can use this account to create
+        // or modify other tech accounts.
+        public static string Default_Admin { get; } = "admin";
+
         // Enable demo accounts.
         public static bool Demo_Mode { get; } = true;
 

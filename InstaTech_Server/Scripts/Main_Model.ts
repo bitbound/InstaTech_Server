@@ -25,8 +25,8 @@ class Main_Model {
     constructor() {
         this.Cases = [];
     } 
-    AuthToken: string;
-    Socket_Chat: WebSocket;
+    AuthenticationToken: string;
+    Socket_Main: WebSocket;
     Cases: Case[];
     Context: ConnectionType;
     LastTypingStatus: Date;

@@ -6,30 +6,121 @@
 <head>
     <title>InstaTech Remote Control</title>
     <link href="~/favicon.ico" rel="icon" />
+    <link href="~/scripts/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/scripts/jquery-ui/jquery-ui.theme.min.css" rel="stylesheet" />
+    <link href="~/scripts/jquery-ui/jquery-ui.structure.min.css" rel="stylesheet" />
     <meta name="viewport" content="width=600" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <script src="~/scripts/jquery/jquery-3.1.1.min.js"></script>
     <script src="~/scripts/jquery-ui/jquery-ui.min.js"></script>
     <script src="~/scripts/adapter.js"></script>
+    <script src="~/scripts/Utilities.js"></script>
     <script src="~/scripts/Remote_Control.js"></script>
+    <script src="~/scripts/Main_Model.js"></script>
 
 </head>
 <body>
+    <div id="divMainTechLoginFrame">
+        <div>
+            <span id="spanMainLoginStatus"><small>Not logged in.</small></span><br />
+            <a class="link" id="aMainTechLogIn" onclick='$("#divMainTechLoginForm").slideToggle()'>Log In</a>
+            <a class="link" id="aMainTechLogOut" onclick="logOutTech(event)" hidden>Log Out</a>
+        </div>
+        <div id="divMainTechLoginForm" hidden>
+            <form id="formTechMainLogin" onsubmit="submitTechMainLogin(event)">
+                <button type="button" onclick='$("#divMainTechLoginForm").slideToggle()' class="close-button-title">X</button>
+                <input type="hidden" name="Type" value="TechMainLogin" />
+                <table>
+                    <tr>
+                        <td>
+                            <label for="inputTechMainUserID">User ID:</label>
+                        </td>
+                        <td>
+                            <input type="text" id="inputTechMainUserID" name="UserID" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="inputTechMainPassword">Password:</label>
+                        </td>
+                        <td>
+                            <input type="password" id="inputTechMainPassword" name="Password" required />
+                        </td>
+                    </tr>
+                    <tr hidden>
+                        <td>
+                            <label for="inputTechMainNewPassword">New Password:</label>
+                        </td>
+                        <td>
+                            <input type="password" id="inputTechMainNewPassword" name="NewPassword" min="8" max="20" />
+                        </td>
+                    </tr>
+                    <tr hidden>
+                        <td>
+                            <label for="inputTechMainConfirmNewPassword">Confirm New Password:</label>
+                        </td>
+                        <td>
+                            <input type="password" id="inputTechMainConfirmNewPassword" name="ConfirmNewPassword" min="8" max="20" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="inputTechMainRememberMe"><small>Remeber Me:</small></label>
+                        </td>
+                        <td>
+                            <input type="checkbox" id="inputTechMainRememberMe" name="RememberMe" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <button type="submit">Submit</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="right-aligned">
+                            <a class="link" onclick="forgotPasswordMain(event)">Forgot password?</a>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
     <div id="divConnect" style="margin-left: -8px; margin-top: -8px; width:100%; height:100%; position: fixed">
         <div style="position:absolute; top: 50%; left:50%; transform:translate(-50%, -50%); border:5px inset white; background-color:lightsteelblue; border-radius: 10%; width:275px; height: 250px">
             <div style="text-align:center; font-family: monospace; font-size: 2em; font-weight: bold; position:relative; top: -80px; color:white">
                 @InstaTech.App_Code.Config.Company_Name<br />
                 Remote Control
             </div>
-            <div style="display:inline-block; position:absolute; top: 50%; left:50%; transform:translate(-50%, -50%);">
-                <div style="font-family: sans-serif; font-weight: bold">Connect to client:</div>
+            <div style="position:absolute; top: 50%; left:50%; transform:translate(-50%, -50%);font-family: sans-serif">
+                <div><strong>Connect to client:</strong></div>
                 <input id="inputSessionID" placeholder="Enter client's session ID." type="text" pattern="[0-9 ]*" onkeypress="if (event.keyCode == 13) { connectToClient() }" style="margin: 5px 0; width:175px" />
+                <img id="imgSearchComputers" class="link" src="~/Assets/Images/Search_64x.png" onclick="searchComputers(event)" title="Show online computers." hidden/>
+                <div id="divSearchComputers" style="display:inline-block; position:absolute; transform: translateY(30px);">
+                    <div style="display:none">
+                        <input id="inputFilterComputers" placeholder="Filter..." style="width:145px" oninput="filterComputers()" onchange="filterComputers();" />
+                        <select id="selectComputers" size="6" style="width:150px" onchange="selectComputer()">
+                            <option>Test</option>
+                            <option>Test</option>
+                            <option>Test</option>
+                            <option>Test</option>
+                            <option>Test</option>
+                            <option>Test</option>
+                            <option>Test</option>
+                            <option>Test asdf asdf asdf </option>
+                        </select>
+                    </div>
+                </div>
                 <br />
                 <div style="text-align:right">
                     <button id="buttonConnect" onclick="connectToClient()">Connect</button>
                 </div>
                 <div id="divStatus" style="font-family: sans-serif; margin-top:10px; font-size:.8em"></div>
+                <div style="margin-top:30px">
+                    <div><strong style="font-size:small">Mode:</strong></div>
+                    <div id="divInteractive" class="toggle-box selected" title="Connect with a user who is at their computer and able to give you a session ID.">Interactive</div><!--
+                    --><div id="divUnattended" class="toggle-box" title="Connect to a computer that has the service running in the background.">Unattended</div>
+                </div>
             </div>
         </div>
     </div>
@@ -55,24 +146,6 @@
                 <div id="divUploadHint" style="font-size: .8em; font-family:sans-serif; color:dodgerblue; cursor:pointer" onclick='showTooltip(this, "bottom", "black", "You can also drag-and-drop files onto the window to upload them.");'>(Hint!)</div>
                 <input id="inputFile" type="file" hidden multiple onchange='transferFiles(this.files); showTooltip($("#divUploadHint"), "bottom", "seagreen", "File(s) uploaded successfully.");' />
             </div>
-            @*<div style="margin-top: 20px;">
-                <span>Resolution:</span>
-                <select style="float:right" onchange="changeResolution(event)">
-                    <option value="25">25%</option>
-                    <option value="50">50%</option>
-                    <option selected value="75">75%</option>
-                    <option value="100">100%</option>
-                </select>
-            </div>
-            <div id="divImageQuality" style="margin-top: 20px;">
-                <span>Image Quality:</span>
-                <select style="float:right" onchange="changeImageQuality(event)">
-                    <option value=".25">25%</option>
-                    <option value=".50">50%</option>
-                    <option selected value="75">75%</option>
-                    <option value="1">100%</option>
-                </select>
-            </div>*@
             <div style="margin-top: 20px; margin-bottom:20px; height: 60px;">
                 <span style="margin-bottom:5px;">Send Clipboard:</span>
                 <textarea id="textClipboard" placeholder="Paste text here." style="float:right; margin-left: 10px; width:100px; resize: none;" oninput="sendClipboard(event)"></textarea>
@@ -106,6 +179,62 @@
             border: .1vw solid white;
             background: radial-gradient(rgb(200,200,200) 0%, rgb(100,100,100) 100%);
         }
+        td label {
+            margin-right: 10px;
+        }
+
+        form {
+            display: inline-block;
+            text-align: left;
+        }
+
+        form button[type="submit"] {
+            float: right;
+        }
+        .left-aligned {
+            text-align: left;
+        }
+
+        .center-aligned {
+            text-align: center;
+        }
+
+        .right-aligned {
+            text-align: right;
+        }
+        #divMainTechLoginFrame {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            text-align: right;
+            color: white;
+            z-index: 1;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        #divMainTechLoginFrame form {
+            background-color: dimgray;
+            padding: 10px;
+            border-radius: 5px;
+            border: 2px solid white;
+        }
+        .close-button-title {
+            float: right;
+            font-size: xx-small;
+            padding: 2px 5px;
+            margin-bottom: 5px;
+        }
+        .link {
+            font-size: .8em;
+            color: steelblue;
+            cursor: pointer;
+        }
+        #imgSearchComputers {
+            height: 20px;
+            width: 20px;
+            position: absolute;
+            margin-left: 5px;
+            transform: translateY(5px);
+        }
         #divMenu {
             position: fixed;
             background-color: lightsteelblue;
@@ -118,7 +247,32 @@
             padding: 0 10px 20px 10px;
             z-index: 1;
         }
-
+        .toggle-box {
+            display: inline-block;
+            width: 70px;
+            height: 25px;
+            line-height: 25px;
+            background-color: gray;
+            border: 1px solid gray;
+            text-align: center;
+            cursor: pointer;
+            font-family: sans-serif;
+            font-size: .75em;
+            margin-top: 5px;
+            margin-left: 0;
+            margin-right: 0;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .toggle-box:hover {
+            background-color: lightgray;
+        }
+        .toggle-box.selected {
+            background-color: whitesmoke;
+            border: 1px solid dimgray;
+        }
         #imgMenu {
             position:fixed;
             left: 50%;

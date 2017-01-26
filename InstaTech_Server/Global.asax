@@ -4,7 +4,21 @@
 
     void Application_Start(object sender, EventArgs e)
     {
-        // Code that runs on application startup
+        // Creates default admin account if it doesn't exist.
+        if (!System.IO.Directory.Exists(InstaTech.App_Code.Utilities.App_Data + "Tech_Accounts"))
+        {
+            System.IO.Directory.CreateDirectory(InstaTech.App_Code.Utilities.App_Data + "Tech_Accounts");
+        }
+        if (!System.IO.File.Exists(InstaTech.App_Code.Utilities.App_Data + "Tech_Accounts\\" + InstaTech.App_Code.Config.Default_Admin + ".json"))
+        {
+            var admin = new InstaTech.App_Code.Models.Tech_Account()
+            {
+                AccessLevel = InstaTech.App_Code.Models.Tech_Account.Access_Levels.Admin,
+                TempPassword = "password",
+                UserID = InstaTech.App_Code.Config.Default_Admin
+            };
+            admin.Save();
+        }
     }
 
     void Application_End(object sender, EventArgs e)
@@ -16,9 +30,9 @@
     void Application_Error(object sender, EventArgs e)
     {
         // Code that runs when an unhandled error occurs
-        if (!System.IO.Directory.Exists(Server.MapPath("~/App_Data/GlobalErrors")))
+        if (!System.IO.Directory.Exists(Server.MapPath("~/App_Data/Errors")))
         {
-            System.IO.Directory.CreateDirectory(Server.MapPath("~/App_Data/GlobalErrors/"));
+            System.IO.Directory.CreateDirectory(Server.MapPath("~/App_Data/Errors/"));
         }
         var exError = Server.GetLastError();
         var jsonError = new
@@ -30,8 +44,7 @@
             StackTrace = exError.StackTrace,
         };
         var error = System.Web.Helpers.Json.Encode(jsonError) + Environment.NewLine;
-        System.IO.File.AppendAllText(Server.MapPath("~/App_Data/GlobalErrors/" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt"), error);
-        throw exError;
+        System.IO.File.AppendAllText(Server.MapPath("~/App_Data/Errors/" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt"), error);
     }
 
     void Session_Start(object sender, EventArgs e)
@@ -55,6 +68,6 @@
     }
     void Application_BeginRequest(object sender, EventArgs e)
     {
-        
+
     }
 </script>

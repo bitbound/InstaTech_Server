@@ -14,18 +14,23 @@ namespace InstaTech.App_Code.Models
     {
         public Tech_Account()
         {
-            //
-            // TODO: Add constructor logic here
-            //
         }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string UserID { get; set; }
         public string HashedPassword { get; set; }
+        public string AuthenticationToken { get; set; }
         public string TempPassword { get; set; }
         public int BadLoginAttempts { get; set; } = 0;
         public DateTime LastBadLogin { get; set; }
         public string Email { get; set; }
+        public Access_Levels AccessLevel { get; set; } = Access_Levels.Standard;
+
+        public enum Access_Levels
+        {
+            Standard,
+            Admin
+        }
         public List<int> Cases { get; set; } = new List<int>();
         public void Save()
         {

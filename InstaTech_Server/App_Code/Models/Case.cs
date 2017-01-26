@@ -16,11 +16,11 @@ namespace InstaTech.App_Code.Models
     {
         public Case()
         {
-            var dirs = Directory.GetDirectories(Utilities.App_Data + "Cases\\")?.ToList();
+            var dirs = Directory.CreateDirectory(Utilities.App_Data + "Cases\\").GetDirectories().ToList();
             if (dirs.Count > 0)
             {
                 dirs.Sort();
-                CaseID = int.Parse(new DirectoryInfo(dirs.Last()).Name.Split('-')[0]);
+                CaseID = int.Parse(dirs.Last().Name.Split('-')[0]);
             }
             while (Directory.GetFiles(CaseDir).Length == 999)
             {

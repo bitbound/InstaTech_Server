@@ -20,11 +20,14 @@
         <script src="~/scripts/Main_Model.js"></script>
         <script src="~/scripts/Utilities.js"></script>
         <script src="~/scripts/Default.js"></script>
-        <script src="~/scripts/Socket_Message_Handlers.js"></script>
-        <script src="~/scripts/Customer_Chat.js"></script>
-        <script src="~/scripts/Tech_Chat.js"></script>
-        <script src="~/scripts/Customer_Remote.js"></script>
-        <script src="~/scripts/Tech_Remote.js"></script>
+        <script src="~/scripts/Socket_Message_Handlers/Chat.js"></script>
+        <script src="~/scripts/Socket_Message_Handlers/Shared.js"></script>
+        <script src="~/scripts/Controls/Customer_Chat.js"></script>
+        <script src="~/scripts/Controls/Tech_Chat.js"></script>
+        <script src="~/scripts/Controls/Customer_Remote.js"></script>
+        <script src="~/scripts/Controls/Tech_Remote.js"></script>
+        <script src="~/scripts/Controls/Account_Center.js"></script>
+        <script src="~/scripts/Controls/Computer_Center.js"></script>
     </head>
     <body>
         <div id="divCustomerPortal" class="center-aligned">
@@ -60,6 +63,71 @@
         </div>
 
         <div id="divTechPortal" class="center-aligned" hidden>
+            <div id="divMainTechLoginFrame">
+                <div>
+                    <span id="spanMainLoginStatus"><small>Not logged in.</small></span><br />
+                    <a class="link" id="aMainTechLogIn" onclick='$("#divMainTechLoginForm").slideToggle()'>Log In</a>
+                    <a class="link" id="aMainTechLogOut" onclick="logOutTech(event)" hidden>Log Out</a>
+                </div>
+                <div id="divMainTechLoginForm" hidden>
+                    <form id="formTechMainLogin" onsubmit="submitTechMainLogin(event)">
+                        <button type="button" onclick='$("#divMainTechLoginForm").slideToggle()' class="close-button-title">X</button>
+                        <input type="hidden" name="Type" value="TechMainLogin" />
+                        <table>
+                            <tr>
+                                <td>
+                                    <label for="inputTechMainUserID">User ID:</label>
+                                </td>
+                                <td>
+                                    <input type="text" id="inputTechMainUserID" name="UserID" required />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label for="inputTechMainPassword">Password:</label>
+                                </td>
+                                <td>
+                                    <input type="password" id="inputTechMainPassword" name="Password" required />
+                                </td>
+                            </tr>
+                            <tr hidden>
+                                <td>
+                                    <label for="inputTechMainNewPassword">New Password:</label>
+                                </td>
+                                <td>
+                                    <input type="password" id="inputTechMainNewPassword" name="NewPassword" min="8" max="20" />
+                                </td>
+                            </tr>
+                            <tr hidden>
+                                <td>
+                                    <label for="inputTechMainConfirmNewPassword">Confirm New Password:</label>
+                                </td>
+                                <td>
+                                    <input type="password" id="inputTechMainConfirmNewPassword" name="ConfirmNewPassword" min="8" max="20" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label for="inputTechMainRememberMe"><small>Remeber Me:</small></label>
+                                </td>
+                                <td>
+                                    <input type="checkbox" id="inputTechMainRememberMe" name="RememberMe" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <button type="submit">Submit</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="right-aligned">
+                                    <a class="link" onclick="forgotPasswordMain(event)">Forgot password?</a>
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+            </div>
             <button id="buttonToTechPortal" class="switch-portal" onclick="switchToCustomerPortal()">
                 <div class="arrow-left"></div>Customer Portal
             </button>
@@ -84,6 +152,21 @@
                         <img src="~/Assets/Images/RemoteDesktop_64x.png" />
                         <br />
                         Remote Session
+                    </div>
+                </div>
+               
+                <div class="portal-option-button" opens="#divAccountCenter" opens-file="Account_Center.cshtml">
+                    <div class="portal-option-text">
+                        <img src="~/Assets/Images/User_64x.png" />
+                        <br />
+                        Account Center
+                    </div>
+                </div>
+                <div class="portal-option-button" opens="#divComputerCenter" opens-file="Computer_Center.cshtml">
+                    <div class="portal-option-text">
+                        <img src="~/Assets/Images/ComputerSystem_256x.png" />
+                        <br />
+                        Computer Center
                     </div>
                 </div>
             </div>

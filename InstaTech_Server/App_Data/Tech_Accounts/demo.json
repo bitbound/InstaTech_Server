@@ -1,1 +1,1 @@
-{"FirstName":"Demo","LastName":"Tech","UserID":"demo","HashedPassword":null,"TempPassword":null,"BadLoginAttempts":0,"LastBadLogin":"\/Date(-62135568000000)\/","Email":null,"Cases":[81]}
+{"FirstName":"Demo","LastName":"Tech","UserID":"demo","HashedPassword":"AF0iKjwukIEuhsHeF/erK36d+SN3aimYWXjbiNJFdGeK2EPnBDmy/p5PIa+ZrqDdTw==","AuthenticationToken":"d355a00836ea403983480cc0844954ef","TempPassword":null,"BadLoginAttempts":0,"LastBadLogin":"\/Date(-62135568000000)\/","Email":null,"AccessLevel":0,"Cases":[]}

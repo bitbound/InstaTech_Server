@@ -67,7 +67,19 @@ form button[type="submit"] {
     left: 50%;
     transform: translate(-50%, -50%);
 }
-
+#divMainTechLoginFrame {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    text-align: right;
+    color: white;
+}
+#divMainTechLoginFrame form {
+    background-color: dimgray;
+    padding: 10px;
+    border-radius: 5px;
+    border: 2px solid white;
+}
 .link {
     font-size: .8em;
     color: steelblue;
@@ -131,7 +143,12 @@ form button[type="submit"] {
     border-bottom: 10px solid transparent;
     border-top: 10px solid transparent;
 }
-
+.close-button-title {
+    float: right;
+    font-size: xx-small;
+    padding: 2px 5px;
+    margin-bottom: 5px;
+}
 
 /*** Main Portal Elements ***/
 .portal-title {
@@ -237,7 +254,7 @@ button.switch-portal:active {
 }
 
 /*** Chat Elements ***/
-#divTechLoginFrame {
+#divTechChatLoginFrame {
     display: inline-block;
     max-width: 350px;
 }
@@ -478,7 +495,7 @@ text-align: center;
 #buttonTake {
     width: 75px;
     height: 45px;
-    color: limegreen;
+    color: lightgreen;
     font-weight: bold;
     font-size: 16px;
 }
@@ -501,6 +518,12 @@ text-align: center;
     height: 30px;
     cursor: grab;
 }
+.draggable-title button {
+    float: right;
+    font-size: 10px;
+    padding: 3px 8px;
+}
+
 .remote-frame-div img {
     width: 100%;
     margin-top: 5px;
@@ -510,9 +533,4 @@ text-align: center;
 }
 .remote-frame-div a img {
     width: 50%;
-}
-.draggable-title button {
-    float: right;
-    font-size: 10px;
-    padding: 3px 8px;
 }

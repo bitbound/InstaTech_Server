@@ -16,8 +16,8 @@ namespace InstaTech.App_Code
     public class TechBot
     {
         private static TechBot Current { get; set; }
-        private static List<Support_Chat> Sockets { get; set; } = new List<Support_Chat>();
-        public static void Notify(Support_Chat Socket)
+        private static List<Socket_Main> Sockets { get; set; } = new List<Socket_Main>();
+        public static void Notify(Socket_Main Socket)
         {
             if (Current == null)
             {
@@ -33,7 +33,7 @@ namespace InstaTech.App_Code
                 var thisSocket = Sockets[0];
                 Sockets.RemoveAt(0);
                 thisSocket.SupportCase.DTReceived = DateTime.Now;
-                thisSocket.Partner = new Support_Chat();
+                thisSocket.Partner = new Socket_Main();
                 var JsonData = new
                 {
                     Type = "TakeCase",
@@ -43,7 +43,7 @@ namespace InstaTech.App_Code
                     TechLastName = "Bot"
                 };
                 thisSocket.Send(Json.Encode(JsonData));
-                foreach (Support_Chat socket in Support_Chat.Customers.Where(cu => cu.Partner == null))
+                foreach (Socket_Main socket in Socket_Main.Customers.Where(cu => cu.Partner == null))
                 {
                     socket.SendWaitUpdate();
                 }
@@ -53,7 +53,7 @@ namespace InstaTech.App_Code
                     Status = "Remove",
                     Case = thisSocket.SupportCase
                 });
-                Support_Chat.Techs.ForEach((Support_Chat sc) => {
+                Socket_Main.Techs.ForEach((Socket_Main sc) => {
                     sc.Send(request);
                 });
                 var message1 = new
