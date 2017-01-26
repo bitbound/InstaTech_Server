@@ -233,6 +233,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                             if (client != null)
                             {
                                 client.Close();
+                                SocketCollection.Remove(client);
                             }
                             ComputerName = jsonMessage.ComputerName.ToString().Trim().ToLower();
                         }
@@ -243,7 +244,10 @@ namespace InstaTech.App_Code.Socket_Handlers
                             {
                                 jsonMessage.Status = "ServiceRunning";
                                 Send(Json.Encode(jsonMessage));
+                                client.Close();
+                                SocketCollection.Remove(client);
                             }
+                            ComputerName = jsonMessage.ComputerName.ToString().Trim().ToLower();
                         }
                         LogConnection();
                         break;
@@ -260,7 +264,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                         {
                             computers.Add(client.ComputerName);
                         }
-                        jsonMessage.Computers = computers;
+                        jsonMessage.Computers = computers.Distinct();
                         Send(Json.Encode(jsonMessage));
                         break;
                     }
@@ -276,10 +280,10 @@ namespace InstaTech.App_Code.Socket_Handlers
                             }
                             else
                             {
-                                jsonMessage.Status = "ok";
-                                Send(Json.Encode(jsonMessage));
                                 this.Partner = (Remote_Control)client;
                                 ((Remote_Control)client).Partner = this;
+                                jsonMessage.Status = "ok";
+                                Send(Json.Encode(jsonMessage));
                                 client.Send(message);
                                 LogSession();
                             }
@@ -303,15 +307,35 @@ namespace InstaTech.App_Code.Socket_Handlers
                         {
                             jsonMessage.Status = "AlreadyHasPartner";
                             Send(Json.Encode(jsonMessage));
+                            return;
                         }
                         else
                         {
-                            jsonMessage.Status = "ok";
-                            Send(Json.Encode(jsonMessage));
                             this.Partner = consoleClient;
                             consoleClient.Partner = this;
+                            jsonMessage.Status = "ok";
+                            Send(Json.Encode(jsonMessage));
                             consoleClient.Send(message);
                             LogSession();
+                            return;
+                        }
+                    }
+                    var serviceClient = (Remote_Control)SocketCollection.FirstOrDefault(sock => ((Remote_Control)sock).ComputerName == jsonMessage.ComputerName.ToString().Trim() && ((Remote_Control)sock).ConnectionType == ConnectionTypes.ClientService);
+                    if (serviceClient != null)
+                    {
+                        if (serviceClient.Partner != null)
+                        {
+                            jsonMessage.Status = "AlreadyHasPartner";
+                            Send(Json.Encode(jsonMessage));
+                            return;
+                        }
+                        else
+                        {
+                            this.Partner = consoleClient;
+                            serviceClient.Partner = this;
+                            serviceClient.Send(message);
+                            LogSession();
+                            return;
                         }
                     }
                     else
@@ -319,7 +343,11 @@ namespace InstaTech.App_Code.Socket_Handlers
                         jsonMessage.Status = "UnknownComputer";
                         Send(Json.Encode(jsonMessage));
                     }
-                    var serviceClient = (Remote_Control)SocketCollection.FirstOrDefault(sock => ((Remote_Control)sock).ComputerName == jsonMessage.ComputerName.ToString().Trim() && ((Remote_Control)sock).ConnectionType == ConnectionTypes.ClientService);
+                    break;
+                case "ProcessStartResult":
+                    Partner.Send(message);
+                    Partner.Partner = null;
+                    this.Partner = null;
                     break;
                 default:
                     {
@@ -412,7 +440,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                 System.IO.Directory.CreateDirectory(Utilities.App_Data + "Logs");
             }
             var strLogPath = Utilities.App_Data + "Logs\\Sessions-" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt";
-            System.IO.File.AppendAllText(strLogPath, DateTime.Now.ToString() + "\t" + SessionID + "\t" + Partner.SessionID);
+            System.IO.File.AppendAllText(strLogPath, DateTime.Now.ToString() + "\t" + SessionID + "\t" + Partner?.SessionID);
         }
     }
 }

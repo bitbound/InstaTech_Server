@@ -32,6 +32,7 @@ function handleTechMainLogin(e) {
         setMainLoginFrame();
     }
     else if (e.Status == "invalid") {
+        clearCachedCreds();
         showDialog("Incorrect Credentials", "The user ID or password is incorrect.  Please try again.");
         return;
     }

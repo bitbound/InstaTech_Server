@@ -126,7 +126,8 @@ function connectToClient() {
         var computerName = $("#inputSessionID").val();
         request = {
             "Type": "ConnectUnattended",
-            "ComputerName": computerName
+            "ComputerName": computerName,
+            "AuthenticationToken": InstaTech.AuthenticationToken
         };
         socket.send(JSON.stringify(request));
     }
@@ -237,6 +238,7 @@ function initWebSocket() {
                         setMainLoginFrame();
                     }
                     else if (jsonMessage.Status == "invalid") {
+                        clearCachedCreds();
                         showDialog("Incorrect Credentials", "The user ID or password is incorrect.  Please try again.");
                         return;
                     }
@@ -298,6 +300,22 @@ function initWebSocket() {
                         $("#divMain").hide();
                         $("#divConnect").show();
                         showTooltip($("#inputSessionID"), "bottom", "red", "That client already has a partner connected.");
+                    }
+                    break;
+                case "ProcessStartResult":
+                    if (jsonMessage.Status == "ok")
+                    {
+                        var computerName = $("#inputSessionID").val();
+                        request = {
+                            "Type": "ConnectUnattended",
+                            "ComputerName": computerName,
+                            "AuthenticationToken": InstaTech.AuthenticationToken
+                        };
+                        socket.send(JSON.stringify(request));
+                    }
+                    else if (jsonMessage.Status == "failed")
+                    {
+                        showDialog("Connection Failed", "Failed to connect to the remote computer.");
                     }
                     break;
                 case "SearchComputers":
