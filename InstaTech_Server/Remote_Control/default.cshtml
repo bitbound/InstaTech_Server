@@ -23,9 +23,9 @@
 <body>
     <div id="divMainTechLoginFrame">
         <div>
-            <span id="spanMainLoginStatus"><small>Not logged in.</small></span><br />
+            <span id="spanMainLoginStatus"><small>Not logged in.</small></span>
             <a class="link" id="aMainTechLogIn" onclick='$("#divMainTechLoginForm").slideToggle()'>Log In</a>
-            <a class="link" id="aMainTechLogOut" onclick="logOutTech(event)" hidden>Log Out</a>
+            <a class="link" id="aMainTechLogOut" onclick="logOutTech(event)" hidden><small>Log Out</small></a>
         </div>
         <div id="divMainTechLoginForm" hidden>
             <form id="formTechMainLogin" onsubmit="submitTechMainLogin(event)">
@@ -180,7 +180,9 @@
             display: inline-block;
             text-align: left;
         }
-
+        form table {
+            display: block;
+        }
         form button[type="submit"] {
             float: right;
         }

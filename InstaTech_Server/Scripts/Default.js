@@ -31,7 +31,7 @@ function init() {
     }
     try {
         var protocol = location.protocol.replace("http:", "ws:").replace("https:", "wss:") + "//";
-        InstaTech.Socket_Main = new WebSocket(protocol + location.host + location.pathname + "/Services/Chat_Socket.cshtml");
+        InstaTech.Socket_Main = new WebSocket((protocol + location.host + location.pathname + "Services/Main_Socket.cshtml"));
         setMainSocketHandlers();
         return true;
     }
@@ -195,7 +195,7 @@ function setMainSocketHandlers() {
         $("#divMainTechLoginFrame").remove();
     };
     InstaTech.Socket_Main.onerror = function (ex) {
-        console.log("WebSocket Error: " + ex);
+        console.log("WebSocket error.");
         $("#divCustomerContent").hide();
         $("#divTechContent").hide();
         $(".portal-button-frame").hide();

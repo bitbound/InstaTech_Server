@@ -150,6 +150,8 @@ namespace InstaTech.App_Code.Socket_Handlers
         public override void OnError()
         {
             SocketCollection.Remove(this);
+            Directory.CreateDirectory(Utilities.App_Data + @"/WebSocket_Errors/");
+            File.WriteAllText(Utilities.App_Data + @"/WebSocket_Errors/" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt", Json.Encode(Error) + Environment.NewLine);
             if (Partner != null)
             {
                 var request = new

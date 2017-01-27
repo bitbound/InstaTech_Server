@@ -40,7 +40,9 @@ form {
     display: inline-block;
     text-align: left;
 }
-
+form table {
+    display:block;
+}
 form button[type="submit"] {
     float: right;
 }
@@ -73,6 +75,7 @@ form button[type="submit"] {
     right: 5px;
     text-align: right;
     color: white;
+    z-index: 3;
 }
 #divMainTechLoginFrame form {
     background-color: dimgray;

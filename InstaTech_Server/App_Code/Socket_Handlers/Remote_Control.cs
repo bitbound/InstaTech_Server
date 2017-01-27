@@ -242,10 +242,9 @@ namespace InstaTech.App_Code.Socket_Handlers
                             var client = SocketCollection.FirstOrDefault(sock => (sock as Remote_Control).ComputerName == jsonMessage.ComputerName);
                             if (client != null)
                             {
-                                jsonMessage.Status = "ServiceRunning";
+                                jsonMessage.Status = "ServiceDuplicate";
                                 Send(Json.Encode(jsonMessage));
-                                client.Close();
-                                SocketCollection.Remove(client);
+                                SocketCollection.Remove(this);
                             }
                             ComputerName = jsonMessage.ComputerName.ToString().Trim().ToLower();
                         }
@@ -345,7 +344,26 @@ namespace InstaTech.App_Code.Socket_Handlers
                     }
                     break;
                 case "ProcessStartResult":
-                    Partner.Send(message);
+                    var startTime = DateTime.Now;
+                    var success = true;
+                    while (SocketCollection.Where(sock => ((Remote_Control)sock).ComputerName == ComputerName && ((Remote_Control)sock).ConnectionType == ConnectionTypes.ClientConsole).Count() == 0)
+                    {
+                        System.Threading.Thread.Sleep(200);
+                        if (DateTime.Now - startTime > TimeSpan.FromSeconds(10))
+                        {
+                            success = false;
+                            break;
+                        }
+                    }
+                    if (success)
+                    {
+                        Partner.Send(message);
+                    }
+                    else
+                    {
+                        jsonMessage.Status = "failed";
+                        Partner.Send(Json.Encode(jsonMessage));
+                    }
                     Partner.Partner = null;
                     this.Partner = null;
                     break;
@@ -377,6 +395,8 @@ namespace InstaTech.App_Code.Socket_Handlers
         }
         public override void OnError()
         {
+            Directory.CreateDirectory(Utilities.App_Data + @"/WebSocket_Errors/");
+            File.WriteAllText(Utilities.App_Data + @"/WebSocket_Errors/" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt", Json.Encode(Error) + Environment.NewLine);
             if (Partner != null)
             {
                 var request = new
@@ -426,18 +446,18 @@ namespace InstaTech.App_Code.Socket_Handlers
         }
         private void LogConnection()
         {
-            if (!System.IO.Directory.Exists(Utilities.App_Data + "Logs"))
+            if (!Directory.Exists(Utilities.App_Data + "Logs"))
             {
-                System.IO.Directory.CreateDirectory(Utilities.App_Data + "Logs");
+                Directory.CreateDirectory(Utilities.App_Data + "Logs");
             }
             var strLogPath = Utilities.App_Data + "Logs\\Connections-" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt";
             System.IO.File.AppendAllText(strLogPath, DateTime.Now.ToString() + "\t" + WebSocketContext.UserHostAddress + "\t" + WebSocketContext.UserAgent + "\t" + ConnectionType.ToString() + "\t" + SessionID);
         }
         private void LogSession()
         {
-            if (!System.IO.Directory.Exists(Utilities.App_Data + "Logs"))
+            if (!Directory.Exists(Utilities.App_Data + "Logs"))
             {
-                System.IO.Directory.CreateDirectory(Utilities.App_Data + "Logs");
+                Directory.CreateDirectory(Utilities.App_Data + "Logs");
             }
             var strLogPath = Utilities.App_Data + "Logs\\Sessions-" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt";
             System.IO.File.AppendAllText(strLogPath, DateTime.Now.ToString() + "\t" + SessionID + "\t" + Partner?.SessionID);
