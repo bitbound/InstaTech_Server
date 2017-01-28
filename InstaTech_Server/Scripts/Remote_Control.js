@@ -19,6 +19,8 @@ var doubleTapped;
 var touchDragging;
 var lastTouchPointX;
 var lastTouchPointY;
+var lastPointerMove;
+
 function submitTechMainLogin(e) {
     if (e) {
         e.preventDefault();
@@ -316,6 +318,7 @@ function initWebSocket() {
                     else if (jsonMessage.Status == "failed")
                     {
                         showDialog("Connection Failed", "Failed to connect to the remote computer.");
+                        $("#divStatus").text("Connection failed.");
                     }
                     break;
                 case "SearchComputers":
@@ -568,7 +571,7 @@ $(document).ready(function () {
                 return;
             }
             $("#imgSearchComputers").show();
-            document.getElementById("inputSessionID").setAttribute("placeholder", "Enter client's computer name.");
+            document.getElementById("inputSessionID").setAttribute("placeholder", "Enter client's PC name.");
             document.getElementById("inputSessionID").removeAttribute("pattern");
         }
         $(".toggle-box").removeClass("selected");
@@ -576,6 +579,11 @@ $(document).ready(function () {
     });
     $(".input-surface").on("mousemove", function (e) {
         e.preventDefault();
+        if (new Date() - lastPointerMove < 50)
+        {
+            return;
+        }
+        lastPointerMove = new Date();
         if (socket.readyState == WebSocket.OPEN) {
             var pointX = e.offsetX / $(e.target).width();
             var pointY = e.offsetY / $(e.target).height();
@@ -681,6 +689,10 @@ $(document).ready(function () {
         }
         if (e.touches.length == 1) {
             e.preventDefault();
+            if (new Date() - lastPointerMove < 50) {
+                return;
+            }
+            lastPointerMove = new Date();
             var touchPointOffset = e.target.getBoundingClientRect();
             var pointX = (e.touches[0].clientX - touchPointOffset.left) / $(e.target).width();
             var pointY = (e.touches[0].clientY - touchPointOffset.top) / $(e.target).height();

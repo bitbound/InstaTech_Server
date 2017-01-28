@@ -26,16 +26,17 @@ namespace InstaTech.App_Code.Socket_Handlers
                 return SocketCollection.Cast<Socket_Main>().ToList().FindAll(sc => sc.ConnectionType == ConnectionTypes.Customer);
             }
         }
-        public static List<Socket_Main> Techs
+        public static List<Socket_Main> AvailableTechs
         {
             get
             {
-                return SocketCollection.Cast<Socket_Main>().ToList().FindAll(sc => sc.ConnectionType == ConnectionTypes.Technician);
+                return SocketCollection.Cast<Socket_Main>().ToList().FindAll(sc => sc.ConnectionType == ConnectionTypes.Technician && sc.LoggedIntoChat == true);
             }
         }
         public Socket_Main Partner { get; set; }
         public Case SupportCase { get; set; }
         public Tech_Account TechAccount { get; set; }
+        public bool LoggedIntoChat { get; set; }
         public string AuthenticationToken { get; set; }
         public int BadLoginAttempts { get; set; } = 0;
         public ConnectionTypes? ConnectionType { get; set; }
@@ -118,7 +119,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                     Status = "Add",
                     Case = Partner.SupportCase
                 });
-                Techs.ForEach((Socket_Main sc) =>
+                AvailableTechs.ForEach((Socket_Main sc) =>
                 {
                     sc.Send(strUpdate);
                 });
@@ -137,7 +138,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                     Status = "Remove",
                     Case = SupportCase
                 });
-                Techs.ForEach((Socket_Main sc) => {
+                AvailableTechs.ForEach((Socket_Main sc) => {
                     sc.Send(request);
                 });
                 if (SupportCase.Status == Case.CaseStatus.Open)
@@ -169,7 +170,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                     Status = "Add",
                     Case = SupportCase
                 });
-                Techs.ForEach((Socket_Main sc) =>
+                AvailableTechs.ForEach((Socket_Main sc) =>
                 {
                     sc.Send(strUpdate);
                 });
@@ -188,7 +189,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                     Status = "Remove",
                     Case = SupportCase
                 });
-                Techs.ForEach((Socket_Main sc) => {
+                AvailableTechs.ForEach((Socket_Main sc) => {
                     sc.Send(strRequest);
                 });
                 if (SupportCase.Status == Case.CaseStatus.Open)
@@ -206,19 +207,19 @@ namespace InstaTech.App_Code.Socket_Handlers
             var cases = SocketCollection.Where(sock => (sock as Socket_Main).ConnectionType == ConnectionTypes.Customer && (sock as Socket_Main).Partner == null && (sock as Socket_Main)?.SupportCase?.DTCreated < SupportCase?.DTCreated);
             return cases.Count() + 1;
         }
-        private void LoginTech(dynamic JsonData)
+        private bool LoginTech(dynamic JsonData)
         {
             if (ConnectionType != null && ConnectionType != ConnectionTypes.Technician)
             {
-                return;
+                return false;
             }
             if (BadLoginAttempts >= 3)
             {
                 JsonData.Status = "temp ban";
                 Send(Json.Encode(JsonData));
-                return;
+                return false;
             }
-            if (Config.Demo_Mode && JsonData.UserID.ToLower() == "demo" && JsonData.Password == "tech")
+            if (Config.Current.Demo_Mode && JsonData.UserID.ToLower() == "demo" && JsonData.Password == "tech")
             {
                 ConnectionType = ConnectionTypes.Technician;
                 AuthenticationToken = Guid.NewGuid().ToString().Replace("-", "");
@@ -241,11 +242,12 @@ namespace InstaTech.App_Code.Socket_Handlers
                 JsonData.Status = "ok";
                 JsonData.AuthenticationToken = AuthenticationToken;
                 Send(Json.Encode(JsonData));
-                return;
+                return true;
             }
-            else if (Config.Active_Directory_Enabled)
+            else if (Config.Current.Active_Directory_Enabled)
             {
                 // TODO: AD authentication.
+                return false;
             }
             else
             {
@@ -258,7 +260,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                     BadLoginAttempts++;
                     JsonData.Status = "invalid";
                     Send(Json.Encode(JsonData));
-                    return;
+                    return false;
                 }
                 Tech_Account account = Json.Decode<Tech_Account>(File.ReadAllText(Utilities.App_Data + "Tech_Accounts\\" + JsonData.UserID + ".json"));
                 if (account.BadLoginAttempts >= 3)
@@ -271,7 +273,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                     {
                         JsonData.Status = "locked";
                         Send(Json.Encode(JsonData));
-                        return;
+                        return false;
                     }
                 }
                 if (JsonData.Password == account.TempPassword)
@@ -280,19 +282,19 @@ namespace InstaTech.App_Code.Socket_Handlers
                     {
                         JsonData.Status = "new required";
                         Send(Json.Encode(JsonData));
-                        return;
+                        return false;
                     }
                     else if (JsonData.NewPassword != JsonData.ConfirmNewPassword)
                     {
                         JsonData.Status = "password mismatch";
                         Send(Json.Encode(JsonData));
-                        return;
+                        return false;
                     }
                     else if (JsonData.NewPassword.Length < 8 || JsonData.NewPassword.Length > 20)
                     {
                         JsonData.Status = "password length";
                         Send(Json.Encode(JsonData));
-                        return;
+                        return false;
                     }
                     else
                     {
@@ -313,7 +315,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                         JsonData.Status = "ok";
                         JsonData.AuthenticationToken = AuthenticationToken;
                         Send(Json.Encode(JsonData));
-                        return;
+                        return true;
                     }
                 }
                 if (Crypto.VerifyHashedPassword(account.HashedPassword, JsonData.Password))
@@ -335,7 +337,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                     JsonData.Status = "ok";
                     JsonData.AuthenticationToken = AuthenticationToken;
                     Send(Json.Encode(JsonData));
-                    return;
+                    return true;
                 }
                 if (!String.IsNullOrEmpty(JsonData.AuthenticationToken))
                 {
@@ -349,14 +351,15 @@ namespace InstaTech.App_Code.Socket_Handlers
                         TechAccount = account;
                         JsonData.Status = "ok";
                         Send(Json.Encode(JsonData));
+                        return true;
                     }
                     else
                     {
                         BadLoginAttempts++;
                         JsonData.Status = "invalid";
                         Send(Json.Encode(JsonData));
+                        return false;
                     }
-                    return;
                 }
                 // Bad login attempt.
                 BadLoginAttempts++;
@@ -365,7 +368,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                 account.Save();
                 JsonData.Status = "invalid";
                 Send(Json.Encode(JsonData));
-                return;
+                return false;
             }
         }
         private bool AuthenticateTech(dynamic JsonData)
@@ -453,10 +456,10 @@ namespace InstaTech.App_Code.Socket_Handlers
                 Status = "Add",
                 Case = SupportCase
             });
-            Techs.ForEach((Socket_Main sc) => {
+            AvailableTechs.ForEach((Socket_Main sc) => {
                 sc.Send(request);
             });
-            if (Config.Demo_Mode && Techs.Count == 0)
+            if (Config.Current.Demo_Mode && AvailableTechs.Count == 0)
             {
                 TechBot.Notify(this);
             }
@@ -464,7 +467,7 @@ namespace InstaTech.App_Code.Socket_Handlers
         public void HandleGetSupportCategories(dynamic JsonData)
         {
             var categories = new List<string>();
-            foreach (var tuple in Config.Support_Categories)
+            foreach (var tuple in Config.Current.Support_Categories)
             {
                 categories.Add(tuple.Item1);
             }
@@ -498,7 +501,7 @@ namespace InstaTech.App_Code.Socket_Handlers
         }
         public void HandleGetSupportTypes(dynamic JsonData)
         {
-            var tuples = Config.Support_Categories.FindAll(tp => tp.Item1 == JsonData.SupportCategory);
+            var tuples = Config.Current.Support_Categories.FindAll(tp => tp.Item1 == JsonData.SupportCategory);
             var types = new List<string>();
             foreach (var tuple in tuples)
             {
@@ -509,7 +512,14 @@ namespace InstaTech.App_Code.Socket_Handlers
         }
         public void HandleTechChatLogin(dynamic JsonData)
         {
-            LoginTech(JsonData);
+            if (LoginTech(JsonData))
+            {
+                LoggedIntoChat = true;
+            }
+        }
+        public void HandleExitTechChat(dynamic JsonData)
+        {
+            LoggedIntoChat = false;
         }
         public void HandleGetQueues(dynamic JsonData)
         {
@@ -518,7 +528,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                 return;
             }
             var queues = new List<string>();
-            foreach (var tuple in Config.Support_Categories)
+            foreach (var tuple in Config.Current.Support_Categories)
             {
                 queues.Add(tuple.Item3);
             }
@@ -591,7 +601,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                 Status = "Remove",
                 Case = SupportCase
             });
-            Techs.ForEach((Socket_Main sc) => {
+            AvailableTechs.ForEach((Socket_Main sc) => {
                 sc.Send(request);
             });
         }
@@ -618,7 +628,7 @@ namespace InstaTech.App_Code.Socket_Handlers
             {
                 Partner.Send(Json.Encode(JsonData));
             }
-            if (Config.Demo_Mode && Partner.WebSocketContext == null)
+            if (Config.Current.Demo_Mode && Partner.WebSocketContext == null)
             {
                 var response = new
                 {
@@ -665,11 +675,11 @@ namespace InstaTech.App_Code.Socket_Handlers
             JsonData.TempPassword = account.TempPassword;
             try
             {
-                WebMail.SmtpServer = Config.Email_SMTP_Server;
-                WebMail.UserName = Config.Email_Username;
-                WebMail.Password = Config.Email_SMTP_Password;
-                WebMail.From = Config.Email_Username;
-                WebMail.Send(account.Email, Config.Company_Name + " Support Portal Password Reset", "As requested, your password has been reset.  Your temporary password is below.<br><br>If you did not request this password reset, or requested it in error, you can safely ignore this email.  Logging in with your old password will invalidate the temporary password and reverse the password reset.<br><br>Temporary Password: " + account.TempPassword);
+                WebMail.SmtpServer = Config.Current.Email_SMTP_Server;
+                WebMail.UserName = Config.Current.Email_Username;
+                WebMail.Password = Config.Current.Email_SMTP_Password;
+                WebMail.From = Config.Current.Email_Username;
+                WebMail.Send(account.Email, Config.Current.Company_Name + " Support Portal Password Reset", "As requested, your password has been reset.  Your temporary password is below.<br><br>If you did not request this password reset, or requested it in error, you can safely ignore this email.  Logging in with your old password will invalidate the temporary password and reverse the password reset.<br><br>Temporary Password: " + account.TempPassword);
                 Send(Json.Encode(JsonData));
             }
             catch
@@ -687,7 +697,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                 Status = "Add",
                 Case = SupportCase
             });
-            Techs.ForEach((Socket_Main sc) =>
+            AvailableTechs.ForEach((Socket_Main sc) =>
             {
                 sc.Send(strUpdate);
             });
@@ -729,7 +739,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                         Status = "Remove",
                         Case = transferCase
                     });
-                    Techs.ForEach((Socket_Main sc) =>
+                    AvailableTechs.ForEach((Socket_Main sc) =>
                     {
                         sc.Send(request);
                     });
@@ -739,7 +749,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                         Status = "Add",
                         Case = transferCase
                     });
-                    Techs.ForEach((Socket_Main sc) =>
+                    AvailableTechs.ForEach((Socket_Main sc) =>
                     {
                         sc.Send(request);
                     });
@@ -779,13 +789,13 @@ namespace InstaTech.App_Code.Socket_Handlers
                     Type = "UnlockCase",
                     CaseID = (lockedCase as Case).CaseID
                 };
-                Techs.ForEach((sc) =>
+                AvailableTechs.ForEach((sc) =>
                 {
                     sc.Send(Json.Encode(request));
                 });
             }, lockCase, 20000, Timeout.Infinite);
             JsonData.Status = "ok";
-            Techs.ForEach((sc) =>
+            AvailableTechs.ForEach((sc) =>
             {
                 sc.Send(Json.Encode(JsonData));
             });

@@ -49,7 +49,7 @@ namespace InstaTech.App_Code.Models
         {
             get
             {
-                return Config.Support_Categories.Find(tp => tp.Item1 == SupportCategory && tp.Item2 == SupportType).Item3;
+                return Config.Current.Support_Categories.Find(tp => tp.Item1 == SupportCategory && tp.Item2 == SupportType).Item3;
             }
         }
         public string Details { get; set; }

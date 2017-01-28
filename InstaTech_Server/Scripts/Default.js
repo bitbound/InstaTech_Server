@@ -31,7 +31,8 @@ function init() {
     }
     try {
         var protocol = location.protocol.replace("http:", "ws:").replace("https:", "wss:") + "//";
-        InstaTech.Socket_Main = new WebSocket((protocol + location.host + location.pathname + "Services/Main_Socket.cshtml"));
+        var hostAndPath = (location.host + location.pathname).replace("//", "")
+        InstaTech.Socket_Main = new WebSocket((protocol + hostAndPath + "/Services/Main_Socket.cshtml"));
         setMainSocketHandlers();
         return true;
     }

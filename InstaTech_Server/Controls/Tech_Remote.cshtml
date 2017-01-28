@@ -6,7 +6,7 @@
         new SelectListItem() { Value = "Mac", Text = "Mac"},
         new SelectListItem() { Value = "Linux", Text = "Linux"},
     };
-    var defaultItem = clientList.Find(sli => sli.Value == InstaTech.App_Code.Config.Default_RC_Download);
+    var defaultItem = clientList.Find(sli => sli.Value == InstaTech.App_Code.Config.Current.Default_RC_Download);
     if (defaultItem != null)
     {
         defaultItem.Selected = true;
@@ -22,7 +22,7 @@
         <hr />
     </div>
     <div class="center-aligned">
-        <button onclick="downloadTechClient(event, @Json.Encode(InstaTech.App_Code.Config.RC_Download_Paths))">Download</button>
+        <button onclick="downloadTechClient(event, @Json.Encode(InstaTech.App_Code.Config.Current.RC_Download_Paths))">Download</button>
         
         @Html.DropDownList("selectTechClientVersion", clientList)
     </div>

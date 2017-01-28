@@ -8,36 +8,37 @@ using System.Web.WebPages.Html;
 
 namespace InstaTech.App_Code
 {
-    public static class Config
+    public class Config
     {
+        public static Config Current { get; set; } = new Config();
         // Replace with your company name.
-        public static string Company_Name { get; } = "InstaTech";
+        public string Company_Name { get; } = "InstaTech";
 
         // This is the single, default admin account that will be created on first start.
         // The temporary password will be "password".  You can use this account to create
         // or modify other tech accounts.
-        public static string Default_Admin { get; } = "admin";
+        public string Default_Admin { get; } = "admin";
 
         // Enable demo accounts.
-        public static bool Demo_Mode { get; } = true;
+        public bool Demo_Mode { get; } = true;
 
         // Whether to enable Active Directory tools and features.
-        public static bool Active_Directory_Enabled { get; } = false;
+        public bool Active_Directory_Enabled { get; } = false;
 
         // If Active Directory features are enabled, techs must be in this AD group in order to log in.
-        public static string Active_Directory_Tech_Group { get; } = "";
+        public string Active_Directory_Tech_Group { get; } = "";
 
         // Determines the default client version of the remote control app that will be downloaded.
         // Values: Windows 7, Windows 8+, Mac, or Linux.
-        public static string Default_RC_Download { get; } = "Windows 8+";
+        public string Default_RC_Download { get; } = "Windows 8+";
 
         // Email settings for sending automated emails (e.g. password resets).
-        public static string Email_SMTP_Server { get; } = "mail.instatech.org";
-        public static int Email_SMTP_Port { get; } = 25;
-        public static string Email_Username { get; } = "DoNotReply@instatech.org";
-        public static string Email_SMTP_Password { get; } = "";
+        public string Email_SMTP_Server { get; } = "mail.instatech.org";
+        public int Email_SMTP_Port { get; } = 25;
+        public string Email_Username { get; } = "DoNotReply@instatech.org";
+        public string Email_SMTP_Password { get; } = "";
         // The download paths for each remote control client version.
-        public static Dictionary<string, string> RC_Download_Paths { get; } = new Dictionary<string, string>()
+        public Dictionary<string, string> RC_Download_Paths { get; } = new Dictionary<string, string>()
         {
             { "Windows 8+", "/Downloads/InstaTech Client.exe" },
             { "Windows 7", "/Downloads/InstaTech_CP.exe" },
@@ -46,7 +47,7 @@ namespace InstaTech.App_Code
         };
 
         // Categories of support.  The first value is major category, second is sub-category, and third is the support queue it falls under.
-        public static List<Tuple<string, string, string>> Support_Categories { get; } = new List<Tuple<string, string, string>>()
+        public List<Tuple<string, string, string>> Support_Categories { get; } = new List<Tuple<string, string, string>>()
         {
             Tuple.Create<string, string, string>("Account Lockout", "Network Account", "General"),
             Tuple.Create<string, string, string>("Account Lockout", "Other", "General"),

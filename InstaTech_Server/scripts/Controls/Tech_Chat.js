@@ -195,7 +195,7 @@ function submitTechMessage(e) {
     InstaTech.Socket_Main.send(JSON.stringify(request));
 }
 function updateQueueVolumes(e) {
-    if (InstaTech.Socket_Main.readyState != 1) {
+    if (InstaTech.Socket_Main.readyState != 1 || $("#divTechChat").length == 0) {
         window.clearInterval(InstaTech.QueueWaitTimer);
         return;
     }
@@ -251,7 +251,6 @@ function dragOverTechChat(e) {
     e.preventDefault();
     e.dataTransfer.dropEffect = "copy";
 }
-;
 function dropOnTechChat(e) {
     e.preventDefault();
     if (e.dataTransfer.files.length < 1) {
@@ -262,7 +261,6 @@ function dropOnTechChat(e) {
     }
     transferFileTech(e.dataTransfer.files);
 }
-;
 function transferFileTech(e) {
     for (var i = 0; i < e.length; i++) {
         var file = e[i];
@@ -374,4 +372,14 @@ function lockCase(e) {
         "CaseID": $("#inputTechQueueCaseID").val(),
     };
     InstaTech.Socket_Main.send(JSON.stringify(request));
+}
+function exitTechChat() {
+    var request = {
+        "Type": "ExitTechChat"
+    }
+    InstaTech.Socket_Main.send(JSON.stringify(request));
+    window.clearInterval(InstaTech.QueueWaitTimer);
+    $("#divTechChat").slideUp(function () {
+        $("#divTechChat").remove();
+    });
 }

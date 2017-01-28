@@ -53,7 +53,7 @@ namespace InstaTech.App_Code
                     Status = "Remove",
                     Case = thisSocket.SupportCase
                 });
-                Socket_Main.Techs.ForEach((Socket_Main sc) => {
+                Socket_Main.AvailableTechs.ForEach((Socket_Main sc) => {
                     sc.Send(request);
                 });
                 var message1 = new

@@ -18,7 +18,7 @@ namespace InstaTech.App_Code {
         {
             get
             {
-                if (Config.Demo_Mode && Socket_Main.Customers?.Where(sc=>sc.Partner == null)?.Count() == 0)
+                if (Config.Current.Demo_Mode && Socket_Main.Customers?.Where(sc=>sc.Partner == null)?.Count() == 0)
                 {
                     for (int i = 0; i < 5; i++)
                     {

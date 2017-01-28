@@ -65,7 +65,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                             Send(Json.Encode(jsonMessage));
                             return;
                         }
-                        if (Config.Demo_Mode && jsonMessage.UserID.ToLower() == "demo" && jsonMessage.Password == "tech")
+                        if (Config.Current.Demo_Mode && jsonMessage.UserID.ToLower() == "demo" && jsonMessage.Password == "tech")
                         {
                             AuthenticationToken = Guid.NewGuid().ToString().Replace("-", "");
                             TechAccount = new Tech_Account()
@@ -89,7 +89,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                             Send(Json.Encode(jsonMessage));
                             return;
                         }
-                        else if (Config.Active_Directory_Enabled)
+                        else if (Config.Current.Active_Directory_Enabled)
                         {
                             // TODO: AD authentication.
                         }

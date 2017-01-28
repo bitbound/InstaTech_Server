@@ -361,6 +361,7 @@ button.switch-portal:active {
     text-align: left;
     /*white-space: nowrap;*/
     overflow-y: auto;
+    margin-top: 10px;
 }
 
 

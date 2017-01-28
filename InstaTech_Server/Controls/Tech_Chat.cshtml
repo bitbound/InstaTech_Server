@@ -5,7 +5,7 @@
             <strong>Tech Login</strong>
             <br />
             @{
-                if (InstaTech.App_Code.Config.Active_Directory_Enabled)
+                if (InstaTech.App_Code.Config.Current.Active_Directory_Enabled)
                 {
                     @Html.Raw("<span>Use your Active Directory credentials to log in.</span>");
                 }
@@ -13,7 +13,7 @@
                 {
                     @Html.Raw("<span>Use your Tech Portal credentials to log in.</span>");
                 }
-                if (InstaTech.App_Code.Config.Demo_Mode)
+                if (InstaTech.App_Code.Config.Current.Demo_Mode)
                 {
                     @Html.Raw("<br/><br/><span>(Note: Demo mode is enabled.  You can log in with user ID \"Demo\" and password \"tech\".)</span>");
                 }
@@ -77,6 +77,9 @@
             </form>
         </div>
         <div id="divQueueFrame" hidden>
+            <div class="right-aligned">
+                <button onclick="exitTechChat()">Exit Chat</button>
+            </div>
             <div id="divQueueTable">
                 <div class="col1" style="width:150px">
                     <div class="queue-title">
