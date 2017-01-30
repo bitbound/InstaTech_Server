@@ -49,7 +49,6 @@ namespace InstaTech.App_Code.Socket_Handlers
         public override void OnMessage(string message)
         {
             dynamic jsonMessage = Json.Decode(message);
-
             if (jsonMessage == null || String.IsNullOrEmpty(jsonMessage.Type))
             {
                 throw new Exception("Type is null within Remote_Control.OnMessage.");
@@ -230,11 +229,6 @@ namespace InstaTech.App_Code.Socket_Handlers
                         else if (ConnectionType == ConnectionTypes.ClientConsole)
                         {
                             var client = SocketCollection.FirstOrDefault(sock => (sock as Remote_Control).ComputerName == jsonMessage.ComputerName);
-                            if (client != null)
-                            {
-                                client.Close();
-                                SocketCollection.Remove(client);
-                            }
                             ComputerName = jsonMessage.ComputerName.ToString().Trim().ToLower();
                         }
                         else if (ConnectionType == ConnectionTypes.ClientService)
@@ -314,7 +308,6 @@ namespace InstaTech.App_Code.Socket_Handlers
                             consoleClient.Partner = this;
                             jsonMessage.Status = "ok";
                             Send(Json.Encode(jsonMessage));
-                            consoleClient.Send(message);
                             LogSession();
                             return;
                         }
@@ -330,7 +323,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                         }
                         else
                         {
-                            this.Partner = consoleClient;
+                            this.Partner = serviceClient;
                             serviceClient.Partner = this;
                             serviceClient.Send(message);
                             LogSession();
@@ -344,28 +337,70 @@ namespace InstaTech.App_Code.Socket_Handlers
                     }
                     break;
                 case "ProcessStartResult":
-                    var startTime = DateTime.Now;
-                    var success = true;
-                    while (SocketCollection.Where(sock => ((Remote_Control)sock).ComputerName == ComputerName && ((Remote_Control)sock).ConnectionType == ConnectionTypes.ClientConsole).Count() == 0)
+                    if (jsonMessage.Status == "ok")
                     {
-                        System.Threading.Thread.Sleep(200);
-                        if (DateTime.Now - startTime > TimeSpan.FromSeconds(10))
+                        var started = DateTime.Now;
+                        var success = true;
+                        while (SocketCollection.Where(sock => ((Remote_Control)sock).ComputerName == ComputerName && ((Remote_Control)sock).ConnectionType == ConnectionTypes.ClientConsole).Count() == 0)
                         {
-                            success = false;
-                            break;
+                            System.Threading.Thread.Sleep(200);
+                            if (DateTime.Now - started > TimeSpan.FromSeconds(5))
+                            {
+                                success = false;
+                                break;
+                            }
                         }
-                    }
-                    if (success)
-                    {
-                        Partner.Send(message);
+                        if (success)
+                        {
+                            Partner.Send(message);
+                        }
+                        else
+                        {
+                            jsonMessage.Status = "failed";
+                            Partner.Send(Json.Encode(jsonMessage));
+                        }
                     }
                     else
                     {
                         jsonMessage.Status = "failed";
                         Partner.Send(Json.Encode(jsonMessage));
                     }
+
                     Partner.Partner = null;
                     this.Partner = null;
+                    break;
+                case "DesktopSwitch":
+                    Partner.Send(Json.Encode(jsonMessage));
+                    var startTime = DateTime.Now;
+                    jsonMessage.Status = "ok";
+                    while (SocketCollection.Where(sock => ((Remote_Control)sock).ComputerName == ComputerName && ((Remote_Control)sock).ConnectionType == ConnectionTypes.ClientConsole).Count() < 2)
+                    {
+                        System.Threading.Thread.Sleep(200);
+                        if (DateTime.Now - startTime > TimeSpan.FromSeconds(5))
+                        {
+                            jsonMessage.Status = "failed";
+                            break;
+                        }
+                    }
+                    if (jsonMessage.Status == "failed")
+                    {
+                        Partner.Send(Json.Encode(jsonMessage));
+                        Partner.Partner = null;
+                        Partner = null;
+                        Close();
+                    }
+                    else
+                    {
+                        SocketCollection.Remove(this);
+                        var newClient = (Remote_Control)SocketCollection.FirstOrDefault(sock => ((Remote_Control)sock).ComputerName == ComputerName && ((Remote_Control)sock).ConnectionType == ConnectionTypes.ClientConsole);
+                        newClient.Partner = Partner;
+                        Partner.Partner = newClient;
+                        jsonMessage.Status = "ok";
+                        jsonMessage.ComputerName = newClient.ComputerName;
+                        Partner.Send(Json.Encode(jsonMessage));
+                        Partner = null;
+                        Close();
+                    }
                     break;
                 default:
                     {
@@ -396,7 +431,15 @@ namespace InstaTech.App_Code.Socket_Handlers
         public override void OnError()
         {
             Directory.CreateDirectory(Utilities.App_Data + @"/WebSocket_Errors/");
-            File.WriteAllText(Utilities.App_Data + @"/WebSocket_Errors/" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt", Json.Encode(Error) + Environment.NewLine);
+            var jsonError = new
+            {
+                Timestamp = DateTime.Now.ToString(),
+                Message = Error?.Message,
+                InnerEx = Error?.InnerException?.Message,
+                Source = Error?.Source,
+                StackTrace = Error?.StackTrace,
+            };
+            File.WriteAllText(Utilities.App_Data + @"/WebSocket_Errors/" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt", Json.Encode(jsonError) + Environment.NewLine);
             if (Partner != null)
             {
                 var request = new
@@ -451,7 +494,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                 Directory.CreateDirectory(Utilities.App_Data + "Logs");
             }
             var strLogPath = Utilities.App_Data + "Logs\\Connections-" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt";
-            System.IO.File.AppendAllText(strLogPath, DateTime.Now.ToString() + "\t" + WebSocketContext.UserHostAddress + "\t" + WebSocketContext.UserAgent + "\t" + ConnectionType.ToString() + "\t" + SessionID);
+            System.IO.File.AppendAllText(strLogPath, DateTime.Now.ToString() + "\t" + WebSocketContext.UserHostAddress + "\t" + WebSocketContext.UserAgent + "\t" + ConnectionType.ToString() + "\t" + SessionID + Environment.NewLine);
         }
         private void LogSession()
         {
@@ -460,7 +503,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                 Directory.CreateDirectory(Utilities.App_Data + "Logs");
             }
             var strLogPath = Utilities.App_Data + "Logs\\Sessions-" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt";
-            System.IO.File.AppendAllText(strLogPath, DateTime.Now.ToString() + "\t" + SessionID + "\t" + Partner?.SessionID);
+            System.IO.File.AppendAllText(strLogPath, DateTime.Now.ToString() + "\t" + SessionID + "\t" + Partner?.SessionID + Environment.NewLine);
         }
     }
 }

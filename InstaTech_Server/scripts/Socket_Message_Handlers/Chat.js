@@ -14,6 +14,7 @@
             localStorage["UserID"] = InstaTech.UserID;
             localStorage["AuthenticationToken"] = InstaTech.AuthenticationToken;
         }
+        setMainLoginFrame();
         $("#divTechChatLoginFrame").fadeOut(750, function () {
             $("#divQueueFrame").fadeIn(750, function () {
                 $("#divTechChat .portal-content-frame").animate({

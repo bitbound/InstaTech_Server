@@ -269,7 +269,7 @@ function initWebSocket() {
                     $("#divStatus").text("");
                     if (jsonMessage.Status == "ok") {
                         // Initialize RTC and attempt to connect.
-                        initRTC();
+                        requestCapture();
                         $("#divConnect").hide();
                         $("#divMain").show();
                     }
@@ -289,7 +289,7 @@ function initWebSocket() {
                     $("#divStatus").text("");
                     if (jsonMessage.Status == "ok") {
                         // Initialize RTC and attempt to connect.
-                        initRTC();
+                        requestCapture();
                         $("#divConnect").hide();
                         $("#divMain").show();
                     }
@@ -319,6 +319,20 @@ function initWebSocket() {
                     {
                         showDialog("Connection Failed", "Failed to connect to the remote computer.");
                         $("#divStatus").text("Connection failed.");
+                    }
+                    break;
+                case "DesktopSwitch":
+                    if (jsonMessage.Status == "pending")
+                    {
+                        console.log("Desktop switch initated.");
+                    }
+                    else if (jsonMessage.Status == "ok")
+                    {
+                        requestCapture();
+                    }
+                    else if (jsonMessage.Status == "failed") {
+                        showDialog("Capture Failed", "The client switched to a desktop, most likely to the lock screen or a UAC prompt, and screen capture failed.");
+                        $("#divStatus").text("Capture failed.");
                     }
                     break;
                 case "SearchComputers":
@@ -376,7 +390,7 @@ function initWebSocket() {
 function disconnect() {
     socket.close();
 }
-function initRTC() {
+function requestCapture() {
     rtcConnection = new RTCPeerConnection({
         iceServers: [
             {
@@ -385,9 +399,6 @@ function initRTC() {
                     "stun:stun.stunprotocol.org",
                     "stun:stun.l.google.com:19302",
                     "stun:stun1.l.google.com:19302",
-                    "stun:stun2.l.google.com:19302",
-                    "stun:stun3.l.google.com:19302",
-                    "stun:stun4.l.google.com:19302"
                 ]
             }
         ]

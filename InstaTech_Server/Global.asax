@@ -53,10 +53,10 @@
         var jsonError = new
         {
             Timestamp = DateTime.Now.ToString(),
-            Message = exError.Message,
-            InnerEx = exError.InnerException.Message,
-            Source = exError.Source,
-            StackTrace = exError.StackTrace,
+            Message = exError?.Message,
+            InnerEx = exError?.InnerException?.Message,
+            Source = exError?.Source,
+            StackTrace = exError?.StackTrace,
         };
         var error = System.Web.Helpers.Json.Encode(jsonError) + Environment.NewLine;
         System.IO.File.AppendAllText(Server.MapPath("~/App_Data/Errors/" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt"), error);

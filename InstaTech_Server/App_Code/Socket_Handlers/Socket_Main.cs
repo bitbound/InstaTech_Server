@@ -152,7 +152,15 @@ namespace InstaTech.App_Code.Socket_Handlers
         {
             SocketCollection.Remove(this);
             Directory.CreateDirectory(Utilities.App_Data + @"/WebSocket_Errors/");
-            File.WriteAllText(Utilities.App_Data + @"/WebSocket_Errors/" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt", Json.Encode(Error) + Environment.NewLine);
+            var jsonError = new
+            {
+                Timestamp = DateTime.Now.ToString(),
+                Message = Error?.Message,
+                InnerEx = Error?.InnerException?.Message,
+                Source = Error?.Source,
+                StackTrace = Error?.StackTrace,
+            };
+            File.WriteAllText(Utilities.App_Data + @"/WebSocket_Errors/" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt", Json.Encode(jsonError) + Environment.NewLine);
             if (Partner != null)
             {
                 var request = new
