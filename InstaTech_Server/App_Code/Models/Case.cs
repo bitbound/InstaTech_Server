@@ -16,23 +16,21 @@ namespace InstaTech.App_Code.Models
     {
         public Case()
         {
-            var dirs = Directory.CreateDirectory(Utilities.App_Data + "Cases\\").GetDirectories().ToList();
-            if (dirs.Count > 0)
+            var year = DateTime.Now.Year.ToString();
+            var month = DateTime.Now.Month.ToString().PadLeft(2, '0');
+            var day = DateTime.Now.Day.ToString().PadLeft(2, '0');
+
+            var baseDir = Directory.CreateDirectory(Path.Combine(Utilities.App_Data, "Cases", year, month, day));
+            var count = 0;
+            while (File.Exists(Path.Combine(baseDir.FullName, year + month + day + count.ToString() + ".json")))
             {
-                dirs.Sort();
-                CaseID = int.Parse(dirs.Last().Name.Split('-')[0]);
+                count++;
             }
-            while (Directory.GetFiles(CaseDir).Length == 999)
-            {
-                CaseID += 1000;
-            }
-            while (File.Exists(CaseDir + CaseID + ".json"))
-            {
-                CaseID += 1;
-            }
+            CaseID = year + month + day + count.ToString();
             DTCreated = DateTime.Now;
+            File.Create(Path.Combine(baseDir.FullName, CaseID + ".json")).Close();
         }
-        public int CaseID { get; set; } = 1;
+        public string CaseID { get; set; } = "";
         public DateTime? DTCreated { get; set; }
         public DateTime? DTReceived { get; set; }
         public DateTime? DTClosed { get; set; }
@@ -49,7 +47,7 @@ namespace InstaTech.App_Code.Models
         {
             get
             {
-                return Config.Current.Support_Categories.Find(tp => tp.Item1 == SupportCategory && tp.Item2 == SupportType).Item3;
+                return Config.Current.Support_Categories.Find(sc => sc.Category == SupportCategory && sc.Type == SupportType).Queue;
             }
         }
         public string Details { get; set; }
@@ -83,18 +81,6 @@ namespace InstaTech.App_Code.Models
         public string LockedBy { get; set; }
         private DateTime? LockedAt { get; set; }
         public List<ChatMessage> Messages { get; set; } = new List<ChatMessage>();
-        private string CaseDir
-        {
-            get
-            {
-                var floored = Math.Floor((decimal)(CaseID / 1000));
-                if (!Directory.Exists(Utilities.App_Data + "Cases\\" + String.Format("{0}-{1}", floored + 1, floored + 1000)))
-                {
-                    Directory.CreateDirectory(Utilities.App_Data + "Cases\\" + String.Format("{0}-{1}", floored + 1, floored + 1000));
-                }
-                return Utilities.App_Data + "Cases\\" + String.Format("{0}-{1}", floored + 1, floored + 1000) + "\\";
-            }
-        }
         public enum CaseStatus
         {
             Open,
@@ -104,7 +90,23 @@ namespace InstaTech.App_Code.Models
         }
         public void Save()
         {
-            File.WriteAllText(CaseDir + CaseID + ".json", Json.Encode(this));
+            var path = Path.Combine(Utilities.App_Data, "Cases", CaseID.Substring(0, 4), CaseID.Substring(4, 2), CaseID.Substring(6, 2), CaseID + ".json");
+
+            File.WriteAllText(path, Json.Encode(this));
+            if (Config.Current.File_Encryption)
+            {
+                File.Encrypt(path);
+            }
+            else
+            {
+                File.Decrypt(path);
+            }
+        }
+        public static Case Load (string CaseID)
+        {
+            var path = Path.Combine(Utilities.App_Data, "Cases", CaseID.Substring(0, 4), CaseID.Substring(4, 2), CaseID.Substring(6, 2), CaseID + ".json");
+            var strCase = File.ReadAllText(path);
+            return Json.Decode<Case>(strCase);
         }
     }
 }

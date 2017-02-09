@@ -31,3 +31,66 @@ function getTimeSince(dateNETDateSince) {
     var mins = Math.floor(totalSec / 60);
     return mins + "m, " + secs + "s";
 }
+function showTooltip(objPlacementTarget, strPlacementDirection, strColor, strMessage) {
+    if (objPlacementTarget instanceof jQuery) {
+        objPlacementTarget = objPlacementTarget[0];
+    }
+    var divTooltip = document.createElement("div");
+    divTooltip.innerText = strMessage;
+    divTooltip.classList.add("tooltip");
+    divTooltip.style.zIndex = 3;
+    divTooltip.id = "tooltip" + String(Math.random());
+    $(divTooltip).css({
+        "position": "absolute",
+        "background-color": "whitesmoke",
+        "color": strColor,
+        "border-radius": "10px",
+        "padding": "5px",
+        "border": "1px solid dimgray",
+        "font-size": ".8em",
+        "box-shadow": "10px 5px 5px rgba(0,0,0,.2)"
+    });
+    var rectPlacement = objPlacementTarget.getBoundingClientRect();
+    switch (strPlacementDirection) {
+        case "top":
+            {
+                divTooltip.style.top = Number(rectPlacement.top - 5) + "px";
+                divTooltip.style.transform = "translateY(-100%)";
+                divTooltip.style.left = rectPlacement.left + "px";
+                break;
+            }
+        case "right":
+            {
+                divTooltip.style.top = rectPlacement.top + "px";
+                divTooltip.style.left = Number(rectPlacement.right + 5) + "px";
+                break;
+            }
+        case "bottom":
+            {
+                divTooltip.style.top = Number(rectPlacement.bottom + 5) + "px";
+                divTooltip.style.left = rectPlacement.left + "px";
+                break;
+            }
+        case "left":
+            {
+                divTooltip.style.top = rectPlacement.top + "px";
+                divTooltip.style.left = Number(rectPlacement.left - 5) + "px";
+                divTooltip.style.transform = "translateX(-100%)";
+                break;
+            }
+        case "center":
+            {
+                divTooltip.style.top = Number(rectPlacement.bottom - (rectPlacement.height / 2)) + "px";
+                divTooltip.style.left = Number(rectPlacement.right - (rectPlacement.width / 2)) + "px";
+                divTooltip.style.transform = "translate(-50%, -50%)";
+            }
+        default:
+            break;
+    }
+    $(document.body).append(divTooltip);
+    window.setTimeout(function () {
+        $(divTooltip).animate({ opacity: 0 }, 1000, function () {
+            $(divTooltip).remove();
+        });
+    }, strMessage.length * 50);
+}

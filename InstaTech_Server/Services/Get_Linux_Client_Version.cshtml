@@ -1,0 +1,20 @@
+﻿@{
+    if (File.Exists(Server.MapPath("/Demo/Downloads/InstaTech_CP.AppImage")))
+    {
+        var sr = new StreamReader(Server.MapPath("/Demo/Downloads/InstaTech_CP.AppImage"));
+        while (sr.EndOfStream == false)
+        {
+            var thisLine = sr.ReadLine();
+            if (thisLine.Contains("X-AppImage-Version="))
+            {
+                var cpLinuxVersion = thisLine.Split("=".ToCharArray())[1];
+                Response.Write(cpLinuxVersion);
+                break;
+            }
+        }
+    }
+    else
+    {
+        Response.Write("0.0.0.0");
+    }
+}

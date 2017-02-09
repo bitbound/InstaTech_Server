@@ -20,6 +20,10 @@ var touchDragging;
 var lastTouchPointX;
 var lastTouchPointY;
 var lastPointerMove;
+var modKeyDown;
+var followingCursor;
+var lastCursorOffsetX;
+var lastCursorOffsetY;
 
 function submitTechMainLogin(e) {
     if (e) {
@@ -43,6 +47,8 @@ function logOutTech(e) {
     clearCachedCreds();
     socket.close();
     $("#spanMainLoginStatus").html("<small>Not logged in.</small>");
+    $("#inputTechMainPassword").val("");
+    $("#inputTechMainUserID").val("");
     $("#aMainTechLogOut").hide();
     $("#aMainTechLogIn").show();
 }
@@ -117,6 +123,8 @@ function connectToClient() {
     };
     socket.send(JSON.stringify(request));
     if ($(".toggle-box.selected").attr("id") == "divInteractive") {
+        $("#divUninstallService").hide();
+        $("#divSendCtrlAltDel").hide();
         var sessionID = $("#inputSessionID").val();
         request = {
             "Type": "Connect",
@@ -125,6 +133,8 @@ function connectToClient() {
         socket.send(JSON.stringify(request));
     }
     else {
+        $("#divUninstallService").show();
+        $("#divSendCtrlAltDel").show();
         var computerName = $("#inputSessionID").val();
         request = {
             "Type": "ConnectUnattended",
@@ -165,13 +175,12 @@ function selectComputer() {
     $("#inputSessionID").val($("#selectComputers").val());
     $("#divSearchComputers > div").slideUp();
 }
-
 function initWebSocket() {
-    if (window.location.href.search("localhost") > -1) {
-        socket = new WebSocket("ws://" + location.host + location.pathname.toLowerCase().split("/remote_control")[0] + "/Services/Remote_Control_Socket.cshtml");
+    if (window.location.host.search("localhost") > -1) {
+        socket = new WebSocket("ws://" + location.host + "/Services/Remote_Control_Socket.cshtml");
     }
     else {
-        socket = new WebSocket("wss://" + location.host + location.pathname.toLowerCase().split("/remote_control")[0] + "/Services/Remote_Control_Socket.cshtml");
+        socket = new WebSocket("wss://" + location.host + "/Services/Remote_Control_Socket.cshtml");
     }
     socket.binaryType = "arraybuffer";
     socket.onopen = function (e) {
@@ -237,11 +246,25 @@ function initWebSocket() {
                             localStorage["AuthenticationToken"] = InstaTech.AuthenticationToken;
                         }
                         $("#divMainTechLoginForm").slideUp();
+                        if ($("#inputTechMainNewPassword").is(":visible")) {
+                            $("#inputTechMainConfirmNewPassword, #inputTechMainNewPassword").removeAttr("required");
+                            $("#inputTechMainConfirmNewPassword, #inputTechMainNewPassword").parent("td").parent("tr").hide();
+                        }
                         setMainLoginFrame();
+                        return;
                     }
                     else if (jsonMessage.Status == "invalid") {
                         clearCachedCreds();
                         showDialog("Incorrect Credentials", "The user ID or password is incorrect.  Please try again.");
+                        return;
+                    }
+                    else if (jsonMessage.Status == "expired") {
+                        clearCachedCreds();
+                        $("#spanMainLoginStatus").html("<small>Not logged in.</small>");
+                        $("#inputTechMainPassword").val("");
+                        $("#aMainTechLogOut").hide();
+                        $("#aMainTechLogIn").show();
+                        showDialog("Token Expired", "Your login token has expired, likely due to logging in on another browser.  Please log in again.");
                         return;
                     }
                     else if (jsonMessage.Status == "locked") {
@@ -265,6 +288,20 @@ function initWebSocket() {
                     $("#divStatus").text("");
                     showDialog("Access Denied", jsonMessage.Reason);
                     break;
+                case "ForgotPassword":
+                    if (jsonMessage.Status == "invalid") {
+                        showDialog("Invalid User ID", "The user ID couldn't be found.");
+                    }
+                    else if (jsonMessage.Status == "noemail") {
+                        showDialog("No Email", "There is no email address on file for this account.  Please contact your system administrator.");
+                    }
+                    else if (jsonMessage.Status == "error") {
+                        showDialog("Error Sending Email", "There was an error sending the email.  Please contact your system administrator.");
+                    }
+                    else if (jsonMessage.Status == "ok") {
+                        showDialog("Password Reset Successful", "A temporary password has been sent to your email.  Please check your inbox.");
+                    }
+                    break;
                 case "Connect":
                     $("#divStatus").text("");
                     if (jsonMessage.Status == "ok") {
@@ -287,12 +324,6 @@ function initWebSocket() {
                     break;
                 case "ConnectUnattended":
                     $("#divStatus").text("");
-                    if (jsonMessage.Status == "ok") {
-                        // Initialize RTC and attempt to connect.
-                        requestCapture();
-                        $("#divConnect").hide();
-                        $("#divMain").show();
-                    }
                     if (jsonMessage.Status == "UnknownComputer") {
                         $("#divMain").hide();
                         $("#divConnect").show();
@@ -305,11 +336,12 @@ function initWebSocket() {
                     }
                     break;
                 case "ProcessStartResult":
+                    $("#divStatus").text("");
                     if (jsonMessage.Status == "ok")
                     {
                         var computerName = $("#inputSessionID").val();
                         request = {
-                            "Type": "ConnectUnattended",
+                            "Type": "CompleteConnection",
                             "ComputerName": computerName,
                             "AuthenticationToken": InstaTech.AuthenticationToken
                         };
@@ -317,6 +349,17 @@ function initWebSocket() {
                     }
                     else if (jsonMessage.Status == "failed")
                     {
+                        showDialog("Connection Failed", "Failed to connect to the remote computer.");
+                        $("#divStatus").text("Connection failed.");
+                    }
+                    break;
+                case "CompleteConnection":
+                    if (jsonMessage.Status == "ok") {
+                        requestCapture();
+                        $("#divConnect").hide();
+                        $("#divMain").show();
+                    }
+                    else if (jsonMessage.Status == "failed") {
                         showDialog("Connection Failed", "Failed to connect to the remote computer.");
                         $("#divStatus").text("Connection failed.");
                     }
@@ -335,6 +378,10 @@ function initWebSocket() {
                         $("#divStatus").text("Capture failed.");
                     }
                     break;
+                case "ClientUpdating":
+                    showDialog("Client Updating", "The client is self-updating.  Please try connecting again in a moment.");
+                    socket.close();
+                    break;
                 case "SearchComputers":
                     var selectEle = document.getElementById("selectComputers");
                     selectEle.innerHTML = "";
@@ -350,6 +397,15 @@ function initWebSocket() {
                 case "Bounds":
                     context.canvas.height = jsonMessage.Height;
                     context.canvas.width = jsonMessage.Width;
+                    break;
+                case "IdleTimeout":
+                    showDialog("Connection Timed Out", "Your connection was closed due to inactivity.");
+                    break;
+                case "UninstallService":
+                    if (jsonMessage.Status == "ok")
+                    {
+                        showTooltip($("#divUninstallService"), "right", "green", "Service uninstalled successfully.");
+                    }
                     break;
                 case "RTCCandidate":
                     rtcConnection.addIceCandidate(new RTCIceCandidate(jsonMessage.Candidate));
@@ -452,6 +508,7 @@ function sendRefreshRequest() {
     socket.send(JSON.stringify(request));
 }
 function toggleMenu() {
+    $("#divMenu").css("max-height", (window.innerHeight) - 80 + "px");
     $("#divMenu").slideToggle();
     $("#imgMenu").toggleClass("rotated180");
 }
@@ -463,6 +520,14 @@ function toggleScaleToFit() {
     else {
         $("#divScaleToFit").attr("status", "off");
         $(".input-surface").css("width", "auto");
+    }
+}
+function toggleFollowCursor() {
+    if ($("#divFollowCursor").attr("status") == "off") {
+        $("#divFollowCursor").attr("status", "on");
+    }
+    else {
+        $("#divFollowCursor").attr("status", "off");
     }
 }
 function sendClipboard(e) {
@@ -481,74 +546,18 @@ function sendClipboard(e) {
     showTooltip(e.target, "bottom", "black", "Clipboard data sent.");
     $("#textClipboard").val("");
 }
-function showTooltip(objPlacementTarget, strPlacementDirection, strColor, strMessage) {
-    if (objPlacementTarget instanceof jQuery) {
-        objPlacementTarget = objPlacementTarget[0];
+function sendCtrlAltDel() {
+    var request = {
+        "Type": "CtrlAltDel"
     }
-    var divTooltip = document.createElement("div");
-    divTooltip.innerText = strMessage;
-    divTooltip.classList.add("tooltip");
-    divTooltip.style.zIndex = 3;
-    divTooltip.id = "tooltip" + String(Math.random());
-    $(divTooltip).css({
-        "position": "absolute",
-        "background-color": "whitesmoke",
-        "color": strColor,
-        "border-radius": "10px",
-        "padding": "5px",
-        "border": "1px solid dimgray",
-        "font-size": ".8em"
-    });
-    var rectPlacement = objPlacementTarget.getBoundingClientRect();
-    switch (strPlacementDirection) {
-        case "top":
-            {
-                divTooltip.style.top = Number(rectPlacement.top - 5) + "px";
-                divTooltip.style.transform = "translateY(-100%)";
-                divTooltip.style.left = rectPlacement.left + "px";
-                break;
-            }
-        case "right":
-            {
-                divTooltip.style.top = rectPlacement.top + "px";
-                divTooltip.style.left = Number(rectPlacement.right + 5) + "px";
-                break;
-            }
-        case "bottom":
-            {
-                divTooltip.style.top = Number(rectPlacement.bottom + 5) + "px";
-                divTooltip.style.left = rectPlacement.left + "px";
-                break;
-            }
-        case "left":
-            {
-                divTooltip.style.top = rectPlacement.top + "px";
-                divTooltip.style.left = Number(rectPlacement.left - 5) + "px";
-                divTooltip.style.transform = "translateX(-100%)";
-                break;
-            }
-        case "center":
-            {
-                divTooltip.style.top = Number(rectPlacement.bottom - (rectPlacement.height / 2)) + "px";
-                divTooltip.style.left = Number(rectPlacement.right - (rectPlacement.width / 2)) + "px";
-                divTooltip.style.transform = "translate(-50%, -50%)";
-            }
-        default:
-            break;
-    }
-    $(document.body).append(divTooltip);
-    window.setTimeout(function () {
-        $(divTooltip).animate({ opacity: 0 }, 1000, function () {
-            $(divTooltip).remove();
-        });
-    }, strMessage.length * 50);
+    socket.send(JSON.stringify(request));
 }
 function transferFiles(fileList) {
     if (socket.readyState != socket.OPEN) {
         return;
     }
     $.each(fileList, function (index, file) {
-        var strPath = (location.pathname.toLowerCase().split("/remote_control")[0] + "/Services/FileTransfer.cshtml").replace("//", "/");
+        var strPath = ("/Services/File_Transfer.cshtml");
         fr.onload = function () {
             var upload = JSON.stringify({
                 "Type": "Upload",
@@ -565,6 +574,36 @@ function transferFiles(fileList) {
         };
         fr.readAsDataURL(file);
     });
+}
+function sendUninstall(e) {
+    var request = {
+        "Type": "UninstallService"
+    }
+    socket.send(JSON.stringify(request));
+    showTooltip($("#divUninstallService"), "right", "green", "Sending uninstall request...");
+}
+function scrollToCursor() {
+    if ($(":hover").length > 0 && $("#divFollowCursor").attr("status") == "on")
+    {
+        followingCursor = true;
+        var percentX = (lastCursorOffsetX / window.innerWidth) - .5;
+        var percentY = (lastCursorOffsetY / window.innerHeight) - .5;
+
+        // If true, cursor is out of deadzone.
+        if (Math.abs(percentX) > .2)
+        {
+            window.scrollBy((percentX * 50), 0);
+        }
+        // If true, cursor is out of deadzone.
+        if (Math.abs(percentY) > .2) {
+            window.scrollBy(0, (percentY * 50));
+        }
+        window.setTimeout(scrollToCursor, 50);
+    }
+    else
+    {
+        followingCursor = false;
+    }
 }
 $(document).ready(function () {
     context = document.getElementById("canvasRemoteControl").getContext("2d");
@@ -616,7 +655,10 @@ $(document).ready(function () {
             var request = {
                 "Type": "MouseDown",
                 "PointX": pointX,
-                "PointY": pointY
+                "PointY": pointY,
+                "Alt": e.altKey,
+                "Ctrl": e.ctrlKey,
+                "Shift": e.shiftKey
             };
             if (e.button == 0) {
                 request.Button = "Left";
@@ -637,7 +679,10 @@ $(document).ready(function () {
             var request = {
                 "Type": "MouseUp",
                 "PointX": pointX,
-                "PointY": pointY
+                "PointY": pointY,
+                "Alt": e.altKey,
+                "Ctrl": e.ctrlKey,
+                "Shift": e.shiftKey
             };
             if (e.button == 0) {
                 request.Button = "Left";
@@ -751,32 +796,79 @@ $(document).ready(function () {
             doubleTapped = false;
         }
     });
+    $(".input-surface").on("wheel", function (e) {
+        e.preventDefault();
+        var request = {
+            "Type": "MouseWheel",
+            "DeltaY": e.originalEvent.deltaY,
+            "DeltaX": e.originalEvent.deltaX
+        };
+        socket.send(JSON.stringify(request));
+    })
+    $(".input-surface").on("click", function (e) {
+        e.preventDefault();
+        $(":focus").blur();
+    });
     $(window).on("keydown", function (e) {
         if ($(":focus").length == 0 && socket.readyState == WebSocket.OPEN) {
             e.preventDefault();
-            if (e.key == "Alt" || e.key == "Shift" || e.key == "Ctrl") {
+            if (e.key == "Alt" || e.key == "Shift" || e.key == "Ctrl" || e.key == "Control") {
+                modKeyDown = true;
                 return;
             }
+            modKeyDown = false;
             var key = e.key;
-            if (e.altKey) {
-                key = "%" + key;
+            var modifers = [];
+            // Need special handling for these characters on Windows.
+            if (key.search("[%^+{}]") > -1)
+            {
+                key = "{" + key + "}";
             }
-            else if (e.ctrlKey) {
-                key = "^" + key;
-            }
-            else if (e.shiftKey) {
-                key = "+" + key;
+            else
+            {
+                if (e.altKey) {
+                    modifers.push("Alt");
+                }
+                if (e.ctrlKey) {
+                    modifers.push("Control");
+                }
+                if (e.shiftKey) {
+                    if (key != "%" && key != "^" && key != "+") {
+                        modifers.push("Shift")
+                    }
+                }
             }
             var request = {
                 "Type": "KeyPress",
                 "Key": key,
+                "Modifiers": modifers
             };
             socket.send(JSON.stringify(request));
         }
-        ;
     });
-    $(".input-surface").on("click", function (e) {
-        $(":focus").blur();
+    $(window).on("keyup", function (e) {
+        if ($(":focus").length == 0 && socket.readyState == WebSocket.OPEN) {
+            e.preventDefault();
+            if (e.key == "Alt" || e.key == "Shift" || e.key == "Ctrl" || e.key == "Control") {
+                if (modKeyDown == true) {
+                    var key = e.key;
+                    if (key == "Alt") {
+                        key = "%";
+                    }
+                    else if (key == "Ctrl" || key == "Control") {
+                        key = "^";
+                    }
+                    else if (key == "Shift") {
+                        key = "+";
+                    }
+                    var request = {
+                        "Type": "KeyPress",
+                        "Key": key,
+                    };
+                    socket.send(JSON.stringify(request));
+                }
+            }
+        }
     });
     $(window).on("click", function (e) {
         if (e.button == 2 && $(":focus").length == 0) {
@@ -785,7 +877,6 @@ $(document).ready(function () {
         if ($("#divMenu").is(":visible") && !$("#imgMenu").is(":hover") && !$("#divMenu").is(":hover")) {
             toggleMenu();
         }
-        ;
     });
     $(window).on("touchstart", function (event) {
         if (event.touches.length > 2) {
@@ -801,6 +892,16 @@ $(document).ready(function () {
             ;
         }
         ;
+    });
+    $(window).on("mousemove", function (e) {
+        lastCursorOffsetX = e.clientX;
+        lastCursorOffsetY = e.clientY;
+        if (!followingCursor) {
+            scrollToCursor();
+        }
+    })
+    $(window).on("resize", function () {
+        $("#divMenu").css("max-height", (window.innerHeight) - 80 + "px");
     });
     window.ondragover = function (e) {
         e.preventDefault();

@@ -33,6 +33,55 @@ namespace InstaTech.App_Code.Socket_Handlers
                 return SocketCollection.Cast<Socket_Main>().ToList().FindAll(sc => sc.ConnectionType == ConnectionTypes.Technician && sc.LoggedIntoChat == true);
             }
         }
+        public static List<Case> Open_Cases
+        {
+            get
+            {
+                if (Config.Current.Demo_Mode && Socket_Main.Customers?.Where(sc => sc.Partner == null)?.Count() == 0)
+                {
+                    for (int i = 0; i < 5; i++)
+                    {
+                        var newSC = new Socket_Main()
+                        {
+                            SupportCase = new Case()
+                            {
+                                CustomerFirstName = "Demo",
+                                CustomerLastName = "Customer " + i,
+                                CustomerEmail = "demo@instatech.org",
+                                CustomerComputerName = "MyFirstPC",
+                                CustomerPhone = "555-555-5555",
+                                CustomerUserID = "ABCT1000",
+                                SupportCategory = "Account Lockout",
+                                SupportType = "Network Account",
+                                Details = "It says my account is locked out and cannot be logged into.",
+                            },
+                            ConnectionType = Socket_Main.ConnectionTypes.Customer,
+                        };
+                        Socket_Main.SocketCollection.Add(newSC);
+                    }
+                }
+                var cases = new List<Case>();
+                foreach (Socket_Main sc in Socket_Main.SocketCollection.Where(sc => (sc as Socket_Main).ConnectionType == Socket_Main.ConnectionTypes.Customer && (sc as Socket_Main).Partner == null))
+                {
+                    cases.Add(sc.SupportCase);
+                }
+                cases.Sort(Comparer<Case>.Create(new Comparison<Case>((Case a, Case b) => {
+                    if (a.DTCreated < b.DTCreated)
+                    {
+                        return -1;
+                    }
+                    else if (b.DTCreated < a.DTCreated)
+                    {
+                        return 1;
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                })));
+                return cases;
+            }
+        }
         public Socket_Main Partner { get; set; }
         public Case SupportCase { get; set; }
         public Tech_Account TechAccount { get; set; }
@@ -81,20 +130,20 @@ namespace InstaTech.App_Code.Socket_Handlers
                 }
                 catch (Exception ex)
                 {
-                    if (!Directory.Exists(HttpContext.Current.Server.MapPath("~/App_Data/Errors")))
+                    var filePath = Path.Combine(Utilities.App_Data, "Errors", DateTime.Now.Year.ToString(), DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Day.ToString().PadLeft(2, '0') + ".txt");
+                    if (!System.IO.Directory.Exists(System.IO.Path.GetDirectoryName(filePath)))
                     {
-                        Directory.CreateDirectory(HttpContext.Current.Server.MapPath("~/App_Data/Errors/"));
+                        System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(filePath));
                     }
                     var jsonError = new
                     {
                         Timestamp = DateTime.Now.ToString(),
-                        Message = ex.Message,
-                        InnerEx = ex.InnerException.Message,
-                        Source = ex.Source,
-                        StackTrace = ex.StackTrace,
+                        Message = ex?.Message,
+                        Source = ex?.Source,
+                        StackTrace = ex?.StackTrace,
                     };
                     var error = Json.Encode(jsonError) + Environment.NewLine;
-                    File.AppendAllText(HttpContext.Current.Server.MapPath("~/App_Data/Errors/" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt"), error);
+                    File.AppendAllText(filePath, error);
                     throw ex;
                 }
             }
@@ -215,170 +264,6 @@ namespace InstaTech.App_Code.Socket_Handlers
             var cases = SocketCollection.Where(sock => (sock as Socket_Main).ConnectionType == ConnectionTypes.Customer && (sock as Socket_Main).Partner == null && (sock as Socket_Main)?.SupportCase?.DTCreated < SupportCase?.DTCreated);
             return cases.Count() + 1;
         }
-        private bool LoginTech(dynamic JsonData)
-        {
-            if (ConnectionType != null && ConnectionType != ConnectionTypes.Technician)
-            {
-                return false;
-            }
-            if (BadLoginAttempts >= 3)
-            {
-                JsonData.Status = "temp ban";
-                Send(Json.Encode(JsonData));
-                return false;
-            }
-            if (Config.Current.Demo_Mode && JsonData.UserID.ToLower() == "demo" && JsonData.Password == "tech")
-            {
-                ConnectionType = ConnectionTypes.Technician;
-                AuthenticationToken = Guid.NewGuid().ToString().Replace("-", "");
-                TechAccount = new Tech_Account()
-                {
-                    UserID = "demo",
-                    FirstName = "Demo",
-                    LastName = "Tech",
-                    HashedPassword = Crypto.HashPassword(JsonData.Password)
-                };
-                if (JsonData.RememberMe == true)
-                {
-                    TechAccount.AuthenticationToken = AuthenticationToken;
-                }
-                else
-                {
-                    TechAccount.AuthenticationToken = null;
-                }
-                TechAccount.Save();
-                JsonData.Status = "ok";
-                JsonData.AuthenticationToken = AuthenticationToken;
-                Send(Json.Encode(JsonData));
-                return true;
-            }
-            else if (Config.Current.Active_Directory_Enabled)
-            {
-                // TODO: AD authentication.
-                return false;
-            }
-            else
-            {
-                if (!Directory.Exists(Utilities.App_Data + "Tech_Accounts"))
-                {
-                    Directory.CreateDirectory(Utilities.App_Data + "Tech_Accounts");
-                }
-                if (!File.Exists(Utilities.App_Data + "Tech_Accounts\\" + JsonData.UserID + ".json"))
-                {
-                    BadLoginAttempts++;
-                    JsonData.Status = "invalid";
-                    Send(Json.Encode(JsonData));
-                    return false;
-                }
-                Tech_Account account = Json.Decode<Tech_Account>(File.ReadAllText(Utilities.App_Data + "Tech_Accounts\\" + JsonData.UserID + ".json"));
-                if (account.BadLoginAttempts >= 3)
-                {
-                    if (DateTime.Now - account.LastBadLogin > TimeSpan.FromMinutes(10))
-                    {
-                        BadLoginAttempts = 0;
-                    }
-                    else
-                    {
-                        JsonData.Status = "locked";
-                        Send(Json.Encode(JsonData));
-                        return false;
-                    }
-                }
-                if (JsonData.Password == account.TempPassword)
-                {
-                    if (String.IsNullOrEmpty(JsonData.NewPassword))
-                    {
-                        JsonData.Status = "new required";
-                        Send(Json.Encode(JsonData));
-                        return false;
-                    }
-                    else if (JsonData.NewPassword != JsonData.ConfirmNewPassword)
-                    {
-                        JsonData.Status = "password mismatch";
-                        Send(Json.Encode(JsonData));
-                        return false;
-                    }
-                    else if (JsonData.NewPassword.Length < 8 || JsonData.NewPassword.Length > 20)
-                    {
-                        JsonData.Status = "password length";
-                        Send(Json.Encode(JsonData));
-                        return false;
-                    }
-                    else
-                    {
-                        ConnectionType = ConnectionTypes.Technician;
-                        AuthenticationToken = Guid.NewGuid().ToString().Replace("-", "");
-                        account.TempPassword = null;
-                        account.HashedPassword = Crypto.HashPassword(JsonData.ConfirmNewPassword);
-                        account.BadLoginAttempts = 0;
-                        if (JsonData.RememberMe == true)
-                        {
-                            account.AuthenticationToken = AuthenticationToken;
-                        }
-                        else
-                        {
-                            account.AuthenticationToken = null;
-                        }
-                        account.Save();
-                        JsonData.Status = "ok";
-                        JsonData.AuthenticationToken = AuthenticationToken;
-                        Send(Json.Encode(JsonData));
-                        return true;
-                    }
-                }
-                if (Crypto.VerifyHashedPassword(account.HashedPassword, JsonData.Password))
-                {
-                    ConnectionType = ConnectionTypes.Technician;
-                    AuthenticationToken = Guid.NewGuid().ToString().Replace("-", "");
-                    account.BadLoginAttempts = 0;
-                    account.TempPassword = null;
-                    if (JsonData.RememberMe == true)
-                    {
-                        account.AuthenticationToken = AuthenticationToken;
-                    }
-                    else
-                    {
-                        account.AuthenticationToken = null;
-                    }
-                    account.Save();
-                    TechAccount = account;
-                    JsonData.Status = "ok";
-                    JsonData.AuthenticationToken = AuthenticationToken;
-                    Send(Json.Encode(JsonData));
-                    return true;
-                }
-                if (!String.IsNullOrEmpty(JsonData.AuthenticationToken))
-                {
-                    if (JsonData.AuthenticationToken == AuthenticationToken || JsonData.AuthenticationToken == account.AuthenticationToken)
-                    {
-                        ConnectionType = ConnectionTypes.Technician;
-                        AuthenticationToken = JsonData.AuthenticationToken;
-                        account.BadLoginAttempts = 0;
-                        account.TempPassword = null;
-                        account.Save();
-                        TechAccount = account;
-                        JsonData.Status = "ok";
-                        Send(Json.Encode(JsonData));
-                        return true;
-                    }
-                    else
-                    {
-                        BadLoginAttempts++;
-                        JsonData.Status = "invalid";
-                        Send(Json.Encode(JsonData));
-                        return false;
-                    }
-                }
-                // Bad login attempt.
-                BadLoginAttempts++;
-                account.BadLoginAttempts++;
-                account.LastBadLogin = DateTime.Now;
-                account.Save();
-                JsonData.Status = "invalid";
-                Send(Json.Encode(JsonData));
-                return false;
-            }
-        }
         private bool AuthenticateTech(dynamic JsonData)
         {
             if (JsonData.AuthenticationToken != AuthenticationToken)
@@ -429,7 +314,172 @@ namespace InstaTech.App_Code.Socket_Handlers
         }
         public void HandleTechMainLogin(dynamic JsonData)
         {
-            LoginTech(JsonData);
+            if (ConnectionType != null && ConnectionType != ConnectionTypes.Technician)
+            {
+                return;
+            }
+            if (BadLoginAttempts >= 3)
+            {
+                JsonData.Status = "temp ban";
+                Send(Json.Encode(JsonData));
+                return;
+            }
+            if (Config.Current.Demo_Mode && JsonData.UserID.ToLower() == "demo" && JsonData.Password == "tech")
+            {
+                ConnectionType = ConnectionTypes.Technician;
+                AuthenticationToken = Guid.NewGuid().ToString().Replace("-", "");
+                TechAccount = new Tech_Account()
+                {
+                    UserID = "demo",
+                    FirstName = "Demo",
+                    LastName = "Tech",
+                    HashedPassword = Crypto.HashPassword(JsonData.Password)
+                };
+                if (JsonData.RememberMe == true)
+                {
+                    TechAccount.AuthenticationToken = AuthenticationToken;
+                }
+                else
+                {
+                    TechAccount.AuthenticationToken = null;
+                }
+                TechAccount.Save();
+                JsonData.Status = "ok";
+                JsonData.Access = TechAccount.AccessLevel;
+                JsonData.AuthenticationToken = AuthenticationToken;
+                Send(Json.Encode(JsonData));
+                return;
+            }
+            else if (Config.Current.Active_Directory_Enabled)
+            {
+                // TODO: AD authentication.
+                return;
+            }
+            else
+            {
+                if (!Directory.Exists(Utilities.App_Data + "Tech_Accounts"))
+                {
+                    Directory.CreateDirectory(Utilities.App_Data + "Tech_Accounts");
+                }
+                if (!File.Exists(Utilities.App_Data + "Tech_Accounts\\" + JsonData.UserID + ".json"))
+                {
+                    BadLoginAttempts++;
+                    JsonData.Status = "invalid";
+                    Send(Json.Encode(JsonData));
+                    return;
+                }
+                Tech_Account account = Tech_Account.Load(JsonData.UserID);
+                if (account.BadLoginAttempts >= 3)
+                {
+                    if (DateTime.Now - account.LastBadLogin > TimeSpan.FromMinutes(10))
+                    {
+                        BadLoginAttempts = 0;
+                    }
+                    else
+                    {
+                        JsonData.Status = "locked";
+                        Send(Json.Encode(JsonData));
+                        return;
+                    }
+                }
+                if (JsonData.Password == account.TempPassword)
+                {
+                    if (String.IsNullOrEmpty(JsonData.NewPassword))
+                    {
+                        JsonData.Status = "new required";
+                        Send(Json.Encode(JsonData));
+                        return;
+                    }
+                    else if (JsonData.NewPassword != JsonData.ConfirmNewPassword)
+                    {
+                        JsonData.Status = "password mismatch";
+                        Send(Json.Encode(JsonData));
+                        return;
+                    }
+                    else if (JsonData.NewPassword.Length < 8 || JsonData.NewPassword.Length > 20)
+                    {
+                        JsonData.Status = "password length";
+                        Send(Json.Encode(JsonData));
+                        return;
+                    }
+                    else
+                    {
+                        ConnectionType = ConnectionTypes.Technician;
+                        AuthenticationToken = Guid.NewGuid().ToString().Replace("-", "");
+                        account.TempPassword = null;
+                        account.HashedPassword = Crypto.HashPassword(JsonData.ConfirmNewPassword);
+                        account.BadLoginAttempts = 0;
+                        if (JsonData.RememberMe == true)
+                        {
+                            account.AuthenticationToken = AuthenticationToken;
+                        }
+                        else
+                        {
+                            account.AuthenticationToken = null;
+                        }
+                        account.Save();
+                        TechAccount = account;
+                        JsonData.Status = "ok";
+                        JsonData.AuthenticationToken = AuthenticationToken;
+                        JsonData.Access = TechAccount.AccessLevel.ToString();
+                        Send(Json.Encode(JsonData));
+                        return;
+                    }
+                }
+                if (Crypto.VerifyHashedPassword(account.HashedPassword, JsonData.Password))
+                {
+                    ConnectionType = ConnectionTypes.Technician;
+                    AuthenticationToken = Guid.NewGuid().ToString().Replace("-", "");
+                    account.BadLoginAttempts = 0;
+                    account.TempPassword = null;
+                    if (JsonData.RememberMe == true)
+                    {
+                        account.AuthenticationToken = AuthenticationToken;
+                    }
+                    else
+                    {
+                        account.AuthenticationToken = null;
+                    }
+                    account.Save();
+                    TechAccount = account;
+                    JsonData.Status = "ok";
+                    JsonData.AuthenticationToken = AuthenticationToken;
+                    JsonData.Access = TechAccount.AccessLevel.ToString();
+                    Send(Json.Encode(JsonData));
+                    return;
+                }
+                if (!String.IsNullOrEmpty(JsonData.AuthenticationToken))
+                {
+                    if (JsonData.AuthenticationToken == AuthenticationToken || JsonData.AuthenticationToken == account.AuthenticationToken)
+                    {
+                        ConnectionType = ConnectionTypes.Technician;
+                        AuthenticationToken = JsonData.AuthenticationToken;
+                        account.BadLoginAttempts = 0;
+                        account.TempPassword = null;
+                        account.Save();
+                        TechAccount = account;
+                        JsonData.Access = TechAccount.AccessLevel.ToString();
+                        JsonData.Status = "ok";
+                        Send(Json.Encode(JsonData));
+                        return;
+                    }
+                    else
+                    {
+                        BadLoginAttempts++;
+                        JsonData.Status = "expired";
+                        Send(Json.Encode(JsonData));
+                        return;
+                    }
+                }
+                // Bad login attempt.
+                BadLoginAttempts++;
+                account.BadLoginAttempts++;
+                account.LastBadLogin = DateTime.Now;
+                account.Save();
+                JsonData.Status = "invalid";
+                Send(Json.Encode(JsonData));
+                return;
+            }
         }
         #endregion
 
@@ -475,53 +525,60 @@ namespace InstaTech.App_Code.Socket_Handlers
         public void HandleGetSupportCategories(dynamic JsonData)
         {
             var categories = new List<string>();
-            foreach (var tuple in Config.Current.Support_Categories)
+            foreach (var sc in Config.Current.Support_Categories)
             {
-                categories.Add(tuple.Item1);
+                categories.Add(sc.Category);
             }
             JsonData.Categories = categories.Distinct();
             Send(Json.Encode(JsonData));
         }
         public void HandleGetCustomerFormInfo(dynamic JsonData)
         {
-            try
-            {
-                var query = new ObjectQuery("SELECT * FROM Win32_ComputerSystem");
-                // TODO: Test in AD environment.
-                //ConnectionOptions conn = new ConnectionOptions();
-                //conn.Username = "";
-                //conn.Password = "";
-                //conn.Authority = "ntlmdomain:DOMAIN";
-                //var scope = new ManagementScope(String.Format("\\\\{0}\\root\\CIMV2", WebSocketContext.UserHostName), conn);
-                //ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, query);
-                ManagementObjectSearcher searcher = new ManagementObjectSearcher(String.Format("\\\\{0}\\root\\CIMV2", WebSocketContext.UserHostName ?? WebSocketContext.UserHostAddress), "SELECT * FROM Win32_ComputerSystem");
-                ManagementObjectCollection collection = searcher.Get();
-                foreach (ManagementObject mo in collection)
-                {
-                    foreach (var moProp in mo.Properties)
-                    {
-                        JsonData[moProp.Name] = moProp?.Value?.ToString();
-                    }
-                }
-            }
-            catch { }
-            Send(Json.Encode(JsonData));
+            // TODO: Use service data when available.
+            //try
+            //{
+            //    var query = new ObjectQuery("SELECT * FROM Win32_ComputerSystem");
+            //    // TODO: Test in AD environment.
+            //    //ConnectionOptions conn = new ConnectionOptions();
+            //    //conn.Username = "";
+            //    //conn.Password = "";
+            //    //conn.Authority = "ntlmdomain:DOMAIN";
+            //    //var scope = new ManagementScope(String.Format("\\\\{0}\\root\\CIMV2", WebSocketContext.UserHostName), conn);
+            //    //ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, query);
+            //    ManagementObjectSearcher searcher = new ManagementObjectSearcher(String.Format("\\\\{0}\\root\\CIMV2", WebSocketContext.UserHostName ?? WebSocketContext.UserHostAddress), "SELECT * FROM Win32_ComputerSystem");
+            //    ManagementObjectCollection collection = searcher.Get();
+            //    foreach (ManagementObject mo in collection)
+            //    {
+            //        foreach (var moProp in mo.Properties)
+            //        {
+            //            JsonData[moProp.Name] = moProp?.Value?.ToString();
+            //        }
+            //    }
+            //}
+            //catch { }
+            //Send(Json.Encode(JsonData));
         }
         public void HandleGetSupportTypes(dynamic JsonData)
         {
-            var tuples = Config.Current.Support_Categories.FindAll(tp => tp.Item1 == JsonData.SupportCategory);
+            var categories = Config.Current.Support_Categories.FindAll(sc => sc.Category == JsonData.SupportCategory);
             var types = new List<string>();
-            foreach (var tuple in tuples)
+            foreach (var sc in categories)
             {
-                types.Add(tuple.Item2);
+                types.Add(sc.Type);
             }
             JsonData.Types = types;
             Send(Json.Encode(JsonData));
         }
-        public void HandleTechChatLogin(dynamic JsonData)
+        public void HandleEnterTechChat(dynamic JsonData)
         {
-            if (LoginTech(JsonData))
+            if (!AuthenticateTech(JsonData))
             {
+                return;
+            }
+            else
+            {
+                JsonData.Status = "ok";
+                Send(Json.Encode(JsonData));
                 LoggedIntoChat = true;
             }
         }
@@ -536,9 +593,9 @@ namespace InstaTech.App_Code.Socket_Handlers
                 return;
             }
             var queues = new List<string>();
-            foreach (var tuple in Config.Current.Support_Categories)
+            foreach (var sc in Config.Current.Support_Categories)
             {
-                queues.Add(tuple.Item3);
+                queues.Add(sc.Queue);
             }
             JsonData.Queues = queues.Distinct();
             Send(Json.Encode(JsonData));
@@ -549,7 +606,7 @@ namespace InstaTech.App_Code.Socket_Handlers
             {
                 return;
             }
-            JsonData.Cases = Utilities.Open_Cases;
+            JsonData.Cases = Open_Cases;
             Send(Json.Encode(JsonData));
         }
         public void HandleTakeCase(dynamic JsonData)
@@ -558,7 +615,7 @@ namespace InstaTech.App_Code.Socket_Handlers
             {
                 return;
             }
-            var takeCase = Utilities.Open_Cases.Find(cs => cs.CaseID == int.Parse(JsonData.CaseID));
+            var takeCase = Open_Cases.Find(cs => cs.CaseID == JsonData.CaseID);
             if (takeCase == null)
             {
                 JsonData.Status = "taken";
@@ -717,7 +774,7 @@ namespace InstaTech.App_Code.Socket_Handlers
         {
             if (JsonData.Status == "Transfer")
             {
-                var transferCase = Utilities.Open_Cases.Find(ca => ca.CaseID == int.Parse(JsonData.CaseID));
+                var transferCase = Open_Cases.Find(ca => ca.CaseID == int.Parse(JsonData.CaseID));
                 if (transferCase != null)
                 {
                     if (transferCase.TechUserID != null)
@@ -766,7 +823,7 @@ namespace InstaTech.App_Code.Socket_Handlers
         }
         public void HandleLockCase(dynamic JsonData)
         {
-            var lockCase = Utilities.Open_Cases.Find(ca => ca.CaseID == int.Parse(JsonData.CaseID));
+            var lockCase = Open_Cases.Find(ca => ca.CaseID == int.Parse(JsonData.CaseID));
             if (lockCase == null)
             {
                 JsonData.Status = "taken";

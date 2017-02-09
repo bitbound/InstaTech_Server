@@ -1,27 +1,27 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26014.0
+VisualStudioVersion = 15.0.26127.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "InstaTech_Server", ".\InstaTech_Server\", "{1DB93CEE-0F60-44E4-8CAD-00B9F8AF5C91}"
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "InstaTech_Server", "InstaTech_Server\", "{1DB93CEE-0F60-44E4-8CAD-00B9F8AF5C91}"
 	ProjectSection(WebsiteProperties) = preProject
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.5.2"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_52422"
-		Debug.AspNetCompiler.PhysicalPath = ".\InstaTech_Server\"
+		Debug.AspNetCompiler.PhysicalPath = "InstaTech_Server\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_52422\"
 		Debug.AspNetCompiler.Updateable = "true"
 		Debug.AspNetCompiler.ForceOverwrite = "true"
 		Debug.AspNetCompiler.FixedNames = "false"
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.VirtualPath = "/localhost_52422"
-		Release.AspNetCompiler.PhysicalPath = ".\InstaTech_Server\"
+		Release.AspNetCompiler.PhysicalPath = "InstaTech_Server\"
 		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_52422\"
 		Release.AspNetCompiler.Updateable = "true"
 		Release.AspNetCompiler.ForceOverwrite = "true"
 		Release.AspNetCompiler.FixedNames = "false"
 		Release.AspNetCompiler.Debug = "False"
 		VWDPort = "52422"
-		SlnRelativePath = ".\InstaTech_Server\"
+		SlnRelativePath = "InstaTech_Server\"
 		DefaultWebSiteLanguage = "Visual C#"
 	EndProjectSection
 EndProject

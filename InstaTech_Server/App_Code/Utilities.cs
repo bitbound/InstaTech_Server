@@ -2,9 +2,10 @@
 using InstaTech.App_Code.Socket_Handlers;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web;
-
+using System.Web.Helpers;
 
 namespace InstaTech.App_Code {
     /// <summary>
@@ -13,56 +14,36 @@ namespace InstaTech.App_Code {
     public static class Utilities
     {
         public static string App_Data { get; } = HttpContext.Current.Server.MapPath("~/App_Data/");
-
-        public static List<Case> Open_Cases
+        public static string Version { get; } = "1.0.0";
+        public static List<Tech_Account> Tech_Accounts
         {
             get
             {
-                if (Config.Current.Demo_Mode && Socket_Main.Customers?.Where(sc=>sc.Partner == null)?.Count() == 0)
+                var accounts = new List<Tech_Account>();
+                foreach (var path in Directory.GetFiles(App_Data + "Tech_Accounts"))
                 {
-                    for (int i = 0; i < 5; i++)
-                    {
-                        var newSC = new Socket_Main()
-                        {
-                            SupportCase = new Case()
-                            {
-                                CaseID = i,
-                                CustomerFirstName = "Demo",
-                                CustomerLastName = "Customer " + i,
-                                CustomerEmail = "demo@instatech.org",
-                                CustomerComputerName = "MyFirstPC",
-                                CustomerPhone = "555-555-5555",
-                                CustomerUserID = "ABCT1000",
-                                SupportCategory = "Account Lockout",
-                                SupportType = "Network Account",
-                                Details = "It says my account is locked out and cannot be logged into.",
-                            },
-                            ConnectionType = Socket_Main.ConnectionTypes.Customer,
-                        };
-                        Socket_Main.SocketCollection.Add(newSC);
-                    }
+                    accounts.Add(Json.Decode<Tech_Account>(File.ReadAllText(path)));
                 }
-                var cases = new List<Case>();
-                foreach (Socket_Main sc in Socket_Main.SocketCollection.Where(sc=>(sc as Socket_Main).ConnectionType == Socket_Main.ConnectionTypes.Customer && (sc as Socket_Main).Partner == null))
-                {
-                    cases.Add(sc.SupportCase);
-                }
-                cases.Sort(Comparer<Case>.Create(new Comparison<Case>((Case a, Case b)=> {
-                    if (a.DTCreated < b.DTCreated)
-                    {
-                        return -1;
-                    }
-                    else if (b.DTCreated < a.DTCreated)
-                    {
-                        return 1;
-                    }
-                    else
-                    {
-                        return 0;
-                    }
-                })));
-                return cases;
+                return accounts;
             }
+        }
+        public static void License_Check()
+        {
+            var request = System.Net.WebRequest.CreateHttp("https://instatech.org/Services/Licence_Check.cshtml");
+            request.Method = "POST";
+            using (var rs = request.GetRequestStream())
+            {
+                using (var sw = new System.IO.StreamWriter(rs))
+                {
+                    var content = new
+                    {
+                        CompanyName = Config.Current.Company_Name,
+                        LicenseKey = Config.Current.License_Key
+                    };
+                    sw.Write(System.Web.Helpers.Json.Encode(content));
+                }
+            }
+            request.GetResponse();
         }
     }
 }

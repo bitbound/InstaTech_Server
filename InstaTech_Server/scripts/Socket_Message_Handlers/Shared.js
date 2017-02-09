@@ -23,17 +23,38 @@ function handleTechMainLogin(e) {
         InstaTech.Context = "Technician";
         InstaTech.UserID = $("#inputTechMainUserID").val();
         InstaTech.AuthenticationToken = e.AuthenticationToken;
+        InstaTech.LoggedIn = true;
         if (document.getElementById("inputTechMainRememberMe").checked) {
             localStorage["RememberMe"] = true;
             localStorage["UserID"] = InstaTech.UserID;
             localStorage["AuthenticationToken"] = InstaTech.AuthenticationToken;
         }
+        if ($("#inputTechMainNewPassword").is(":visible")) {
+            $("#inputTechMainConfirmNewPassword, #inputTechMainNewPassword").removeAttr("required");
+            $("#inputTechMainConfirmNewPassword, #inputTechMainNewPassword").parent("td").parent("tr").hide();
+        }
         $("#divMainTechLoginForm").slideUp();
         setMainLoginFrame();
+        $("#divTechPortal .portal-button-frame").show();
+        $("#divTechLoginNotice").remove();
+        if (e.Access != "Admin")
+        {
+            $(".portal-option-button[opens='#divAccountCenter']").remove();
+            $(".portal-option-button[opens='#divConfiguration']").remove();
+        }
     }
     else if (e.Status == "invalid") {
         clearCachedCreds();
         showDialog("Incorrect Credentials", "The user ID or password is incorrect.  Please try again.");
+        return;
+    }
+    else if (jsonMessage.Status == "expired") {
+        clearCachedCreds();
+        $("#spanMainLoginStatus").html("<small>Not logged in.</small>");
+        $("#inputTechMainPassword").val("");
+        $("#aMainTechLogOut").hide();
+        $("#aMainTechLogIn").show();
+        showDialog("Token Expired", "Your login token has expired, likely due from logging in on another browser.  Please log in again.");
         return;
     }
     else if (e.Status == "locked") {

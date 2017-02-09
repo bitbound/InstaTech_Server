@@ -1,11 +1,20 @@
 @{
-    
+    if (Request.Url.AbsoluteUri.ToLower().Contains("default.cshtml"))
+    {
+        Response.Redirect(Request.Url.AbsoluteUri.ToLower().Replace("/default.cshtml", ""));
+        return;
+    }
+    if (Request.FilePath != "/")
+    {
+        @Html.Raw("<div>The InstaTech server can't be run from a subdirectory.  It must be at the root of the IIS website.</div>");
+        return;
+    }
 }
 
 <!DOCTYPE html>
 <html>
     <head>
-        <title>@InstaTech.App_Code.Config.Current.Company_Name</title>
+        <title>@InstaTech.App_Code.Config.Current.Company_Name Support Portal</title>
         <meta name="keywords" content="Tech Support, Computer Support, Computer Help, Remote Support, Remote Tools, Remote Control, Support Chat, Live Chat" />
         <meta name="viewport" content="width=600, user-scalable=no" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -28,6 +37,7 @@
         <script src="~/scripts/Controls/Tech_Remote.js"></script>
         <script src="~/scripts/Controls/Account_Center.js"></script>
         <script src="~/scripts/Controls/Computer_Hub.js"></script>
+        <script src="~/scripts/Controls/Configuration.js"></script>
     </head>
     <body>
         <div id="divCustomerPortal" class="center-aligned">
@@ -41,20 +51,26 @@
             </div>
             <br />
             <div class="portal-button-frame">
-                <div class="portal-option-button" opens="#divCustomerChat" opens-file="Customer_Chat.cshtml">
-                    <div class="portal-option-text">
-                        <img src="~/Assets/Images/Message_16x.svg" />
-                        <br />
-                        Support Chat
+                @if (InstaTech.App_Code.Config.Current.Feature_Enabled_Chat)
+                {
+                    <div class='portal-option-button' opens='#divCustomerChat' opens-file='Customer_Chat.cshtml'>
+                        <div class='portal-option-text'>
+                            <img src='~/Assets/Images/Message_16x.svg' />
+                            <br/>
+                            Support Chat
+                        </div>
                     </div>
-                </div>
-                <div class="portal-option-button" opens="#divCustomerRemote" opens-file="Customer_Remote.cshtml">
-                    <div class="portal-option-text">
-                        <img src="~/Assets/Images/RemoteDesktop_64x.png" />
-                        <br />
-                        Remote Session
+                }
+                @if (InstaTech.App_Code.Config.Current.Feature_Enabled_Remote_Control)
+                {
+                    <div class='portal-option-button' opens='#divCustomerRemote' opens-file='Customer_Remote.cshtml'>
+                        <div class='portal-option-text'>
+                            <img src='~/Assets/Images/RemoteDesktop_64x.png' />
+                            <br />
+                            Remote Session
+                        </div>
                     </div>
-                </div>
+                }
             </div>
             <br />
             <div id="divCustomerContent">
@@ -140,39 +156,81 @@
             <div class="portal-button-frame">
                 @* Portal buttons must have "opens-file" and "opens" attribute that tells it the file
                     in /Controls/ from which to load content and the element to show with the slideDown effect.*@
-                <div class="portal-option-button" opens="#divTechChat" opens-file="Tech_Chat.cshtml">
-                    <div class="portal-option-text">
-                        <img src="~/Assets/Images/Message_16x.svg" />
-                        <br />
-                        Support Chat
+
+                @if (InstaTech.App_Code.Config.Current.Feature_Enabled_Chat)
+                {
+                    <div class='portal-option-button' opens='#divTechChat' opens-file='Tech_Chat.cshtml'>
+                        <div class='portal-option-text'>
+                            <img src='~/Assets/Images/Message_16x.svg' />
+                            <br />
+                            Support Chat
+                        </div>
                     </div>
-                </div>
-                <div class="portal-option-button" opens="#divTechRemote" opens-file="Tech_Remote.cshtml">
-                    <div class="portal-option-text">
-                        <img src="~/Assets/Images/RemoteDesktop_64x.png" />
-                        <br />
-                        Remote Session
+                }
+                @if (InstaTech.App_Code.Config.Current.Feature_Enabled_Remote_Control)
+                {
+                    <div class='portal-option-button' opens='#divTechRemote' opens-file='Tech_Remote.cshtml'>
+                        <div class='portal-option-text'>
+                            <img src='~/Assets/Images/RemoteDesktop_64x.png' />
+                            <br />
+                            Remote Session
+                        </div>
                     </div>
-                </div>
-               
-                <div class="portal-option-button" opens="#divAccountCenter" opens-file="Account_Center.cshtml">
-                    <div class="portal-option-text">
-                        <img src="~/Assets/Images/User_64x.png" />
-                        <br />
-                        Account Center
+                }
+                @if (InstaTech.App_Code.Config.Current.Feature_Enabled_Computer_Hub)
+                {
+                    <div class='portal-option-button' opens='#divComputerHub' opens-file='Computer_Hub.cshtml'>
+                        <div class='portal-option-text'>
+                            <img src='~/Assets/Images/ComputerSystem_256x.png' />
+                            <br />
+                            Computer Hub
+                        </div>
                     </div>
-                </div>
-                <div class="portal-option-button" opens="#divComputerHub" opens-file="Computer_Hub.cshtml">
-                    <div class="portal-option-text">
-                        <img src="~/Assets/Images/ComputerSystem_256x.png" />
-                        <br />
-                        Computer Hub
+                }
+                <br />
+                @if (InstaTech.App_Code.Config.Current.Feature_Enabled_Account_Center)
+                {
+                    <div class='portal-option-button' opens='#divAccountCenter' opens-file='Account_Center.cshtml'>
+                        <div class='portal-option-text'>
+                            <img src='~/Assets/Images/User_64x.png' />
+                            <br />
+                            Account Center
+                        </div>
                     </div>
-                </div>
+                }
+                @if (InstaTech.App_Code.Config.Current.Feature_Enabled_Configuration)
+                {
+                    <div class='portal-option-button' opens='#divConfiguration' opens-file='Configuration.cshtml'>
+                        <div class='portal-option-text'>
+                            <img src='~/Assets/Images/Settings_256x.png' />
+                            <br />
+                            Configuration
+                        </div>
+                    </div>
+                }
             </div>
             <br />
             <div id="divTechContent">
-
+                <div id="divTechLoginNotice" class="portal-content-frame">
+                    <strong>You must log in to access the tech portal.</strong>
+                    <br />
+                    <br />
+                    @{
+                        if (InstaTech.App_Code.Config.Current.Active_Directory_Enabled)
+                        {
+                            <span>Use your Active Directory credentials to log in.</span>
+                        }
+                        else
+                        {
+                            <span>Use your Tech Portal credentials to log in.</span>
+                        }
+                        if (InstaTech.App_Code.Config.Current.Demo_Mode)
+                        {
+                            <br /><br />
+                            <span>(Note: Demo mode is enabled.  You can log in with user ID "Demo" and password "tech".)</span>
+                        }
+                    }
+                </div>
             </div>
         </div>
         <div id="divWebSocketUnavailable" class="center-aligned"  hidden>
@@ -188,6 +246,9 @@
         <div id="divWebSocketClosed" class="center-aligned" hidden>
             <div class="portal-content-frame">
                 Your session has ended.
+            </div>
+            <div>
+                <button type="button" style="line-height:2" onclick="window.location.assign(window.location.href)">New Session</button>
             </div>
         </div>
         <div id="divLoading" hidden>

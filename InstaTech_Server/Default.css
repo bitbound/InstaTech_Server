@@ -153,6 +153,48 @@ form button[type="submit"] {
     margin-bottom: 5px;
 }
 
+/***  Toggle Switch ***/
+.switch-outer {
+    height: 25px;
+    width: 45px;
+    float: right;
+    border-radius: 10px;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.switch-outer[status="on"] {
+    background-color: steelblue;
+    transition: .5s;
+}
+
+.switch-outer[status="off"] {
+    background-color: lightgray;
+    transition: .5s;
+}
+
+.switch-inner {
+    border-radius: 100%;
+    background-color: white;
+    height: 20px;
+    width: 20px;
+    cursor: pointer;
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.switch-outer[status="on"] .switch-inner {
+    margin-left: 24%;
+    transition: .5s;
+}
+
+.switch-outer[status="off"] .switch-inner {
+    margin-left: -24%;
+    transition: .5s;
+}
+
 /*** Main Portal Elements ***/
 .portal-title {
     display: inline-block;
@@ -174,7 +216,9 @@ form button[type="submit"] {
 }
 .portal-button-frame {
     margin-top: 5vw;
-    display: inline-block;
+}
+#divTechPortal .portal-button-frame {
+    display: none;
 }
 .portal-option-button {
     position: relative;
@@ -257,7 +301,7 @@ button.switch-portal:active {
 }
 
 /*** Chat Elements ***/
-#divTechChatLoginFrame {
+#divTechChatEnterFrame {
     display: inline-block;
     max-width: 350px;
 }

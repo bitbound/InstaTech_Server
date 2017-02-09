@@ -22,6 +22,12 @@ $(document).ready(function () {
         $("#divLoading").hide();
     });
     setPortalButtonHandlers();
+    if (window.location.search.toLocaleLowerCase().search("user=tech") > -1)
+    {
+        $("#divCustomerPortal").hide();
+        $("#divTechPortal").show();
+
+    }
 });
 function init() {
     if (typeof WebSocket == "undefined") {
@@ -147,7 +153,7 @@ function setPortalButtonHandlers() {
         }
         if ($(strOpens).length == 0) {
             var strFile = $(e.currentTarget).attr("opens-file");
-            $.get(location.href + "/Controls/" + strFile, function (data) {
+            $.get(window.location.origin + "/Controls/" + strFile, function (data) {
                 $("#divTechContent:visible, #divCustomerContent:visible").append(data);
                 slideToggleContent(strOpens);
                 if ($(strOpens).length > 0 && $(strOpens)[0].onload) {

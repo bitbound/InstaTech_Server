@@ -1,33 +1,14 @@
 function initTechChat() {
     if (InstaTech.UserID != undefined && InstaTech.AuthenticationToken != undefined) {
-        $("#inputTechChatUserID").val(InstaTech.UserID);
-        $("#inputTechChatUserID").attr("disabled", true);
-        $("#inputTechChatPassword").val("**********");
-        $("#inputTechChatPassword").attr("disabled", true);
-        if (localStorage["RememberMe"])
-        {
-            document.getElementById("inputTechChatRememberMe").checked = true;
-        }
+
     }
 }
-function submitTechChatLogin(e) {
-    e.preventDefault();
-    var formData = {};
-    $("#formTechChatLogin").find("input").each(function (index, item) {
-        if (item.type == "checkbox")
-        {
-            formData[item.name] = item.checked;
-        }
-        else
-        {
-            formData[item.name] = item.value;
-        }
-    });
-    if (InstaTech.AuthenticationToken) 
-    {
-        formData["AuthenticationToken"] = InstaTech.AuthenticationToken;
+function enterTechChat(e) {
+    var request = {
+        "Type": "EnterTechChat",
+        "AuthenticationToken": InstaTech.AuthenticationToken
     }
-    InstaTech.Socket_Main.send(JSON.stringify(formData));
+    InstaTech.Socket_Main.send(JSON.stringify(request));
 }
 function forgotPasswordChat(e) {
     if ($("#inputTechChatUserID").val().length == 0) {

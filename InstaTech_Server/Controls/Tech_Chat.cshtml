@@ -1,80 +1,11 @@
 ﻿@{ }
 <div id="divTechChat" hidden onload="initTechChat()">
     <div class="portal-content-frame">
-        <div id="divTechChatLoginFrame">
-            <strong>Tech Login</strong>
-            <br />
-            @{
-                if (InstaTech.App_Code.Config.Current.Active_Directory_Enabled)
-                {
-                    @Html.Raw("<span>Use your Active Directory credentials to log in.</span>");
-                }
-                else
-                {
-                    @Html.Raw("<span>Use your Tech Portal credentials to log in.</span>");
-                }
-                if (InstaTech.App_Code.Config.Current.Demo_Mode)
-                {
-                    @Html.Raw("<br/><br/><span>(Note: Demo mode is enabled.  You can log in with user ID \"Demo\" and password \"tech\".)</span>");
-                }
-            }
+        <div id="divTechChatEnterFrame">
+            Click Enter to begin taking support cases.
             <br />
             <br />
-            <form id="formTechChatLogin" onsubmit="submitTechChatLogin(event)">
-                <input type="hidden" name="Type" value="TechChatLogin" />
-                <table>
-                    <tr>
-                        <td>
-                            <label for="inputTechChatUserID">User ID:</label>
-                        </td>
-                        <td>
-                            <input type="text" id="inputTechChatUserID" name="UserID" required />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label for="inputTechChatPassword">Password:</label>
-                        </td>
-                        <td>
-                            <input type="password" id="inputTechChatPassword" name="Password" required />
-                        </td>
-                    </tr>
-                    <tr hidden>
-                        <td>
-                            <label for="inputTechChatNewPassword">New Password:</label>
-                        </td>
-                        <td>
-                            <input type="password" id="inputTechChatNewPassword" name="NewPassword" min="8" max="20" />
-                        </td>
-                    </tr>
-                    <tr hidden>
-                        <td>
-                            <label for="inputTechChatConfirmNewPassword">Confirm New Password:</label>
-                        </td>
-                        <td>
-                            <input type="password" id="inputTechChatConfirmNewPassword" name="ConfirmNewPassword" min="8" max="20" />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label for="inputTechChatRememberMe"><small>Remeber Me:</small></label>
-                        </td>
-                        <td>
-                            <input type="checkbox" id="inputTechChatRememberMe" name="RememberMe" />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <button type="submit">Submit</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" class="right-aligned">
-                            <a class="link" onclick="forgotPasswordChat(event)">Forgot password?</a>
-                        </td>
-                    </tr>
-                </table>
-            </form>
+            <button type="button" onclick="enterTechChat()">Enter</button>
         </div>
         <div id="divQueueFrame" hidden>
             <div class="right-aligned">

@@ -1,21 +1,7 @@
-﻿function handleTechChatLogin(e) {
-    if (e.Status == "new required") {
-        $("#inputTechConfirmNewPassword, #inputTechNewPassword").attr("required", true);
-        $("#inputTechConfirmNewPassword, #inputTechNewPassword").parent("td").parent("tr").show();
-        return;
-    }
-    else if (e.Status == "ok") {
-        clearCachedCreds();
+﻿function handleEnterTechChat(e) {
+    if (e.Status == "ok") {
         InstaTech.Context = "Technician";
-        InstaTech.UserID = $("#inputTechChatUserID").val();
-        InstaTech.AuthenticationToken = e.AuthenticationToken;
-        if (document.getElementById("inputTechChatRememberMe").checked) {
-            localStorage["RememberMe"] = true;
-            localStorage["UserID"] = InstaTech.UserID;
-            localStorage["AuthenticationToken"] = InstaTech.AuthenticationToken;
-        }
-        setMainLoginFrame();
-        $("#divTechChatLoginFrame").fadeOut(750, function () {
+        $("#divTechChatEnterFrame").fadeOut(750, function () {
             $("#divQueueFrame").fadeIn(750, function () {
                 $("#divTechChat .portal-content-frame").animate({
                     "width": "90vw"
@@ -34,27 +20,6 @@
             window.clearInterval(InstaTech.QueueWaitTimer);
         }
         InstaTech.QueueWaitTimer = window.setInterval(updateQueueVolumes, 2000);
-    }
-    else if (e.Status == "invalid") {
-        clearCachedCreds();
-        showDialog("Incorrect Credentials", "The user ID or password is incorrect.  Please try again.");
-        return;
-    }
-    else if (e.Status == "locked") {
-        showDialog("Account Locked", "Your account as been locked due to failed login attempts.  It will unlock automatically after 10 minutes.  Please try again later.");
-        return;
-    }
-    else if (e.Status == "temp ban") {
-        showDialog("Temporary Ban", "Due to failed login attempts, you must refresh your browser to try again.");
-        return;
-    }
-    else if (e.Status == "password mismatch") {
-        showDialog("Password Mismatch", "The passwords you entered don't match.  Please retype them.");
-        return;
-    }
-    else if (e.Status == "password length") {
-        showDialog("Password Length", "Your new password must be between 8 and 20 characters long.");
-        return;
     }
 }
 function handleGetSupportCategories(e) {

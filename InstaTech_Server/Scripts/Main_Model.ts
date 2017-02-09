@@ -25,13 +25,14 @@ class Main_Model {
     constructor() {
         this.Cases = [];
     } 
+    UserID: string;
     AuthenticationToken: string;
+    LoggedIn: boolean;
     Socket_Main: WebSocket;
     Cases: Case[];
     Context: ConnectionType;
     LastTypingStatus: Date;
     QueueWaitTimer: Number;
-    UserID: string;
     PartnerFirstName: string;
     PartnerLastName: string;
 }

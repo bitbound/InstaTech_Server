@@ -1,5 +1,9 @@
 ﻿@{
-    
+    if (Request.Url.AbsoluteUri.ToLower().Contains("default.cshtml"))
+    {
+        Response.Redirect(Request.Url.AbsoluteUri.ToLower().Replace("/default.cshtml", ""));
+    }
+
 }
 <!DOCTYPE html>
 <html>
@@ -18,6 +22,7 @@
     <script src="~/scripts/Utilities.js"></script>
     <script src="~/scripts/Remote_Control.js"></script>
     <script src="~/scripts/Main_Model.js"></script>
+    <script src="~/scripts/Utilities.js"></script>
 
 </head>
 <body>
@@ -96,7 +101,7 @@
                 <div><strong>Connect to client:</strong></div>
                 <input id="inputSessionID" placeholder="Enter client's session ID." type="text" pattern="[0-9 ]*" onkeypress="if (event.keyCode == 13) { connectToClient() }" style="margin: 5px 0; width:175px" />
                 <img id="imgSearchComputers" class="link" src="~/Assets/Images/Search_64x.png" onclick="searchComputers(event)" title="Show online computers." hidden/>
-                <div id="divSearchComputers" style="display:inline-block; position:absolute; transform: translateY(30px);">
+                <div id="divSearchComputers">
                     <div style="display:none">
                         <input id="inputFilterComputers" placeholder="Filter..." style="width:145px" oninput="filterComputers()" onchange="filterComputers();" />
                         <select id="selectComputers" size="6" style="width:150px" onchange="selectComputer()">
@@ -129,21 +134,35 @@
             </div>
             <div style="margin-top: 20px;">
                 <span>Scale to fit:</span>
-                <div id="divScaleToFit" status="on" class="switch-outer" onclick="toggleScaleToFit()">
+                <div id="divScaleToFit" status="on" class="switch-outer" onclick="toggleScaleToFit()" title="Scales the images to fit the width of your browser.">
+                    <div class="switch-inner"></div>
+                </div>
+            </div>
+            <div style="margin-top: 20px;">
+                <span>Follow cursor:</span>
+                <div id="divFollowCursor" status="on" class="switch-outer" onclick="toggleFollowCursor()" title="When the cursor is moved to the edge of the browser window, the screen will scroll to follow it.">
                     <div class="switch-inner"></div>
                 </div>
             </div>
             <div style="margin-top: 20px;">
                 <span style="margin-bottom:5px;">File Transfer:</span>
-                <button type="button" style="float:right;" onclick='$("#inputFile").click()'>Upload...</button>
+                <button type="button" style="float:right;"  title="Transfer files to the remote computer." onclick='$("#inputFile").click()'>Upload...</button>
                 <div id="divUploadHint" style="font-size: .8em; font-family:sans-serif; color:dodgerblue; cursor:pointer" onclick='showTooltip(this, "bottom", "black", "You can also drag-and-drop files onto the window to upload them.");'>(Hint!)</div>
                 <input id="inputFile" type="file" hidden multiple onchange='transferFiles(this.files); showTooltip($("#divUploadHint"), "bottom", "seagreen", "File(s) uploaded successfully.");' />
             </div>
-            <div style="margin-top: 20px; margin-bottom:20px; height: 60px;">
+            <div id="divSendCtrlAltDel" style="margin-top: 10px; display:none">
+                <span>Send Ctrl+Alt+Del:</span>
+                <button type="button" style="float:right" onclick="sendCtrlAltDel()" title="Send the Ctrl+Alt+Del key combination.">Send</button>
+            </div>
+            <div id="divUninstallService" style="margin-top: 20px; display:none">
+                <span>Uninstall Service:</span>
+                <button type="button" style="float:right" onclick="sendUninstall()" title="Uninstall the service on the remote computer.">Uninstall</button>
+            </div>
+            <div style="margin-top: 20px; height: 40px;">
                 <span style="margin-bottom:5px;">Send Clipboard:</span>
                 <textarea id="textClipboard" placeholder="Paste text here." style="float:right; margin-left: 10px; width:100px; resize: none;" oninput="sendClipboard(event)"></textarea>
             </div>
-            <button type="button" onclick="disconnect()" style="position:absolute; bottom:5px; right:5px">Disconnect</button>
+            <button type="button" onclick="disconnect()" style="margin-top: 20px; float:right">Disconnect</button>
         </div>
 
         <canvas id="canvasRemoteControl" class="input-surface"></canvas>
@@ -223,12 +242,21 @@
             color: steelblue;
             cursor: pointer;
         }
+        #divSearchComputers {
+            display: inline-block;
+            position: absolute;
+            transform: translate(180px, 50px);
+            top: 0;
+            right: 0;
+        }
         #imgSearchComputers {
             height: 20px;
             width: 20px;
             position: absolute;
             margin-left: 5px;
-            transform: translateY(5px);
+            transform: translate(25px, 22px);
+            top: 0;
+            right: 0;
         }
         #divMenu {
             position: fixed;
@@ -241,6 +269,7 @@
             display: none;
             padding: 0 10px 20px 10px;
             z-index: 1;
+            overflow-y: auto;
         }
         .toggle-box {
             display: inline-block;
@@ -293,7 +322,11 @@
             margin-top: 30px;
             border: 1px groove gray;
             background-color: lightgray;
-            display:none;
+            display: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         #buttonRefresh {
