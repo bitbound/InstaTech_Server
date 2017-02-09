@@ -48,7 +48,7 @@ function handleTechMainLogin(e) {
         showDialog("Incorrect Credentials", "The user ID or password is incorrect.  Please try again.");
         return;
     }
-    else if (jsonMessage.Status == "expired") {
+    else if (e.Status == "expired") {
         clearCachedCreds();
         $("#spanMainLoginStatus").html("<small>Not logged in.</small>");
         $("#inputTechMainPassword").val("");

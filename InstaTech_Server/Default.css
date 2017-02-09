@@ -209,6 +209,7 @@ form button[type="submit"] {
     border-radius: 10px;
     border: .5vw solid white;
     background: linear-gradient(to right, rgb(25,25,25), rgb(75,75,75), rgb(25,25,25));
+    box-shadow: 10px 10px 5px rgba(0,0,0,0.2);
 }
 .portal-title.tech-portal-title {
     color: lightsteelblue;
@@ -233,6 +234,7 @@ form button[type="submit"] {
     user-select: none;
     transition-duration: 0.5s;
     transition-timing-function: ease;
+    box-shadow: 10px 10px 5px rgba(0,0,0,0.2);
 }
 
 .portal-option-button:hover {
@@ -291,6 +293,7 @@ button.switch-portal:active {
     box-shadow: rgba(255,255,255,.1) 10px 10px 5px;
     width: 60vw;
     text-align: center;
+    box-shadow: 10px 10px 5px rgba(0,0,0,0.2);
 }
 .error-frame {
     color: red;

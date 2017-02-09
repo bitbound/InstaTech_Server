@@ -82,7 +82,7 @@
             <div id="divMainTechLoginFrame">
                 <div>
                     <span id="spanMainLoginStatus"><small>Not logged in.</small></span><br />
-                    <a class="link" id="aMainTechLogIn" onclick='$("#divMainTechLoginForm").slideToggle()'>Log In</a>
+                    <a class="link" id="aMainTechLogIn" onclick='$("#divMainTechLoginForm").slideToggle(function () { $("#inputTechMainUserID").focus() })'>Log In</a>
                     <a class="link" id="aMainTechLogOut" onclick="logOutTech(event)" hidden>Log Out</a>
                 </div>
                 <div id="divMainTechLoginForm" hidden>

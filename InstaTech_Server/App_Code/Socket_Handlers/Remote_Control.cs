@@ -144,7 +144,8 @@ namespace InstaTech.App_Code.Socket_Handlers
                     UserID = "demo",
                     FirstName = "Demo",
                     LastName = "Tech",
-                    HashedPassword = Crypto.HashPassword(JsonData.Password)
+                    HashedPassword = Crypto.HashPassword(JsonData.Password),
+                    AccessLevel = Tech_Account.Access_Levels.Admin
                 };
                 if (JsonData.RememberMe == true)
                 {
@@ -537,26 +538,6 @@ namespace InstaTech.App_Code.Socket_Handlers
         }
         private bool AuthenticateTech(dynamic JsonData)
         {
-            if (TechAccount?.UserID.ToLower() == "demo" && JsonData.Type == "ConnectUnattended")
-            {
-                var response = new
-                {
-                    Type = "Unauthorized",
-                    Reason = "The demo account is not authorized to start unattended sessions."
-                };
-                Send(Json.Encode(response));
-                return false;
-            }
-            if (TechAccount?.UserID.ToLower() == "demo" && JsonData.Type == "SearchComputers")
-            {
-                var response = new
-                {
-                    Type = "Unauthorized",
-                    Reason = "The demo account is not authorized to search computers."
-                };
-                Send(Json.Encode(response));
-                return false;
-            }
             if (JsonData.AuthenticationToken != AuthenticationToken)
             {
                 var response = new

@@ -131,9 +131,9 @@ namespace InstaTech.App_Code.Socket_Handlers
                 catch (Exception ex)
                 {
                     var filePath = Path.Combine(Utilities.App_Data, "Errors", DateTime.Now.Year.ToString(), DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Day.ToString().PadLeft(2, '0') + ".txt");
-                    if (!System.IO.Directory.Exists(System.IO.Path.GetDirectoryName(filePath)))
+                    if (!Directory.Exists(Path.GetDirectoryName(filePath)))
                     {
-                        System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(filePath));
+                        Directory.CreateDirectory(Path.GetDirectoryName(filePath));
                     }
                     var jsonError = new
                     {
@@ -333,7 +333,8 @@ namespace InstaTech.App_Code.Socket_Handlers
                     UserID = "demo",
                     FirstName = "Demo",
                     LastName = "Tech",
-                    HashedPassword = Crypto.HashPassword(JsonData.Password)
+                    HashedPassword = Crypto.HashPassword(JsonData.Password),
+                    AccessLevel = Tech_Account.Access_Levels.Admin
                 };
                 if (JsonData.RememberMe == true)
                 {
@@ -345,7 +346,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                 }
                 TechAccount.Save();
                 JsonData.Status = "ok";
-                JsonData.Access = TechAccount.AccessLevel;
+                JsonData.Access = TechAccount.AccessLevel.ToString();
                 JsonData.AuthenticationToken = AuthenticationToken;
                 Send(Json.Encode(JsonData));
                 return;
