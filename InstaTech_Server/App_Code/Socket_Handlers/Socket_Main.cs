@@ -200,7 +200,11 @@ namespace InstaTech.App_Code.Socket_Handlers
         public override void OnError()
         {
             SocketCollection.Remove(this);
-            Directory.CreateDirectory(Utilities.App_Data + @"/WebSocket_Errors/");
+            var filePath = Path.Combine(Utilities.App_Data, "WebSocket_Errors", DateTime.Now.Year.ToString(), DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Day.ToString().PadLeft(2, '0') + ".txt");
+            if (!Directory.Exists(Path.GetDirectoryName(filePath)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+            }
             var jsonError = new
             {
                 Timestamp = DateTime.Now.ToString(),
@@ -209,7 +213,9 @@ namespace InstaTech.App_Code.Socket_Handlers
                 Source = Error?.Source,
                 StackTrace = Error?.StackTrace,
             };
-            File.WriteAllText(Utilities.App_Data + @"/WebSocket_Errors/" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt", Json.Encode(jsonError) + Environment.NewLine);
+            var error = Json.Encode(jsonError) + Environment.NewLine;
+            File.AppendAllText(filePath, error);
+
             if (Partner != null)
             {
                 var request = new
@@ -585,6 +591,10 @@ namespace InstaTech.App_Code.Socket_Handlers
         }
         public void HandleExitTechChat(dynamic JsonData)
         {
+            if (Partner != null)
+            {
+                HandleSendToQueue(JsonData);
+            }
             LoggedIntoChat = false;
         }
         public void HandleGetQueues(dynamic JsonData)
@@ -648,8 +658,6 @@ namespace InstaTech.App_Code.Socket_Handlers
             SupportCase = Partner.SupportCase;
             Partner.Partner = this;
             takeCase.Save();
-            TechAccount.Cases.Add(takeCase.CaseID);
-            TechAccount.Save();
             JsonData.Status = "ok";
             JsonData.TechID = TechAccount.UserID;
             JsonData.TechFirstName = TechAccount.FirstName;
@@ -865,6 +873,48 @@ namespace InstaTech.App_Code.Socket_Handlers
             {
                 sc.Send(Json.Encode(JsonData));
             });
+        }
+        #endregion
+
+        #region Socket Message Handlers - Account Center
+        public void HandleGetTechAccounts(dynamic JsonData)
+        {
+            if (!AuthenticateTech(JsonData))
+            {
+                return;
+            }
+            if (TechAccount.AccessLevel != Tech_Account.Access_Levels.Admin)
+            {
+                JsonData.Status = "unauthorized";
+                Send(Json.Encode(JsonData));
+                return;
+            }
+            JsonData.Status = "ok";
+            JsonData.TechAccounts = Utilities.Tech_Accounts;
+            Send(Json.Encode(JsonData));
+        }
+        public void HandleSaveTechAccount(dynamic JsonData)
+        {
+            var account = Utilities.Tech_Accounts.Find(ta => ta.UserID == JsonData.Account.UserID);
+            if (account == null)
+            {
+                JsonData.Status = "notfound";
+                Send(Json.Encode(JsonData));
+                return;
+            }
+            try
+            {
+                account = JsonData.Account;
+                account.Save();
+                JsonData.Status = "ok";
+                Send(Json.Encode(JsonData));
+            }
+            catch
+            {
+                JsonData.Status = "failed";
+                Send(Json.Encode(JsonData));
+            }
+            
         }
         #endregion
     }

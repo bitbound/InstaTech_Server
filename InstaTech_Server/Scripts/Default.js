@@ -1,11 +1,13 @@
 $(document).ready(function () {
     window.onerror = function (messageOrEvent, source, lineno, colno, error) {
-        error.lineno = lineno;
-        error.colno = colno;
-        error.source = source;
-        var strError = JSON.stringify(error);
+        var ex = {};
+        ex.msg = messageOrEvent;
+        ex.lineno = lineno;
+        ex.colno = colno;
+        ex.source = source;
+        ex.error = error;
+        var strError = JSON.stringify(ex);
         sendClientError(strError);
-        throw error;
     };
     if (!init()) {
         return;

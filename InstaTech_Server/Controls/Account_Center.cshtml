@@ -1,9 +1,63 @@
 ﻿@{ }
 <div id="divAccountCenter" hidden onload="initAccountCenter()">
-    <div class="portal-content-frame">
-        <div><strong>Coming in a future update.</strong></div>
-        <div>This will be a place to view and edit all technician accounts.  For now, please modify the JSON files directly in /App_Data/Tech_Accounts/.</div>
-        <br />
-        <br />
+    <div class="portal-content-frame" style="width: 80vw; max-height:90vh; overflow:auto">
+        <div style="height:40px;">
+            <input id="inputSearchTechs" type="text" placeholder="Search..." style="float:left; margin-top: 10px; margin-left: 10px" onchange="searchTechs()" oninput="searchTechs()" />
+            <button style="float:right; margin-left: 15px;" onclick="refreshAccountCenter()">Refresh</button>
+            <button style="float:right; margin-left: 15px;" onclick="editTechAccount()">Edit</button>
+            <button style="float:right; margin-left: 15px;" onclick="deleteTechAccount()">Delete</button>
+            <button style="float:right;" onclick="newTechAccount()">New</button>
+        </div>
+        <table id="tableAccountCenter" class="data-grid">
+            <thead>
+                <tr>
+                    <td>User ID</td>
+                    <td>First Name</td>
+                    <td>Last Name</td>
+                    <td>Email</td>
+                    <td>Temp Password</td>
+                    <td>Last Bad Login</td>
+                    <td>Bad Login Count</td>
+                    <td>Computer Groups</td>
+                    <td>Access Level</td>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
     </div>
 </div>
+<style>
+    .data-grid {
+        vertical-align: bottom;
+        border: 3px groove black;
+        border-radius: 5px;
+    }
+
+    .data-grid thead {
+        font-weight: bold;
+        background-color: lightsteelblue;
+        padding: 5px;
+    }
+    .data-grid tbody {
+        padding: 5px;
+    }
+    .data-grid td {
+        padding: 5px 10px;
+    }
+    .data-grid tbody tr {
+        cursor: pointer;
+    }
+    .data-grid tbody tr:nth-child(even)
+    {
+        background-color: rgb(230, 230, 230);
+    }
+    .data-grid tbody tr:hover {
+        background-color: lightskyblue;
+    }
+
+    .data-grid tbody tr.selected {
+        background-color: lightgreen;
+    }
+</style>

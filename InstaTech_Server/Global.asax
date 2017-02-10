@@ -86,7 +86,7 @@
     }
     void Application_BeginRequest(object sender, EventArgs e)
     {
-        if (!Request.IsLocal && !Request.IsSecureConnection && !Request.Url.AbsoluteUri.Contains("test.instatech.org"))
+        if (!Request.IsLocal && !Request.IsSecureConnection)
         {
             Response.RedirectPermanent(Request.Url.AbsoluteUri.ToLower().Replace("http://", "https://"), true);
             return;

@@ -45,5 +45,9 @@ namespace InstaTech.App_Code {
             }
             request.GetResponse();
         }
+        public static dynamic Clone(object InputObject)
+        {
+            return Json.Decode(Json.Encode(InputObject));
+        }
     }
 }

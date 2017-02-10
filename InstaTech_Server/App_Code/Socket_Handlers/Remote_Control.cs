@@ -57,7 +57,12 @@ namespace InstaTech.App_Code.Socket_Handlers
         }
         public override void OnError()
         {
-            Directory.CreateDirectory(Utilities.App_Data + @"/WebSocket_Errors/");
+            SocketCollection.Remove(this);
+            var filePath = Path.Combine(Utilities.App_Data, "WebSocket_Errors", DateTime.Now.Year.ToString(), DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Day.ToString().PadLeft(2, '0') + ".txt");
+            if (!Directory.Exists(Path.GetDirectoryName(filePath)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+            }
             var jsonError = new
             {
                 Timestamp = DateTime.Now.ToString(),
@@ -66,7 +71,8 @@ namespace InstaTech.App_Code.Socket_Handlers
                 Source = Error?.Source,
                 StackTrace = Error?.StackTrace,
             };
-            File.WriteAllText(Utilities.App_Data + @"/WebSocket_Errors/" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt", Json.Encode(jsonError) + Environment.NewLine);
+            var error = Json.Encode(jsonError) + Environment.NewLine;
+            File.AppendAllText(filePath, error);
             if (Partner != null)
             {
                 var request = new
@@ -78,7 +84,6 @@ namespace InstaTech.App_Code.Socket_Handlers
                 Partner.Partner = null;
                 Partner = null;
             }
-            SocketCollection.Remove(this);
         }
         public override void OnMessage(byte[] message)
         {

@@ -32,7 +32,6 @@ namespace InstaTech.App_Code.Models
             Standard,
             Admin
         }
-        public List<string> Cases { get; set; } = new List<string>();
         public void Save()
         {
             if (!Directory.Exists(Utilities.App_Data + "Tech_Accounts"))
