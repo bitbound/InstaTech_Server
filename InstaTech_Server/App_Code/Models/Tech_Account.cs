@@ -15,15 +15,15 @@ namespace InstaTech.App_Code.Models
         public Tech_Account()
         {
         }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
+        public string FirstName { get; set; } = "";
+        public string LastName { get; set; } = "";
         public string UserID { get; set; }
         public string HashedPassword { get; set; } = "";
         public string AuthenticationToken { get; set; }
-        public string TempPassword { get; set; }
+        public string TempPassword { get; set; } = "";
         public int BadLoginAttempts { get; set; } = 0;
         public DateTime LastBadLogin { get; set; }
-        public string Email { get; set; }
+        public string Email { get; set; } = "";
         public List<string> ComputerGroups { get; set; } = new List<string>();
         public Access_Levels AccessLevel { get; set; } = Access_Levels.Standard;
 

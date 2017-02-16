@@ -53,6 +53,8 @@ class Main_Model {
     QueueWaitTimer: null;
     PartnerFirstName: string;
     PartnerLastName: string;
+    ComputerGroups: string[];
     Temp: {};
 }
 const InstaTech = new Main_Model();
+InstaTech.Temp = {};

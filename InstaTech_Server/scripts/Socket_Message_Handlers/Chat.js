@@ -24,18 +24,18 @@
 }
 function handleGetSupportCategories(e) {
     if (InstaTech.Context == "Technician") {
-        $('#selectMoveCaseCategory').html("");
+        $('#selectSupportCategory').html("");
         for (var i = 0; i < e.Categories.length; i++) {
             var category = e.Categories[i];
             var option = document.createElement("option");
             option.value = category;
             option.innerHTML = category;
-            $('#selectMoveCaseCategory')[0].options.add(option);
+            $('#selectSupportCategory')[0].options.add(option);
         }
-        $('#selectMoveCaseCategory').selectmenu("refresh");
+        $('#selectSupportCategory').selectmenu("refresh");
         var request = {
             "Type": "GetSupportTypes",
-            "SupportCategory": $('#selectMoveCaseCategory').val()
+            "SupportCategory": $('#selectSupportCategory').val()
         };
         InstaTech.Socket_Main.send(JSON.stringify(request));
     }
@@ -54,15 +54,15 @@ function handleGetSupportCategories(e) {
 }
 function handleGetSupportTypes(e) {
     if (InstaTech.Context == "Technician") {
-        $('#selectMoveCaseType').html("");
+        $('#selectSupportType').html("");
         for (var i = 0; i < e.Types.length; i++) {
             var type = e.Types[i];
             var option = document.createElement("option");
             option.value = type;
             option.innerHTML = type;
-            $('#selectMoveCaseType')[0].options.add(option);
+            $('#selectSupportType')[0].options.add(option);
         }
-        $('#selectMoveCaseType').selectmenu("refresh");
+        $('#selectSupportType').selectmenu("refresh");
     }
     else
     {

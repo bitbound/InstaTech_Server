@@ -389,6 +389,10 @@ namespace InstaTech.App_Code.Socket_Handlers
                         return;
                     }
                 }
+                if (String.IsNullOrWhiteSpace(JsonData.Password))
+                {
+                    return;
+                }
                 if (JsonData.Password == account.TempPassword)
                 {
                     if (String.IsNullOrEmpty(JsonData.NewPassword))
@@ -750,9 +754,9 @@ namespace InstaTech.App_Code.Socket_Handlers
             try
             {
                 WebMail.SmtpServer = Config.Current.Email_SMTP_Server;
-                WebMail.UserName = Config.Current.Email_Username;
+                WebMail.UserName = Config.Current.Email_SMTP_Username;
                 WebMail.Password = Config.Current.Email_SMTP_Password;
-                WebMail.From = Config.Current.Email_Username;
+                WebMail.From = Config.Current.Email_SMTP_Username;
                 WebMail.Send(account.Email, Config.Current.Company_Name + " Support Portal Password Reset", "As requested, your password has been reset.  Your temporary password is below.<br><br>If you did not request this password reset, or requested it in error, you can safely ignore this email.  Logging in with your old password will invalidate the temporary password and reverse the password reset.<br><br>Temporary Password: " + account.TempPassword);
                 Send(Json.Encode(JsonData));
             }
@@ -904,7 +908,7 @@ namespace InstaTech.App_Code.Socket_Handlers
             }
             try
             {
-                account = JsonData.Account;
+                account = Json.Decode<Tech_Account>(Json.Encode(JsonData.Account));
                 account.Save();
                 JsonData.Status = "ok";
                 Send(Json.Encode(JsonData));
@@ -915,6 +919,72 @@ namespace InstaTech.App_Code.Socket_Handlers
                 Send(Json.Encode(JsonData));
             }
             
+        }
+        public void HandleNewTechAccount(dynamic JsonData)
+        {
+            if (Utilities.Tech_Accounts.Exists(ta => ta.UserID == JsonData.Account.UserID))
+            {
+                JsonData.Status = "exists";
+                Send(Json.Encode(JsonData));
+                return;
+            }
+            else if (JsonData.Account.UserID.Length < 3)
+            {
+                JsonData.Status = "length";
+                Send(Json.Encode(JsonData));
+                return;
+            }
+            else if (new Regex("[^0-9a-zA-Z]").IsMatch(JsonData.Account.UserID as string))
+            {
+                JsonData.Status = "invalid";
+                Send(Json.Encode(JsonData));
+                return;
+            }
+            try
+            {
+                var account = Json.Decode<Tech_Account>(Json.Encode(JsonData.Account));
+                account.Save();
+                JsonData.Status = "ok";
+                JsonData.Account = account;
+                Send(Json.Encode(JsonData));
+            }
+            catch
+            {
+                JsonData.Status = "failed";
+                Send(Json.Encode(JsonData));
+            }
+        }
+        public void HandleDeleteTechAccount(dynamic JsonData)
+        {
+            var account = Utilities.Tech_Accounts.Find(ta => ta.UserID == JsonData.UserID);
+            if (account == null)
+            {
+                JsonData.Status = "notfound";
+                Send(Json.Encode(JsonData));
+                return;
+            }
+            try
+            {
+                File.Delete(Path.Combine(Utilities.App_Data, "Tech_Accounts", JsonData.UserID + ".json"));
+                JsonData.Status = "ok";
+                Send(Json.Encode(JsonData));
+            }
+            catch
+            {
+                JsonData.Status = "failed";
+                Send(Json.Encode(JsonData));
+            }
+
+        }
+        public void HandleGetAllComputerGroups(dynamic JsonData)
+        {
+            if (!AuthenticateTech(JsonData))
+            {
+                return;
+            }
+            JsonData.Status = "ok";
+            JsonData.ComputerGroups = Config.Current.Computer_Groups;
+            Send(Json.Encode(JsonData));
         }
         #endregion
     }

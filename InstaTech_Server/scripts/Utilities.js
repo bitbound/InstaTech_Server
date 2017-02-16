@@ -54,34 +54,34 @@ function showTooltip(objPlacementTarget, strPlacementDirection, strColor, strMes
     switch (strPlacementDirection) {
         case "top":
             {
-                divTooltip.style.top = Number(rectPlacement.top - 5) + "px";
+                divTooltip.style.top = Number((rectPlacement.top + window.scrollY) - 5) + "px";
                 divTooltip.style.transform = "translateY(-100%)";
-                divTooltip.style.left = rectPlacement.left + "px";
+                divTooltip.style.left = Number(rectPlacement.left + window.scrollX) + "px";
                 break;
             }
         case "right":
             {
-                divTooltip.style.top = rectPlacement.top + "px";
-                divTooltip.style.left = Number(rectPlacement.right + 5) + "px";
+                divTooltip.style.top = Number(rectPlacement.top + window.scrollY) + "px";
+                divTooltip.style.left = Number(rectPlacement.right + window.scrollX + 5) + "px";
                 break;
             }
         case "bottom":
             {
-                divTooltip.style.top = Number(rectPlacement.bottom + 5) + "px";
-                divTooltip.style.left = rectPlacement.left + "px";
+                divTooltip.style.top = Number(rectPlacement.bottom + window.scrollY + 5) + "px";
+                divTooltip.style.left = Number(rectPlacement.left + window.scrollX) + "px";
                 break;
             }
         case "left":
             {
-                divTooltip.style.top = rectPlacement.top + "px";
-                divTooltip.style.left = Number(rectPlacement.left - 5) + "px";
+                divTooltip.style.top = Number(rectPlacement.top + window.scrollY) + "px";
+                divTooltip.style.left = Number(rectPlacement.left + window.scrollX - 5) + "px";
                 divTooltip.style.transform = "translateX(-100%)";
                 break;
             }
         case "center":
             {
-                divTooltip.style.top = Number(rectPlacement.bottom - (rectPlacement.height / 2)) + "px";
-                divTooltip.style.left = Number(rectPlacement.right - (rectPlacement.width / 2)) + "px";
+                divTooltip.style.top = Number(rectPlacement.bottom + window.scrollY - (rectPlacement.height / 2)) + "px";
+                divTooltip.style.left = Number(rectPlacement.right + window.scrollX - (rectPlacement.width / 2)) + "px";
                 divTooltip.style.transform = "translate(-50%, -50%)";
             }
         default:

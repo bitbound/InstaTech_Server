@@ -309,9 +309,9 @@ namespace InstaTech.App_Code.Socket_Handlers
             try
             {
                 WebMail.SmtpServer = Config.Current.Email_SMTP_Server;
-                WebMail.UserName = Config.Current.Email_Username;
+                WebMail.UserName = Config.Current.Email_SMTP_Username;
                 WebMail.Password = Config.Current.Email_SMTP_Password;
-                WebMail.From = Config.Current.Email_Username;
+                WebMail.From = Config.Current.Email_SMTP_Username;
                 WebMail.Send(account.Email, Config.Current.Company_Name + " Support Portal Password Reset", "As requested, your password has been reset.  Your temporary password is below.<br><br>If you did not request this password reset, or requested it in error, you can safely ignore this email.  Logging in with your old password will invalidate the temporary password and reverse the password reset.<br><br>Temporary Password: " + account.TempPassword);
                 Send(Json.Encode(JsonData));
             }

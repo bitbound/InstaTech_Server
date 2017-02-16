@@ -58,10 +58,12 @@ function handleTechMainLogin(e) {
         return;
     }
     else if (e.Status == "locked") {
+        clearCachedCreds();
         showDialog("Account Locked", "Your account as been locked due to failed login attempts.  It will unlock automatically after 10 minutes.  Please try again later.");
         return;
     }
     else if (e.Status == "temp ban") {
+        clearCachedCreds();
         showDialog("Temporary Ban", "Due to failed login attempts, you must refresh your browser to try again.");
         return;
     }

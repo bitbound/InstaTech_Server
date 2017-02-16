@@ -20,11 +20,25 @@ button:active {
     border: 2px solid gray;
     background: radial-gradient(rgb(100,100,100) 0%, rgb(50,50,50) 100%);
 }
+input, select {
+    border: 1px solid steelblue;
+    border-radius: 3px;
+    height: 1.5em;
+}
+select[multiple] {
+    height: auto;
+}
+input:hover, select:hover {
+    border: 1px solid black;
+}
+input:focus, select:focus {
+    border-width: 2px;
+}
+
 .tooltip-anchor {
     padding: .5px 2px !important;
     cursor: pointer
 }
-
 td textarea {
     width: 100%;
     min-height: 150px;
@@ -114,12 +128,12 @@ form button[type="submit"] {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    left: -1vw;
+    left: calc((1vw + 1vh) / -2);
     width: 0;
     height: 0;
-    border-top: 1vw solid transparent;
-    border-bottom: 1vw solid transparent;
-    border-right: 1vw solid lightgray;
+    border-top: calc((1vw + 1vh) / 2) solid transparent;
+    border-bottom: calc((1vw + 1vh) / 2) solid transparent;
+    border-right: calc((1vw + 1vh) / 2) solid lightgray;
 }
 
 .arrow-down {
@@ -152,23 +166,34 @@ form button[type="submit"] {
     padding: 2px 5px;
     margin-bottom: 5px;
 }
+.frame-title {
+    background: white;
+    margin: -12px -5px 10px -5px;
+    padding-right: 10px;
+    height: 30px;
+}
+.frame-title button {
+    float: right;
+    font-size: 10px;
+    padding: 3px 8px;
+    margin-top: 3px;
+}
 
 /***  Toggle Switch ***/
 .switch-outer {
     height: 25px;
     width: 45px;
-    float: right;
     border-radius: 10px;
     cursor: pointer;
     display: inline-block;
 }
 
-.switch-outer[status="on"] {
+.switch-outer[on="true"] {
     background-color: steelblue;
     transition: .5s;
 }
 
-.switch-outer[status="off"] {
+.switch-outer[on="false"] {
     background-color: lightgray;
     transition: .5s;
 }
@@ -185,12 +210,12 @@ form button[type="submit"] {
     transform: translate(-50%, -50%);
 }
 
-.switch-outer[status="on"] .switch-inner {
+.switch-outer[on="true"] .switch-inner {
     margin-left: 24%;
     transition: .5s;
 }
 
-.switch-outer[status="off"] .switch-inner {
+.switch-outer[on="false"] .switch-inner {
     margin-left: -24%;
     transition: .5s;
 }
@@ -198,25 +223,29 @@ form button[type="submit"] {
 /*** Main Portal Elements ***/
 .portal-title {
     display: inline-block;
-    margin-top: 2vw;
-    min-width: 60vw;
-    padding-top: 1vw;
-    padding-bottom: 1vw;
-    font-size: 5vw;
+    margin-top: calc((2vw + 2vh) /2);
+    min-width: calc((60vw + 60vh) /2);
+    padding-top: calc((1vw + 1vh) / 2);
+    padding-bottom: calc((1vw + 1vh) / 2);
+    font-size: calc((5vw + 5vh) / 2);
     font-weight: bold;
     text-align: center;
     color: white;
     border-radius: 10px;
-    border: .5vw solid white;
+    border-width: calc((.5vw + .5vh) / 2);
+    border-style: solid;
+    border-color: white;
     background: linear-gradient(to right, rgb(25,25,25), rgb(75,75,75), rgb(25,25,25));
     box-shadow: 10px 10px 5px rgba(0,0,0,0.2);
 }
 .portal-title.tech-portal-title {
     color: lightsteelblue;
-    border: .5vw solid lightsteelblue;
+    border-color: lightsteelblue;
+    border-style: solid;
+    border-width: calc((.5vw + .5vh) / 2);
 }
 .portal-button-frame {
-    margin-top: 5vw;
+    margin-top: calc((5vw + 5vh) / 2);
 }
 #divTechPortal .portal-button-frame {
     display: none;
@@ -224,12 +253,14 @@ form button[type="submit"] {
 .portal-option-button {
     position: relative;
     display: inline-block;
-    height: 15vw;
-    width: 15vw;
+    height: calc((15vw + 15vh) / 2);
+    width: calc((15vw + 15vh) / 2);
     background: radial-gradient(rgb(100,100,100) 0%, rgb(50,50,50) 100%);
     border-radius: 100%;
-    border: .75vw outset white;
-    margin: 1vw 2vw 1vw 2vw;
+    border-color: white;
+    border-style: outset;
+    border-width: calc((.75vw + .75vh) / 2);
+    margin: calc((1vw + 1vh) / 2) calc((2vw + 2vh) / 2) calc((1vw + 1vh) / 2) calc((2vw + 2vh) / 2);
     cursor: pointer;
     user-select: none;
     transition-duration: 0.5s;
@@ -248,9 +279,9 @@ form button[type="submit"] {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 12vw;
+    width: calc((12vw + 12vh) / 2);
     transform: translate(-50%, -50%);
-    font-size: 1.5vw;
+    font-size: calc((1.5vw + 1.5vh) / 2);
     font-weight: bold;
     color: white;
     -moz-user-select: none;
@@ -259,26 +290,32 @@ form button[type="submit"] {
     user-select: none;
 }
 .portal-option-text img {
-    width: 5vw;
-    height: 5vw;
+    width: calc((5vw + 5vh) / 2);
+    height: calc((5vw + 5vh) / 2);
 }
 
 button.switch-portal {
-    border: .1vw solid lightgray;
+    border-color: lightgray;
+    border-style: solid;
+    border-width: calc((.1vw + .1vh) / 2);
     position: absolute;
     overflow: visible;
-    left: 2vw;
-    font-size: 1vw;
-    width: 6vw;
-    height: 4vw;
+    left: calc((2vw + 2vh) / 2);
+    font-size: calc((1vw + 1vh) / 2);
+    width: calc((6vw + 6vh) / 2);
+    height: calc((4vw + 4vh) / 2);
     padding: 0;
 }
 button.switch-portal:hover {
-    border: .1vw solid white;
+    border-style: solid;
+    border-color: white;
+    border-width: calc((.1vw + .1vh) / 2);
     background: radial-gradient(rgb(200,200,200) 0%, rgb(100,100,100) 100%);
 }
 button.switch-portal:active {
-    border: .1vw solid gray;
+    border-style: solid;
+    border-color: gray;
+    border-width: calc((.1vw + .1vh) / 2);
     background: radial-gradient(rgb(100,100,100) 0%, rgb(50,50,50) 100%);
 }
 
@@ -584,4 +621,45 @@ text-align: center;
 }
 .remote-frame-div a img {
     width: 50%;
+}
+
+/*** Account Center ***/
+.data-grid {
+    vertical-align: bottom;
+    border: 3px groove black;
+    border-radius: 5px;
+}
+
+.data-grid thead {
+    font-weight: bold;
+    background-color: lightsteelblue;
+    padding: 5px;
+}
+
+.data-grid tbody {
+    padding: 5px;
+}
+
+.data-grid td {
+    padding: 5px 10px;
+}
+
+.data-grid tbody tr {
+    cursor: pointer;
+}
+
+.data-grid tbody tr:nth-child(even) {
+    background-color: rgb(230, 230, 230);
+}
+
+.data-grid tbody tr:hover {
+    background-color: lightskyblue;
+}
+
+.data-grid tbody tr.selected {
+    background-color: lightgreen;
+}
+
+.data-grid select {
+    width: 100px;
 }

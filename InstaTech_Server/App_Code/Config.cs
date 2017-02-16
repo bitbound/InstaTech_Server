@@ -43,7 +43,7 @@ namespace InstaTech.App_Code
         // Email settings for sending automated emails (e.g. password resets).
         public string Email_SMTP_Server { get; set; } = "";
         public int Email_SMTP_Port { get; set; } = 25;
-        public string Email_Username { get; set; } = "";
+        public string Email_SMTP_Username { get; set; } = "";
         public string Email_SMTP_Password { get; set; } = "";
 
         // Determines the default client version of the remote control app that will be downloaded.

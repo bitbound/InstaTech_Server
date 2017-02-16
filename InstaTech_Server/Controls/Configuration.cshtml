@@ -1,7 +1,183 @@
 ﻿@{ }
 <div id="divConfiguration" hidden onload="initConfiguration()">
     <div class="portal-content-frame">
-        <div><strong>Coming in a future update.</strong></div>
-        <div>This will be a place to modify the configuration, export settings, back up data, etc.</div>
+        <div class="frame-title">
+            <small>Configuration</small>
+            <button onclick="$('#divConfiguration').slideToggle()">X</button>
+        </div>
+        <table style="text-align:left; padding-left: 20px; padding-right: 20px">
+            <tr>
+                <td>
+                    Company Name:
+                </td>
+                <td>
+                    <input type="text" value="@InstaTech.App_Code.Config.Current.Company_Name" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    License Key:
+                </td>
+                <td>
+                    <input type="text" readonly disabled value="@InstaTech.App_Code.Config.Current.License_Key" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Default Admin:
+                </td>
+                <td>
+                    <input type="text" value="@InstaTech.App_Code.Config.Current.Default_Admin" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Demo Mode:
+                </td>
+                <td>
+                    <div class="switch-outer" on="@InstaTech.App_Code.Config.Current.Demo_Mode.ToString().ToLower()" prop="Demo_Mode" onclick="toggleProperty(event)">
+                        <div class="switch-inner"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    File Encryption:
+                </td>
+                <td>
+                    <div class="switch-outer" on="@InstaTech.App_Code.Config.Current.File_Encryption.ToString().ToLower()" prop="File_Encryption" onclick="toggleProperty(event)">
+                        <div class="switch-inner"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    AD Enabled:
+                </td>
+                <td>
+                    <div class="switch-outer" on="@InstaTech.App_Code.Config.Current.Active_Directory_Enabled.ToString().ToLower()" prop="Active_Directory_Enabled" onclick="toggleProperty(event)">
+                        <div class="switch-inner"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    AD Tech Group:
+                </td>
+                <td>
+                    <input type="text" value="@InstaTech.App_Code.Config.Current.Active_Directory_Tech_Group" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Feature - Chat:
+                </td>
+                <td>
+                    <div class="switch-outer" on="@InstaTech.App_Code.Config.Current.Feature_Enabled_Chat.ToString().ToLower()" prop="Feature_Chat" onclick="toggleProperty(event)">
+                        <div class="switch-inner"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Feature - Remote Control:
+                </td>
+                <td>
+                    <div class="switch-outer" on="@InstaTech.App_Code.Config.Current.Feature_Enabled_Remote_Control.ToString().ToLower()" prop="Feature_Remote_Control" onclick="toggleProperty(event)">
+                        <div class="switch-inner"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Feature - Account Center:
+                </td>
+                <td>
+                    <div class="switch-outer" on="@InstaTech.App_Code.Config.Current.Feature_Enabled_Account_Center.ToString().ToLower()" prop="Feature_Account_Center" onclick="toggleProperty(event)">
+                        <div class="switch-inner"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Feature - Computer Hub:
+                </td>
+                <td>
+                    <div class="switch-outer" on="@InstaTech.App_Code.Config.Current.Feature_Enabled_Computer_Hub.ToString().ToLower()" prop="Feature_Computer_Hub" onclick="toggleProperty(event)">
+                        <div class="switch-inner"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Feature - Configuration:
+                </td>
+                <td>
+                    <div class="switch-outer" on="@InstaTech.App_Code.Config.Current.Feature_Enabled_Configuration.ToString().ToLower()" prop="Feature_Configuration" onclick="toggleProperty(event)">
+                        <div class="switch-inner"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Email SMTP Server:
+                </td>
+                <td>
+                    <input type="text" value="@InstaTech.App_Code.Config.Current.Email_SMTP_Server" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Email SMTP Port:
+                </td>
+                <td>
+                    <input type="text" value="@InstaTech.App_Code.Config.Current.Email_SMTP_Port" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Email Username:
+                </td>
+                <td>
+                    <input type="text" value="@InstaTech.App_Code.Config.Current.Email_SMTP_Username" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Email Password:
+                </td>
+                <td>
+                    <input type="text" value="@InstaTech.App_Code.Config.Current.Email_SMTP_Password" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Default RC Download:
+                </td>
+                <td>
+                    <select>
+                        <option selected value="@InstaTech.App_Code.Config.Current.Default_RC_Download">@InstaTech.App_Code.Config.Current.Default_RC_Download</option>
+                        @{ 
+                            foreach (var option in InstaTech.App_Code.Config.Current.RC_Download_Paths.Where(dp => dp.Key != InstaTech.App_Code.Config.Current.Default_RC_Download))
+                            {
+                                <option value="@option.Key">@option.Key</option>
+                            }
+                        }
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Support Categories:</td>
+                <td>
+
+                </td>
+            </tr>
+            <tr>
+                <td>Computer Groups:</td>
+                <td>
+
+                </td>
+            </tr>
+        </table>
     </div>
 </div>
