@@ -1,6 +1,7 @@
 function initCustomerChat() {
     var request = {
-        "Type": "GetSupportCategories"
+        "Type": "GetSupportCategories",
+        "ElementID": "selectSupportCategory" 
     };
     InstaTech.Socket_Main.send(JSON.stringify(request));
     var request = {
@@ -12,6 +13,7 @@ function initCustomerChat() {
         showLabel: false
     });
     $("a.tooltip-anchor").tooltip();
+    $("#formCustomerChat").find("input[type=text]").first().select();
 }
 function submitCustomerChatLogin(e) {
     e.preventDefault();
@@ -32,7 +34,8 @@ function changeSupportCategory(e) {
         $("#selectSupportType").parent().parent().show();
         var request = {
             "Type": "GetSupportTypes",
-            "SupportCategory": category
+            "SupportCategory": category,
+            "ElementID": "selectSupportType"
         };
         InstaTech.Socket_Main.send(JSON.stringify(request));
     }

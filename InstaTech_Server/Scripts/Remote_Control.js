@@ -24,6 +24,7 @@ var modKeyDown;
 var followingCursor;
 var lastCursorOffsetX;
 var lastCursorOffsetY;
+var isTouchScreen = false;
 
 function submitTechMainLogin(e) {
     if (e) {
@@ -447,6 +448,16 @@ function disconnect() {
     socket.close();
 }
 function requestCapture() {
+    if (typeof RTCPeeerConnection == "undefined")
+    {
+        var request = {
+            "Type": "CaptureScreen",
+            "Source": "WebSocket",
+        };
+        console.log("RTC unsupported by browser.  Falling back to websocket communication.");
+        socket.send(JSON.stringify(request));
+        return;
+    }
     rtcConnection = new RTCPeerConnection({
         iceServers: [
             {
@@ -583,7 +594,7 @@ function sendUninstall(e) {
     showTooltip($("#divUninstallService"), "right", "green", "Sending uninstall request...");
 }
 function scrollToCursor() {
-    if ($(":hover").length > 0 && $("#divFollowCursor").attr("status") == "on")
+    if ($(":hover").length > 0 && $("#divFollowCursor").attr("status") == "on" && isTouchScreen == false)
     {
         followingCursor = true;
         var percentX = (lastCursorOffsetX / window.innerWidth) - .5;
@@ -698,6 +709,7 @@ $(document).ready(function () {
         if (socket.readyState != WebSocket.OPEN) {
             return;
         }
+        isTouchScreen = true;
         currentTouches++;
         var touchPointOffset = e.target.getBoundingClientRect();
         lastTouchPointX = (e.touches[0].clientX - touchPointOffset.left) / $(e.target).width();
@@ -728,6 +740,7 @@ $(document).ready(function () {
                             "Button": "Right"
                         };
                         socket.send(JSON.stringify(request));
+                        cancelNextTouch = true;
                     }
                 }, 500);
             }

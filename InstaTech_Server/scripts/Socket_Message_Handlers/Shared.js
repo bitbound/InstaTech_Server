@@ -90,3 +90,36 @@ function handleForgotPassword(e) {
         showDialog("Password Reset Successful", "A temporary password has been sent to your email.  Please check your inbox.");
     }
 }
+function handleGetSupportCategories(e) {
+    $('#' + e.ElementID).html("");
+    for (var i = 0; i < e.Categories.length; i++) {
+        var category = e.Categories[i];
+        var option = document.createElement("option");
+        option.value = category;
+        option.innerHTML = category;
+        $('#' + e.ElementID)[0].options.add(option);
+    }
+    $('#' + e.ElementID)[0].selectedIndex = -1;
+    if ($('#' + e.ElementID + "-button").length > 0) {
+        $('#' + e.ElementID).selectmenu("refresh");
+        $('#' + e.ElementID + "-button").find(".ui-selectmenu-text").html("");
+    }
+}
+function handleGetSupportTypes(e) {
+    $('#' + e.ElementID).html("");
+    for (var i = 0; i < e.Types.length; i++) {
+        var type = e.Types[i];
+        var option = document.createElement("option");
+        option.value = type;
+        option.innerHTML = type;
+        $('#' + e.ElementID)[0].options.add(option);
+    }
+    $('#' + e.ElementID)[0].selectedIndex = -1;
+    if ($('#' + e.ElementID + "-button").length > 0) {
+        $('#' + e.ElementID).selectmenu("refresh");
+        $('#' + e.ElementID + "-button").find(".ui-selectmenu-text").html("");
+    }
+}
+function handleGetSupportQueue(e) {
+    $('#' + e.ElementID).val(e.SupportQueue);
+}

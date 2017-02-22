@@ -1,7 +1,7 @@
 ﻿@{
-    if (File.Exists(Server.MapPath("/Downloads/InstaTech_CP.exe")))
+    if (File.Exists(Server.MapPath(InstaTech.App_Code.Config.Current.RC_Download_Paths["Windows 7"])))
     {
-        var version = System.Diagnostics.FileVersionInfo.GetVersionInfo(Server.MapPath("/Downloads/InstaTech_CP.exe")).FileVersion.ToString();
+        var version = System.Diagnostics.FileVersionInfo.GetVersionInfo(Server.MapPath(InstaTech.App_Code.Config.Current.RC_Download_Paths["Windows 7"])).FileVersion.ToString();
         Response.Write(version);
     }
     else

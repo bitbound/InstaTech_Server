@@ -326,7 +326,11 @@ function moveCase(e) {
         ],
         open: function () {
             $(this).find("select").selectmenu();
-            InstaTech.Socket_Main.send(JSON.stringify({ "Type": "GetSupportCategories" }));
+            $(this).find("select").each(function(index, elem) {
+                elem.selectedIndex = -1;
+            })
+            $(this).find("select").selectmenu("refresh");
+            InstaTech.Socket_Main.send(JSON.stringify({ "Type": "GetSupportCategories", "ElementID": "selectMoveCaseCategory" }));
             $("#selectMoveCaseCategory").on("selectmenuchange", function (e) {
                 var category = $("#selectMoveCaseCategory").val();
                 if (category == "Other") {
@@ -336,7 +340,8 @@ function moveCase(e) {
                     $("#selectMoveCaseType").selectmenu("enable");
                     var request = {
                         "Type": "GetSupportTypes",
-                        "SupportCategory": category
+                        "SupportCategory": category,
+                        "ElementID": "selectMoveCaseType"
                     };
                     InstaTech.Socket_Main.send(JSON.stringify(request));
                 }

@@ -70,7 +70,7 @@ namespace InstaTech.App_Code
             new Support_Category("Slowness", "Other", "Technical"),
             new Support_Category("Crashes", "Microsoft Office", "Technical"),
             new Support_Category("Crashes", "Other", "Technical"),
-            new Support_Category("Other", "", "Other")
+            new Support_Category("Other", "Other", "Other")
         };
 
         // Groups that you can use to sort computers and restrict access.  If a tech as a

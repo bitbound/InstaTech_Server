@@ -22,61 +22,7 @@
         InstaTech.QueueWaitTimer = window.setInterval(updateQueueVolumes, 2000);
     }
 }
-function handleGetSupportCategories(e) {
-    if (InstaTech.Context == "Technician") {
-        $('#selectSupportCategory').html("");
-        for (var i = 0; i < e.Categories.length; i++) {
-            var category = e.Categories[i];
-            var option = document.createElement("option");
-            option.value = category;
-            option.innerHTML = category;
-            $('#selectSupportCategory')[0].options.add(option);
-        }
-        $('#selectSupportCategory').selectmenu("refresh");
-        var request = {
-            "Type": "GetSupportTypes",
-            "SupportCategory": $('#selectSupportCategory').val()
-        };
-        InstaTech.Socket_Main.send(JSON.stringify(request));
-    }
-    else 
-    {
-        $('#selectSupportCategory').html("");
-        for (var i = 0; i < e.Categories.length; i++) {
-            var category = e.Categories[i];
-            var option = document.createElement("option");
-            option.value = category;
-            option.innerHTML = category;
-            $('#selectSupportCategory')[0].options.add(option);
-        }
-        $('#selectSupportCategory')[0].selectedIndex = -1;
-    }
-}
-function handleGetSupportTypes(e) {
-    if (InstaTech.Context == "Technician") {
-        $('#selectSupportType').html("");
-        for (var i = 0; i < e.Types.length; i++) {
-            var type = e.Types[i];
-            var option = document.createElement("option");
-            option.value = type;
-            option.innerHTML = type;
-            $('#selectSupportType')[0].options.add(option);
-        }
-        $('#selectSupportType').selectmenu("refresh");
-    }
-    else
-    {
-        $('#selectSupportType').html("");
-        for (var i = 0; i < e.Types.length; i++) {
-            var type = e.Types[i];
-            var option = document.createElement("option");
-            option.value = type;
-            option.innerHTML = type;
-            $('#selectSupportType')[0].options.add(option);
-        }
-        $('#selectSupportType')[0].selectedIndex = -1;
-    }
-}
+
 function handleCustomerChatLogin(e) {
     if (e.Status == "ok") {
         InstaTech.Context = "Customer";

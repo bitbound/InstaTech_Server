@@ -1,17 +1,17 @@
-﻿@{ }
+﻿@{}
 <div id="divConfiguration" hidden onload="initConfiguration()">
     <div class="portal-content-frame">
         <div class="frame-title">
             <small>Configuration</small>
             <button onclick="$('#divConfiguration').slideToggle()">X</button>
         </div>
-        <table style="text-align:left; padding-left: 20px; padding-right: 20px">
+        <table id="tableConfiguration">
             <tr>
                 <td>
                     Company Name:
                 </td>
                 <td>
-                    <input type="text" value="@InstaTech.App_Code.Config.Current.Company_Name" />
+                    <input id="inputCompanyName" type="text" prop="Company_Name" onchange="changeStringProperty(event)" />
                 </td>
             </tr>
             <tr>
@@ -19,7 +19,7 @@
                     License Key:
                 </td>
                 <td>
-                    <input type="text" readonly disabled value="@InstaTech.App_Code.Config.Current.License_Key" />
+                    <input id="inputLicenseKey" type="text" readonly disabled />
                 </td>
             </tr>
             <tr>
@@ -27,7 +27,7 @@
                     Default Admin:
                 </td>
                 <td>
-                    <input type="text" value="@InstaTech.App_Code.Config.Current.Default_Admin" />
+                    <input id="inputDefaultAdmin" type="text" prop="Default_Admin" onchange="changeStringProperty(event)" />
                 </td>
             </tr>
             <tr>
@@ -35,7 +35,7 @@
                     Demo Mode:
                 </td>
                 <td>
-                    <div class="switch-outer" on="@InstaTech.App_Code.Config.Current.Demo_Mode.ToString().ToLower()" prop="Demo_Mode" onclick="toggleProperty(event)">
+                    <div id="toggleDemoMode" class="switch-outer" prop="Demo_Mode" onclick="toggleProperty(event)">
                         <div class="switch-inner"></div>
                     </div>
                 </td>
@@ -45,7 +45,7 @@
                     File Encryption:
                 </td>
                 <td>
-                    <div class="switch-outer" on="@InstaTech.App_Code.Config.Current.File_Encryption.ToString().ToLower()" prop="File_Encryption" onclick="toggleProperty(event)">
+                    <div id="toggleFileEncryption" class="switch-outer" prop="File_Encryption" onclick="toggleProperty(event)">
                         <div class="switch-inner"></div>
                     </div>
                 </td>
@@ -55,7 +55,7 @@
                     AD Enabled:
                 </td>
                 <td>
-                    <div class="switch-outer" on="@InstaTech.App_Code.Config.Current.Active_Directory_Enabled.ToString().ToLower()" prop="Active_Directory_Enabled" onclick="toggleProperty(event)">
+                    <div id="toggleADEnabled" class="switch-outer" prop="Active_Directory_Enabled" onclick="toggleProperty(event)">
                         <div class="switch-inner"></div>
                     </div>
                 </td>
@@ -65,7 +65,7 @@
                     AD Tech Group:
                 </td>
                 <td>
-                    <input type="text" value="@InstaTech.App_Code.Config.Current.Active_Directory_Tech_Group" />
+                    <input id="inputADTechGroup" type="text" prop="AD_Tech_Group" onchange="changeStringProperty(event)" />
                 </td>
             </tr>
             <tr>
@@ -73,7 +73,7 @@
                     Feature - Chat:
                 </td>
                 <td>
-                    <div class="switch-outer" on="@InstaTech.App_Code.Config.Current.Feature_Enabled_Chat.ToString().ToLower()" prop="Feature_Chat" onclick="toggleProperty(event)">
+                    <div id="toggleFeatureChat" class="switch-outer" prop="Feature_Chat" onclick="toggleProperty(event)">
                         <div class="switch-inner"></div>
                     </div>
                 </td>
@@ -83,7 +83,7 @@
                     Feature - Remote Control:
                 </td>
                 <td>
-                    <div class="switch-outer" on="@InstaTech.App_Code.Config.Current.Feature_Enabled_Remote_Control.ToString().ToLower()" prop="Feature_Remote_Control" onclick="toggleProperty(event)">
+                    <div id="toggleFeatureRemoteControl" class="switch-outer" prop="Feature_Remote_Control" onclick="toggleProperty(event)">
                         <div class="switch-inner"></div>
                     </div>
                 </td>
@@ -93,7 +93,7 @@
                     Feature - Account Center:
                 </td>
                 <td>
-                    <div class="switch-outer" on="@InstaTech.App_Code.Config.Current.Feature_Enabled_Account_Center.ToString().ToLower()" prop="Feature_Account_Center" onclick="toggleProperty(event)">
+                    <div id="toggleFeatureAccountCenter" class="switch-outer" prop="Feature_Account_Center" onclick="toggleProperty(event)">
                         <div class="switch-inner"></div>
                     </div>
                 </td>
@@ -103,7 +103,7 @@
                     Feature - Computer Hub:
                 </td>
                 <td>
-                    <div class="switch-outer" on="@InstaTech.App_Code.Config.Current.Feature_Enabled_Computer_Hub.ToString().ToLower()" prop="Feature_Computer_Hub" onclick="toggleProperty(event)">
+                    <div id="toggleFeatureComputerHub" class="switch-outer" prop="Feature_Computer_Hub" onclick="toggleProperty(event)">
                         <div class="switch-inner"></div>
                     </div>
                 </td>
@@ -113,7 +113,7 @@
                     Feature - Configuration:
                 </td>
                 <td>
-                    <div class="switch-outer" on="@InstaTech.App_Code.Config.Current.Feature_Enabled_Configuration.ToString().ToLower()" prop="Feature_Configuration" onclick="toggleProperty(event)">
+                    <div id="toggleFeatureConfiguration" class="switch-outer" prop="Feature_Configuration" onclick="toggleProperty(event)">
                         <div class="switch-inner"></div>
                     </div>
                 </td>
@@ -123,7 +123,7 @@
                     Email SMTP Server:
                 </td>
                 <td>
-                    <input type="text" value="@InstaTech.App_Code.Config.Current.Email_SMTP_Server" />
+                    <input id="inputEmailServer" type="text" prop="Email_Server" onchange="changeStringProperty(event)" />
                 </td>
             </tr>
             <tr>
@@ -131,7 +131,7 @@
                     Email SMTP Port:
                 </td>
                 <td>
-                    <input type="text" value="@InstaTech.App_Code.Config.Current.Email_SMTP_Port" />
+                    <input id="inputEmailPort" type="text" prop="Email_Port" onchange="changeStringProperty(event)" />
                 </td>
             </tr>
             <tr>
@@ -139,7 +139,7 @@
                     Email Username:
                 </td>
                 <td>
-                    <input type="text" value="@InstaTech.App_Code.Config.Current.Email_SMTP_Username" />
+                    <input id="inputEmailUsername" type="text" prop="Email_Username" onchange="changeStringProperty(event)" />
                 </td>
             </tr>
             <tr>
@@ -147,7 +147,7 @@
                     Email Password:
                 </td>
                 <td>
-                    <input type="text" value="@InstaTech.App_Code.Config.Current.Email_SMTP_Password" />
+                    <input id="inputEmailPassword" type="text" prop="Email_Password" onchange="changeStringProperty(event)" />
                 </td>
             </tr>
             <tr>
@@ -155,10 +155,9 @@
                     Default RC Download:
                 </td>
                 <td>
-                    <select>
-                        <option selected value="@InstaTech.App_Code.Config.Current.Default_RC_Download">@InstaTech.App_Code.Config.Current.Default_RC_Download</option>
+                    <select id="selectDefaultRCDownload" prop="Default_RC_Download" onchange="changeStringProperty(event)">
                         @{ 
-                            foreach (var option in InstaTech.App_Code.Config.Current.RC_Download_Paths.Where(dp => dp.Key != InstaTech.App_Code.Config.Current.Default_RC_Download))
+                            foreach (var option in InstaTech.App_Code.Config.Current.RC_Download_Paths)
                             {
                                 <option value="@option.Key">@option.Key</option>
                             }
@@ -166,18 +165,63 @@
                     </select>
                 </td>
             </tr>
+            <tr style="height: 20px">
+                <!-- Spacer row. -->
+            </tr>
+            <tr>
+                <td>
+                </td>
+                <td>
+                    <a class="tooltip-anchor" title='Support Categories are major categories of support that customers will be able to choose from when starting support chat.  Support Types are subcategories that fall within a major category.  The Support Queue determines where the Category/Type combination will appear in the technician view when taking cases.'>?</a>
+                </td>
+            </tr>
             <tr>
                 <td>Support Categories:</td>
                 <td>
-
+                    <select id="selectSupportCategories" onchange="changeConfigSupportCategory(event)"></select>
+                    <img src="~/Assets/Images/Add_grey_16x.svg" title="Add Category" onclick="addSupportCategory(event)" style="height: 15px; width: 15px; cursor: pointer" />
+                    <img src="~/Assets/Images/Cancel_48x.png" title="Delete Category" onclick="deleteSupportCategory(event)" style="height: 15px; width: 15px; cursor:pointer" />
                 </td>
+            </tr>
+            <tr>
+                <td>Support Types:</td>
+                <td>
+                    <select id="selectSupportTypes" onchange="changeConfigSupportType(event)"></select>
+                    <img src="~/Assets/Images/Add_grey_16x.svg" title="Add Type" onclick="addSupportType(event)" style="height: 15px; width: 15px; cursor: pointer" />
+                    <img src="~/Assets/Images/Cancel_48x.png" title="Delete Type" onclick="deleteSupportType(event)" style="height: 15px; width: 15px; cursor:pointer" />
+                </td>
+            </tr>
+            <tr>
+                <td>Support Queue:</td>
+                <td>
+                    <select id="selectSupportQueues" onchange="changeConfigSupportQueue(event)" disabled></select>
+                    <img src="~/Assets/Images/Add_grey_16x.svg" title="Add Queue" onclick="addSupportQueue(event)" style="height: 15px; width: 15px; cursor: pointer" />
+                    <img src="~/Assets/Images/Cancel_48x.png" title="Delete Queue" onclick="deleteSupportQueue(event)" style="height: 15px; width: 15px; cursor:pointer" />
+                </td>
+            </tr>
+            <tr style="height: 20px">
+                <!-- Spacer row. -->
             </tr>
             <tr>
                 <td>Computer Groups:</td>
                 <td>
-
+                    <select id="selectComputerGroups">
+                    </select>
+                    <img src="~/Assets/Images/Add_grey_16x.svg" title="Add Group" onclick="addComputerGroup(event)" style="height: 15px; width: 15px; cursor: pointer"/>
+                    <img src="~/Assets/Images/Cancel_48x.png" title="Delete Group" onclick="deleteComputerGroup(event)" style="height: 15px; width: 15px; cursor:pointer" />
                 </td>
             </tr>
         </table>
     </div>
 </div>
+<style>
+    #tableConfiguration {
+        text-align: left;
+        padding-left: 20px;
+        padding-right: 20px
+    }
+    #tableConfiguration select {
+        min-width: 150px;
+        width: auto;
+    }
+</style>

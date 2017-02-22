@@ -4,7 +4,10 @@ function showDialog(title, content) {
     $(dialog).dialog({
         width: document.body.clientWidth * .5,
         title: title,
-        classes: { "ui-dialog-title": "center-aligned" },
+        classes: {
+            "ui-dialog-title": "center-aligned",
+            "ui-dialog": "ui-corner-all ui-widget ui-widget-content ui-front ui-dialog-buttons ui-draggable ui-resizable ui-widget-shadow",
+        },
         buttons: [
             {
                 text: "OK",
@@ -14,6 +17,22 @@ function showDialog(title, content) {
             }
         ],
         close: function () {
+            $(this).dialog('destroy').remove();
+        }
+    });
+}
+function showDialogEx(title, content, buttons) {
+    var dialog = document.createElement("div");
+    dialog.innerHTML = content;
+    $(dialog).dialog({
+        width: document.body.clientWidth * .5,
+        title: title,
+        classes: {
+            "ui-dialog-title": "center-aligned",
+            "ui-dialog": "ui-corner-all ui-widget ui-widget-content ui-front ui-dialog-buttons ui-draggable ui-resizable ui-widget-shadow",
+        },
+        buttons: buttons,
+        close: function() {
             $(this).dialog('destroy').remove();
         }
     });

@@ -1,7 +1,7 @@
 ﻿@{
-    if (File.Exists(Server.MapPath("/Demo/Downloads/InstaTech_CP.AppImage")))
+    if (File.Exists(Server.MapPath(InstaTech.App_Code.Config.Current.RC_Download_Paths["Linux"])))
     {
-        var sr = new StreamReader(Server.MapPath("/Demo/Downloads/InstaTech_CP.AppImage"));
+        var sr = new StreamReader(Server.MapPath(InstaTech.App_Code.Config.Current.RC_Download_Paths["Linux"]));
         while (sr.EndOfStream == false)
         {
             var thisLine = sr.ReadLine();

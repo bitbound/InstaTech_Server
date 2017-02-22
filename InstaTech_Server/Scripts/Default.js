@@ -176,7 +176,6 @@ function slideToggleContent(strElementIDSelector) {
     else {
         opens.slideDown(function () {
             window.scroll(0, opens.offset().top);
-            opens.find("input[type=text]").first().select();
         });
     }
     ;

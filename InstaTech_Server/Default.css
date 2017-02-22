@@ -20,10 +20,12 @@ button:active {
     border: 2px solid gray;
     background: radial-gradient(rgb(100,100,100) 0%, rgb(50,50,50) 100%);
 }
+input {
+    height: 1.5em;
+}
 input, select {
     border: 1px solid steelblue;
     border-radius: 3px;
-    height: 1.5em;
 }
 select[multiple] {
     height: auto;
@@ -194,7 +196,7 @@ form button[type="submit"] {
 }
 
 .switch-outer[on="false"] {
-    background-color: lightgray;
+    background-color: gray;
     transition: .5s;
 }
 
@@ -327,7 +329,7 @@ button.switch-portal:active {
     border: .2vw solid white;
     margin: 1vw 2vw 1vw 2vw;
     padding: 10px 5px;
-    box-shadow: rgba(255,255,255,.1) 10px 10px 5px;
+    box-shadow: 10px 10px 5px rgba(0,0,0,0.2);
     width: 60vw;
     text-align: center;
     box-shadow: 10px 10px 5px rgba(0,0,0,0.2);

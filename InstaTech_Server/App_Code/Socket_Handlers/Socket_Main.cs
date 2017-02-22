@@ -288,6 +288,24 @@ namespace InstaTech.App_Code.Socket_Handlers
                 return true;
             }
         }
+        private bool AuthenticateAdmin (dynamic JsonData)
+        {
+            if (JsonData.AuthenticationToken != AuthenticationToken || TechAccount.AccessLevel != Tech_Account.Access_Levels.Admin)
+            {
+                var response = new
+                {
+                    Type = "SessionEnded",
+                    Details = "An unauthorized request was made."
+                };
+                Send(Json.Encode(response));
+                Close();
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
         public void SendWaitUpdate()
         {
             var request = new
@@ -357,11 +375,11 @@ namespace InstaTech.App_Code.Socket_Handlers
                 Send(Json.Encode(JsonData));
                 return;
             }
-            else if (Config.Current.Active_Directory_Enabled)
-            {
-                // TODO: AD authentication.
-                return;
-            }
+            //else if (Config.Current.Active_Directory_Enabled)
+            //{
+            //    // TODO: AD authentication.
+            //    return;
+            //}
             else
             {
                 if (!Directory.Exists(Utilities.App_Data + "Tech_Accounts"))
@@ -389,8 +407,14 @@ namespace InstaTech.App_Code.Socket_Handlers
                         return;
                     }
                 }
-                if (String.IsNullOrWhiteSpace(JsonData.Password))
+                if (String.IsNullOrEmpty(JsonData.Password))
                 {
+                    BadLoginAttempts++;
+                    account.BadLoginAttempts++;
+                    account.LastBadLogin = DateTime.Now;
+                    account.Save();
+                    JsonData.Status = "invalid";
+                    Send(Json.Encode(JsonData));
                     return;
                 }
                 if (JsonData.Password == account.TempPassword)
@@ -417,7 +441,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                     {
                         ConnectionType = ConnectionTypes.Technician;
                         AuthenticationToken = Guid.NewGuid().ToString().Replace("-", "");
-                        account.TempPassword = null;
+                        account.TempPassword = "";
                         account.HashedPassword = Crypto.HashPassword(JsonData.ConfirmNewPassword);
                         account.BadLoginAttempts = 0;
                         if (JsonData.RememberMe == true)
@@ -533,16 +557,6 @@ namespace InstaTech.App_Code.Socket_Handlers
                 TechBot.Notify(this);
             }
         }
-        public void HandleGetSupportCategories(dynamic JsonData)
-        {
-            var categories = new List<string>();
-            foreach (var sc in Config.Current.Support_Categories)
-            {
-                categories.Add(sc.Category);
-            }
-            JsonData.Categories = categories.Distinct();
-            Send(Json.Encode(JsonData));
-        }
         public void HandleGetCustomerFormInfo(dynamic JsonData)
         {
             // TODO: Use service data when available.
@@ -569,6 +583,16 @@ namespace InstaTech.App_Code.Socket_Handlers
             //catch { }
             //Send(Json.Encode(JsonData));
         }
+        public void HandleGetSupportCategories(dynamic JsonData)
+        {
+            var categories = new List<string>();
+            foreach (var sc in Config.Current.Support_Categories)
+            {
+                categories.Add(sc.Category);
+            }
+            JsonData.Categories = categories.Distinct();
+            Send(Json.Encode(JsonData));
+        }
         public void HandleGetSupportTypes(dynamic JsonData)
         {
             var categories = Config.Current.Support_Categories.FindAll(sc => sc.Category == JsonData.SupportCategory);
@@ -579,6 +603,15 @@ namespace InstaTech.App_Code.Socket_Handlers
             }
             JsonData.Types = types;
             Send(Json.Encode(JsonData));
+        }
+        public void HandleGetSupportQueue(dynamic JsonData)
+        {
+            var queue = Config.Current.Support_Categories.Find(sc => sc.Category == JsonData.SupportCategory && sc.Type == JsonData.SupportType);
+            if (queue != null)
+            {
+                JsonData.SupportQueue = queue.Queue;
+                Send(Json.Encode(JsonData));
+            }
         }
         public void HandleEnterTechChat(dynamic JsonData)
         {
@@ -612,6 +645,7 @@ namespace InstaTech.App_Code.Socket_Handlers
             {
                 queues.Add(sc.Queue);
             }
+            queues.Sort();
             JsonData.Queues = queues.Distinct();
             Send(Json.Encode(JsonData));
         }
@@ -787,7 +821,7 @@ namespace InstaTech.App_Code.Socket_Handlers
         {
             if (JsonData.Status == "Transfer")
             {
-                var transferCase = Open_Cases.Find(ca => ca.CaseID == int.Parse(JsonData.CaseID));
+                var transferCase = Open_Cases.Find(ca => ca.CaseID == (string)JsonData.CaseID);
                 if (transferCase != null)
                 {
                     if (transferCase.TechUserID != null)
@@ -883,7 +917,7 @@ namespace InstaTech.App_Code.Socket_Handlers
         #region Socket Message Handlers - Account Center
         public void HandleGetTechAccounts(dynamic JsonData)
         {
-            if (!AuthenticateTech(JsonData))
+            if (!AuthenticateAdmin(JsonData))
             {
                 return;
             }
@@ -899,6 +933,10 @@ namespace InstaTech.App_Code.Socket_Handlers
         }
         public void HandleSaveTechAccount(dynamic JsonData)
         {
+            if (!AuthenticateAdmin(JsonData))
+            {
+                return;
+            }
             var account = Utilities.Tech_Accounts.Find(ta => ta.UserID == JsonData.Account.UserID);
             if (account == null)
             {
@@ -922,6 +960,10 @@ namespace InstaTech.App_Code.Socket_Handlers
         }
         public void HandleNewTechAccount(dynamic JsonData)
         {
+            if (!AuthenticateAdmin(JsonData))
+            {
+                return;
+            }
             if (Utilities.Tech_Accounts.Exists(ta => ta.UserID == JsonData.Account.UserID))
             {
                 JsonData.Status = "exists";
@@ -956,6 +998,10 @@ namespace InstaTech.App_Code.Socket_Handlers
         }
         public void HandleDeleteTechAccount(dynamic JsonData)
         {
+            if (!AuthenticateAdmin(JsonData))
+            {
+                return;
+            }
             var account = Utilities.Tech_Accounts.Find(ta => ta.UserID == JsonData.UserID);
             if (account == null)
             {
@@ -978,12 +1024,269 @@ namespace InstaTech.App_Code.Socket_Handlers
         }
         public void HandleGetAllComputerGroups(dynamic JsonData)
         {
-            if (!AuthenticateTech(JsonData))
+            if (!AuthenticateAdmin(JsonData))
             {
                 return;
             }
             JsonData.Status = "ok";
             JsonData.ComputerGroups = Config.Current.Computer_Groups;
+            Send(Json.Encode(JsonData));
+        }
+        #endregion
+
+        #region Socket Message Handlers - Configuration
+        public void HandleGetConfiguration(dynamic JsonData)
+        {
+            if (!AuthenticateAdmin(JsonData))
+            {
+                return;
+            }
+            JsonData.Status = "ok";
+            JsonData.Config = Config.Current;
+            Send(Json.Encode(JsonData));
+        }
+        public void HandleSetConfigProperty(dynamic JsonData)
+        {
+            if (!AuthenticateAdmin(JsonData))
+            {
+                return;
+            }
+            switch ((string)JsonData.Property)
+            {
+                case "Company_Name":
+                    Config.Current.Company_Name = JsonData.Value;
+                    break;
+                case "Default_Admin":
+                    Config.Current.Default_Admin = JsonData.Value;
+                    break;
+                case "Demo_Mode":
+                    Config.Current.Demo_Mode = JsonData.Value;
+                    break;
+                case "File_Encryption":
+                    Config.Current.File_Encryption = JsonData.Value;
+                    break;
+                case "Active_Directory_Enabled":
+                    Config.Current.Active_Directory_Enabled = JsonData.Value;
+                    break;
+                case "AD_Tech_Group":
+                    Config.Current.Active_Directory_Tech_Group = JsonData.Value;
+                    break;
+                case "Feature_Chat":
+                    Config.Current.Feature_Enabled_Chat = JsonData.Value;
+                    break;
+                case "Feature_Remote_Control":
+                    Config.Current.Feature_Enabled_Remote_Control = JsonData.Value;
+                    break;
+                case "Feature_Account_Center":
+                    Config.Current.Feature_Enabled_Account_Center = JsonData.Value;
+                    break;
+                case "Feature_Computer_Hub":
+                    Config.Current.Feature_Enabled_Computer_Hub = JsonData.Value;
+                    break;
+                case "Feature_Configuration":
+                    Config.Current.Feature_Enabled_Configuration = JsonData.Value;
+                    break;
+                case "Email_Server":
+                    Config.Current.Email_SMTP_Server = JsonData.Value;
+                    break;
+                case "Email_Port":
+                    Config.Current.Email_SMTP_Port = JsonData.Value;
+                    break;
+                case "Email_Username":
+                    Config.Current.Email_SMTP_Username = JsonData.Value;
+                    break;
+                case "Email_Password":
+                    Config.Current.Email_SMTP_Password = JsonData.Value;
+                    break;
+                case "Default_RC_Download":
+                    Config.Current.Default_RC_Download = JsonData.Value;
+                    break;
+                default:
+                    break;
+            }
+            Config.Save();
+        }
+
+        public void HandleSetSupportQueue(dynamic JsonData)
+        {
+            if (!AuthenticateAdmin(JsonData))
+            {
+                return;
+            }
+            try
+            {
+                var item = Config.Current.Support_Categories.Find(sc => sc.Category == JsonData.SupportCategory && sc.Type == JsonData.SupportType);
+                item.Queue = JsonData.SupportQueue;
+                Config.Save();
+                JsonData.Status = "ok";
+                Send(Json.Encode(JsonData));
+            }
+            catch
+            {
+                JsonData.Status = "failed";
+                Send(Json.Encode(JsonData));
+            }
+        }
+        public void HandleAddSupportCategory(dynamic JsonData)
+        {
+            if (!AuthenticateAdmin(JsonData))
+            {
+                return;
+            }
+            if (String.IsNullOrWhiteSpace(JsonData.SupportCategory))
+            {
+                JsonData.Status = "length";
+                Send(Json.Encode(JsonData));
+                return;
+            }
+            if (JsonData.SupportCategory.Length < 3)
+            {
+                JsonData.Status = "length";
+                Send(Json.Encode(JsonData));
+                return;
+            }
+            if (Config.Current.Support_Categories.Exists(sc=>sc.Category == JsonData.SupportCategory))
+            {
+                JsonData.Status = "exists";
+                Send(Json.Encode(JsonData));
+                return;
+            }
+            var comparer = StringComparer.Create(System.Globalization.CultureInfo.CurrentCulture, true);
+            Config.Current.Support_Categories.Add(new Support_Category(JsonData.SupportCategory, "Other", "Other"));
+            Config.Current.Support_Categories.Sort(new Comparison<Support_Category>((Support_Category a, Support_Category b) => {
+                if (a.Category == b.Category)
+                {
+                    return comparer.Compare(a.Type, b.Type);
+                }
+                else
+                {
+                    return comparer.Compare(a.Category, b.Category);
+                }
+            }));
+            Config.Save();
+            JsonData.Status = "ok";
+            Send(Json.Encode(JsonData));
+        }
+        public void HandleDeleteSupportCategory(dynamic JsonData)
+        {
+            if (!AuthenticateAdmin(JsonData))
+            {
+                return;
+            }
+            if (JsonData.SupportCategory == "Other")
+            {
+                return;
+            }
+            Config.Current.Support_Categories.RemoveAll(sc => sc.Category == JsonData.SupportCategory);
+            Config.Save();
+            JsonData.Status = "ok";
+            Send(Json.Encode(JsonData));
+        }
+        public void HandleAddSupportType(dynamic JsonData)
+        {
+            if (!AuthenticateAdmin(JsonData))
+            {
+                return;
+            }
+            if (String.IsNullOrWhiteSpace(JsonData.SupportCategory) || String.IsNullOrWhiteSpace(JsonData.SupportType))
+            {
+                JsonData.Status = "length";
+                Send(Json.Encode(JsonData));
+                return;
+            }
+            if (JsonData.SupportType.Length < 3)
+            {
+                JsonData.Status = "length";
+                Send(Json.Encode(JsonData));
+                return;
+            }
+            if (Config.Current.Support_Categories.Exists(sc => sc.Category == JsonData.SupportCategory && sc.Type == JsonData.SupportType))
+            {
+                JsonData.Status = "exists";
+                Send(Json.Encode(JsonData));
+                return;
+            }
+            var comparer = StringComparer.Create(System.Globalization.CultureInfo.CurrentCulture, true);
+            Config.Current.Support_Categories.Add(new Support_Category(JsonData.SupportCategory, JsonData.SupportType, "Other"));
+            Config.Current.Support_Categories.Sort(new Comparison<Support_Category>((Support_Category a, Support_Category b) => {
+                if (a.Category == b.Category)
+                {
+                    return comparer.Compare(a.Type, b.Type);
+                }
+                else
+                {
+                    return comparer.Compare(a.Category, b.Category);
+                }
+            }));
+            Config.Save();
+            JsonData.Status = "ok";
+            Send(Json.Encode(JsonData));
+        }
+        public void HandleDeleteSupportType(dynamic JsonData)
+        {
+            if (!AuthenticateAdmin(JsonData))
+            {
+                return;
+            }
+            if (JsonData.SupportCategory == "Other")
+            {
+                return;
+            }
+            if (Config.Current.Support_Categories.Where(sc=>sc.Category == JsonData.SupportCategory).Count() == 1)
+            {
+                return;
+            }
+            Config.Current.Support_Categories.RemoveAll(sc => sc.Category == JsonData.SupportCategory && sc.Type == JsonData.SupportType);
+            Config.Save();
+            JsonData.Status = "ok";
+            Send(Json.Encode(JsonData));
+        }
+        public void HandleAddSupportQueue(dynamic JsonData)
+        {
+            if (!AuthenticateAdmin(JsonData))
+            {
+                return;
+            }
+            try
+            {
+                var item = Config.Current.Support_Categories.Find(sc => sc.Category == JsonData.SupportCategory && sc.Type == JsonData.SupportType);
+                item.Queue = JsonData.SupportQueue;
+                Config.Save();
+                JsonData.Status = "ok";
+                Send(Json.Encode(JsonData));
+            }
+            catch
+            {
+                JsonData.Status = "failed";
+                Send(Json.Encode(JsonData));
+            }
+        }
+        public void HandleAddComputerGroup(dynamic JsonData)
+        {
+            if (String.IsNullOrEmpty(JsonData.Group))
+            {
+                return;
+            }
+            if (JsonData.Group.Length < 3)
+            {
+                return;
+            }
+            if (Config.Current.Computer_Groups.Contains(JsonData.Group))
+            {
+                JsonData.Status = "exists";
+                Send(Json.Encode(JsonData));
+                return;
+            }
+            Config.Current.Computer_Groups.Add(JsonData.Group);
+            Config.Save();
+            JsonData.Status = "ok";
+            Send(Json.Encode(JsonData));
+        }
+        public void HandleDeleteComputerGroup(dynamic JsonData)
+        {
+            Config.Current.Computer_Groups.RemoveAll(cg => cg == JsonData.Group);
+            Config.Save();
+            JsonData.Status = "ok";
             Send(Json.Encode(JsonData));
         }
         #endregion
