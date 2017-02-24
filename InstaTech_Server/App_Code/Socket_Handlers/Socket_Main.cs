@@ -1071,6 +1071,9 @@ namespace InstaTech.App_Code.Socket_Handlers
                 case "AD_Tech_Group":
                     Config.Current.Active_Directory_Tech_Group = JsonData.Value;
                     break;
+                case "AD_admin_Group":
+                    Config.Current.Active_Directory_Admin_Group = JsonData.Value;
+                    break;
                 case "Feature_Chat":
                     Config.Current.Feature_Enabled_Chat = JsonData.Value;
                     break;

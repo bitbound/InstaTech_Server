@@ -32,6 +32,8 @@ namespace InstaTech.App_Code
 
         // If Active Directory features are enabled, techs must be in this AD group in order to log in.
         public string Active_Directory_Tech_Group { get; set; } = "";
+        // If Active Directory features are enabled, admins must be in this AD group in order to log in.
+        public string Active_Directory_Admin_Group { get; set; } = "";
 
         // Features to enable.  Only the enabled features will appear as buttons on the portal page.
         public bool Feature_Enabled_Chat { get; set; } = true;

@@ -336,6 +336,16 @@ function initWebSocket() {
                         showTooltip($("#inputSessionID"), "bottom", "red", "That client already has a partner connected.");
                     }
                     break;
+                case "ConnectUpgrade":
+                    if (jsonMessage.Status == "ok") {
+                        var request = {
+                            "Type": "CaptureScreen",
+                            "Source": "WebSocket",
+                        };
+                        socket.send(JSON.stringify(request));
+                        console.log("Upgrade complete.");
+                    }
+                    break;
                 case "ProcessStartResult":
                     $("#divStatus").text("");
                     if (jsonMessage.Status == "ok")
@@ -445,6 +455,7 @@ function initWebSocket() {
     };
 }
 function disconnect() {
+    toggleMenu();
     socket.close();
 }
 function requestCapture() {

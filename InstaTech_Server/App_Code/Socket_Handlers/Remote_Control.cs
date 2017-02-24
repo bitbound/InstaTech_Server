@@ -26,7 +26,9 @@ namespace InstaTech.App_Code.Socket_Handlers
             ClientApp,
             ViewerApp,
             ClientService,
-            ClientConsole
+            ClientServiceOnce,
+            ClientConsole,
+            ClientConsoleOnce
         }
         #endregion
 
@@ -326,6 +328,10 @@ namespace InstaTech.App_Code.Socket_Handlers
             ConnectionType = Enum.Parse(typeof(ConnectionTypes), JsonData.ConnectionType.ToString());
             if (ConnectionType == ConnectionTypes.ClientApp || ConnectionType == ConnectionTypes.ViewerApp)
             {
+                if (!String.IsNullOrWhiteSpace(JsonData.ComputerName))
+                {
+                    ComputerName = JsonData.ComputerName.ToString().Trim().ToLower();
+                }
                 var random = new Random();
                 var sessionID = random.Next(0, 999).ToString().PadLeft(3, '0') + " " + random.Next(0, 999).ToString().PadLeft(3, '0');
                 SessionID = sessionID.Replace(" ", "");
@@ -338,7 +344,6 @@ namespace InstaTech.App_Code.Socket_Handlers
             }
             else if (ConnectionType == ConnectionTypes.ClientConsole)
             {
-                var client = SocketCollection.FirstOrDefault(sock => (sock as Remote_Control).ComputerName == JsonData.ComputerName);
                 ComputerName = JsonData.ComputerName.ToString().Trim().ToLower();
             }
             else if (ConnectionType == ConnectionTypes.ClientService)
@@ -363,6 +368,14 @@ namespace InstaTech.App_Code.Socket_Handlers
                     };
                     File.AppendAllText(filePath, Json.Encode(entry) + Environment.NewLine);
                 }
+                ComputerName = JsonData.ComputerName.ToString().Trim().ToLower();
+            }
+            else if (ConnectionType == ConnectionTypes.ClientServiceOnce)
+            {
+                ComputerName = JsonData.ComputerName.ToString().Trim().ToLower();
+            }
+            else if (ConnectionType == ConnectionTypes.ClientConsoleOnce)
+            {
                 ComputerName = JsonData.ComputerName.ToString().Trim().ToLower();
             }
             LogConnection();
@@ -419,7 +432,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                     return;
                 }
             }
-            var serviceClient = (Remote_Control)SocketCollection.FirstOrDefault(sock => ((Remote_Control)sock).ComputerName == JsonData.ComputerName.ToString().Trim() && ((Remote_Control)sock).ConnectionType == ConnectionTypes.ClientService);
+            var serviceClient = (Remote_Control)SocketCollection.FirstOrDefault(sock => ((Remote_Control)sock).ComputerName == JsonData.ComputerName.ToString().Trim().ToLower() && ((Remote_Control)sock).ConnectionType == ConnectionTypes.ClientService);
             if (serviceClient != null)
             {
                 if (serviceClient.Partner != null)
@@ -435,6 +448,66 @@ namespace InstaTech.App_Code.Socket_Handlers
             else
             {
                 JsonData.Status = "UnknownComputer";
+                Send(Json.Encode(JsonData));
+            }
+        }
+        public void HandleConnectUpgrade(dynamic JsonData)
+        {
+            if (Partner == null)
+            {
+                JsonData.Status = "nopartner";
+                Send(Json.Encode(JsonData));
+                return;
+            }
+            var startTime = DateTime.Now;
+            Remote_Control serviceClient = null;
+            while (serviceClient == null)
+            {
+                if (DateTime.Now - startTime > TimeSpan.FromSeconds(10))
+                {
+                    break;
+                }
+                System.Threading.Thread.Sleep(200);
+                serviceClient = (Remote_Control)SocketCollection.FirstOrDefault(sock => ((Remote_Control)sock).ComputerName == JsonData.ComputerName.ToString().Trim().ToLower() && ((Remote_Control)sock).ConnectionType == ConnectionTypes.ClientServiceOnce);
+            }
+            if (serviceClient != null)
+            {
+                var request = new
+                {
+                    Type = "ConnectUnattendedOnce"
+                };
+                serviceClient.Send(Json.Encode(request));
+                startTime = DateTime.Now;
+                Remote_Control consoleClient = null;
+                while (consoleClient == null)
+                {
+                    if (DateTime.Now - startTime > TimeSpan.FromSeconds(10))
+                    {
+                        break;
+                    }
+                    System.Threading.Thread.Sleep(200);
+                    consoleClient = (Remote_Control)SocketCollection.FirstOrDefault(sock => ((Remote_Control)sock).ComputerName == JsonData.ComputerName.ToString().Trim().ToLower() && ((Remote_Control)sock).ConnectionType == ConnectionTypes.ClientConsoleOnce);
+                }
+                if (consoleClient != null)
+                {
+                    var viewer = Partner;
+                    consoleClient.Partner = viewer;
+                    viewer.Partner = consoleClient;
+                    Partner = null;
+                    JsonData.Status = "ok";
+                    Send(Json.Encode(JsonData));
+                    viewer.Send(Json.Encode(JsonData));
+                    return;
+                }
+                else
+                {
+                    JsonData.Status = "timeout";
+                    Send(Json.Encode(JsonData));
+                }
+            }
+            else
+            {
+                JsonData.Status = "timeout";
                 Send(Json.Encode(JsonData));
             }
         }
