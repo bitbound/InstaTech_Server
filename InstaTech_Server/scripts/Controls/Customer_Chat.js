@@ -117,6 +117,7 @@ function dropOnCustomerChat(e) {
 ;
 function transferFileCustomer(e) {
     for (var i = 0; i < e.length; i++) {
+        $("#divCustomerStatus").html("Uploading file...");
         var file = e[i];
         var strPath = "/Services/File_Transfer_Chat.cshtml";
         var fd = new FormData();
@@ -125,17 +126,16 @@ function transferFileCustomer(e) {
         xhr.open('POST', strPath, true);
         xhr.onload = function () {
             if (xhr.status === 200) {
+                $("#divCustomerStatus").html("Upload completed.");
                 var fileName = xhr.responseText;
-                var url = location.href + "Services/File_Transfer_Chat.cshtml?file=" + fileName;
+                var url = location.origin + "/Services/File_Transfer_Chat.cshtml?file=" + fileName;
                 $("#textCustomerInput").val('File Sharing Link: <a target="_blank" href="' + url + '">' + fileName + '</a>');
                 submitCustomerMessage();
             }
             else {
+                $("#divCustomerStatus").html("Upload failed.");
                 showDialog("Upload Failed", "File upload failed.");
             }
-        };
-        xhr.onprogress = function (e) {
-            $("#divCustomerStatus").html("File Upload: " + Math.round(e.loaded / e.total * 100) + "%");
         };
         xhr.send(fd);
     }

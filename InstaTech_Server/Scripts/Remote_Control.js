@@ -25,6 +25,7 @@ var followingCursor;
 var lastCursorOffsetX;
 var lastCursorOffsetY;
 var isTouchScreen = false;
+var args = {};
 
 function submitTechMainLogin(e) {
     if (e) {
@@ -185,7 +186,17 @@ function initWebSocket() {
     }
     socket.binaryType = "arraybuffer";
     socket.onopen = function (e) {
-        if (localStorage["RememberMe"]) {
+        if (window.location.search.search("AuthenticationToken") > -1) {
+            InstaTech.AuthenticationToken = args.AuthenticationToken;
+            var request = {
+                "Type": "QuickConnect",
+                "UserID": args.UserID,
+                "AuthenticationToken": args.AuthenticationToken,
+                "ComputerName": args.Computer
+            };
+            socket.send(JSON.stringify(request));
+        }
+        else if (localStorage["RememberMe"]) {
             InstaTech.UserID = localStorage["UserID"];
             InstaTech.AuthenticationToken = localStorage["AuthenticationToken"];
             $("#inputTechMainUserID").val(InstaTech.UserID);
@@ -200,7 +211,14 @@ function initWebSocket() {
         $("#videoRemoteControl").hide();
         $("#divConnect").show();
         $("#divStatus").text("Session closed.");
-        initWebSocket();
+        // Prevent reconnection of quick connect from Computer Hub.
+        if (window.location.search.search("AuthenticationToken") > -1) {
+            window.close();
+        }
+        else
+        {
+            initWebSocket();
+        }
     };
     socket.onerror = function (e) {
         $("#divMain").hide();
@@ -330,10 +348,26 @@ function initWebSocket() {
                         $("#divConnect").show();
                         showTooltip($("#inputSessionID"), "bottom", "red", "Computer name not found.");
                     }
-                    if (jsonMessage.Status == "AlreadyHasPartner") {
+                    else if (jsonMessage.Status == "AlreadyHasPartner") {
                         $("#divMain").hide();
                         $("#divConnect").show();
                         showTooltip($("#inputSessionID"), "bottom", "red", "That client already has a partner connected.");
+                    }
+                    else if (jsonMessage.Status == "unauthorized") {
+                        $("#divMain").hide();
+                        $("#divConnect").show();
+                        showDialog("Unauthorized", "You are not authorized to access this computer.");
+                    }
+                    break;
+                case "QuickConnect":
+                    if (jsonMessage.Status == "denied") {
+                        showDialog("Access Denied", "Your authentication token was denied.");
+                    }
+                    else if (jsonMessage.Status == "unknown") {
+                        showDialog("Computer Not Found", "The computer wasn't found.");
+                    }
+                    else if (jsonMessage.Status == "unauthorized") {
+                        showDialog("Unauthorized", "You are not authorized to access this computer.");
                     }
                     break;
                 case "ConnectUpgrade":
@@ -562,10 +596,10 @@ function sendClipboard(e) {
     }
     var request = {
         "Type": "SendClipboard",
-        "Data": btoa(e.target.value),
+        "Data": btoa(e.currentTarget.value),
     };
     socket.send(JSON.stringify(request));
-    showTooltip(e.target, "bottom", "black", "Clipboard data sent.");
+    showTooltip(e.currentTarget, "bottom", "black", "Clipboard data sent.");
     $("#textClipboard").val("");
 }
 function sendCtrlAltDel() {
@@ -578,24 +612,31 @@ function transferFiles(fileList) {
     if (socket.readyState != socket.OPEN) {
         return;
     }
-    $.each(fileList, function (index, file) {
-        var strPath = ("/Services/File_Transfer.cshtml");
-        fr.onload = function () {
-            var upload = JSON.stringify({
-                "Type": "Upload",
-                "File": fr.result
-            });
-            $.post(strPath, upload, function (data) {
+    for (var i = 0; i < fileList.length; i++) {
+        var file = fileList[i];
+        var strPath = "/Services/File_Transfer.cshtml";
+        var fd = new FormData();
+        fd.append('fileUpload', file);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', strPath, true);
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                var fileName = xhr.responseText;
+                var url = location.origin + "/Services/File_Transfer.cshtml?file=" + fileName;
                 var request = {
                     "Type": "FileTransfer",
-                    "FileName": file.name,
-                    "RetrievalCode": data,
+                    "FileName": fileName,
+                    "URL": url,
                 };
                 socket.send(JSON.stringify(request));
-            });
+                showTooltip($(document.body), "center", "seagreen", "File(s) uploaded successfully.");
+            }
+            else {
+                showDialog("Upload Failed", "File upload failed.");
+            }
         };
-        fr.readAsDataURL(file);
-    });
+        xhr.send(fd);
+    }
 }
 function sendUninstall(e) {
     var request = {
@@ -628,6 +669,10 @@ function scrollToCursor() {
     }
 }
 $(document).ready(function () {
+    window.location.search.replace("?", "").split("&").forEach(function (value, index) {
+        var split = value.split("=");
+        args[split[0]] = split[1];
+    });
     context = document.getElementById("canvasRemoteControl").getContext("2d");
     $(".toggle-box").on("click", function (e) {
         if (e.currentTarget.id == "divInteractive") {
@@ -657,8 +702,8 @@ $(document).ready(function () {
         }
         lastPointerMove = new Date();
         if (socket.readyState == WebSocket.OPEN) {
-            var pointX = e.offsetX / $(e.target).width();
-            var pointY = e.offsetY / $(e.target).height();
+            var pointX = e.offsetX / $(e.currentTarget).width();
+            var pointY = e.offsetY / $(e.currentTarget).height();
             var request = {
                 "Type": "MouseMove",
                 "PointX": pointX,
@@ -672,8 +717,8 @@ $(document).ready(function () {
             if (e.button != 0 && e.button != 2) {
                 return;
             }
-            var pointX = e.offsetX / $(e.target).width();
-            var pointY = e.offsetY / $(e.target).height();
+            var pointX = e.offsetX / $(e.currentTarget).width();
+            var pointY = e.offsetY / $(e.currentTarget).height();
             var request = {
                 "Type": "MouseDown",
                 "PointX": pointX,
@@ -696,8 +741,8 @@ $(document).ready(function () {
             if (e.button != 0 && e.button != 2) {
                 return;
             }
-            var pointX = e.offsetX / $(e.target).width();
-            var pointY = e.offsetY / $(e.target).height();
+            var pointX = e.offsetX / $(e.currentTarget).width();
+            var pointY = e.offsetY / $(e.currentTarget).height();
             var request = {
                 "Type": "MouseUp",
                 "PointX": pointX,
@@ -722,9 +767,9 @@ $(document).ready(function () {
         }
         isTouchScreen = true;
         currentTouches++;
-        var touchPointOffset = e.target.getBoundingClientRect();
-        lastTouchPointX = (e.touches[0].clientX - touchPointOffset.left) / $(e.target).width();
-        lastTouchPointY = (e.touches[0].clientY - touchPointOffset.top) / $(e.target).height();
+        var touchPointOffset = e.currentTarget.getBoundingClientRect();
+        lastTouchPointX = (e.touches[0].clientX - touchPointOffset.left) / $(e.currentTarget).width();
+        lastTouchPointY = (e.touches[0].clientY - touchPointOffset.top) / $(e.currentTarget).height();
         if (e.touches.length > 1) {
             multiTouched = true;
             lastMultiTouch = Date.now();
@@ -773,9 +818,9 @@ $(document).ready(function () {
                 return;
             }
             lastPointerMove = new Date();
-            var touchPointOffset = e.target.getBoundingClientRect();
-            var pointX = (e.touches[0].clientX - touchPointOffset.left) / $(e.target).width();
-            var pointY = (e.touches[0].clientY - touchPointOffset.top) / $(e.target).height();
+            var touchPointOffset = e.currentTarget.getBoundingClientRect();
+            var pointX = (e.touches[0].clientX - touchPointOffset.left) / $(e.currentTarget).width();
+            var pointY = (e.touches[0].clientY - touchPointOffset.top) / $(e.currentTarget).height();
             var request = {
                 "Type": "TouchMove",
                 "MoveByX": pointX - lastTouchPointX,
@@ -795,9 +840,9 @@ $(document).ready(function () {
         }
         currentTouches--;
         var request;
-        var touchPointOffset = e.target.getBoundingClientRect();
-        var pointX = (e.changedTouches[0].clientX - touchPointOffset.left) / $(e.target).width();
-        var pointY = (e.changedTouches[0].clientY - touchPointOffset.top) / $(e.target).height();
+        var touchPointOffset = e.currentTarget.getBoundingClientRect();
+        var pointX = (e.changedTouches[0].clientX - touchPointOffset.left) / $(e.currentTarget).width();
+        var pointY = (e.changedTouches[0].clientY - touchPointOffset.top) / $(e.currentTarget).height();
         if (e.touches.length == 0) {
             e.preventDefault();
             if (cancelNextTouch || multiTouched || touchDragging) {
@@ -937,7 +982,6 @@ $(document).ready(function () {
             return;
         }
         transferFiles(e.dataTransfer.files);
-        showTooltip($(document.body), "center", "seagreen", "File(s) uploaded successfully.");
     };
     initWebSocket();
 });

@@ -7,6 +7,7 @@
         var config = e.Config;
         $("#inputCompanyName").val(config.Company_Name);
         $("#inputLicenseKey").val(config.License_Key);
+        $("#inputLicenseKey").attr("title", config.License_Key);
         $("#inputDefaultAdmin").val(config.Default_Admin);
         $("#toggleDemoMode").attr("on", config.Demo_Mode);
         $("#toggleFileEncryption").attr("on", config.File_Encryption);
@@ -140,6 +141,7 @@ function handleAddComputerGroup(e) {
         option.innerHTML = e.Group;
         $("#selectComputerGroups").append(option);
         showTooltip($("#selectComputerGroups"), "left", "green", "Group added.");
+        getAllComputerGroups();
         return;
     }
 }
@@ -149,5 +151,6 @@ function handleDeleteComputerGroup(e) {
             return elem.value == e.Group;
         }).remove();
         showTooltip($("#selectComputerGroups"), "left", "green", "Group deleted.");
+        getAllComputerGroups();
     }
 }

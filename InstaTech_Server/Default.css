@@ -85,9 +85,47 @@ form button[type="submit"] {
     left: 50%;
     transform: translate(-50%, -50%);
 }
-#divMainTechLoginFrame {
+#svgMainMenu {
     position: absolute;
     top: 5px;
+    right: 5px;
+    height: 25px;
+    width: 25px;
+    margin-left: 10px;
+    cursor: pointer;
+    background-color: dimgray;
+    border: 2px solid gray;
+}
+#svgMainMenu:hover {
+    background-color: lightgray;
+}
+#divMainMenuOuter {
+    position: absolute;
+    top: 35px;
+    right: 35px;
+    z-index: 4;
+    overflow: hidden;
+    width: 0;
+    height: 0;
+}
+#divMainMenuInner {
+    background-color: dimgray;
+    border: 2px solid white;
+}
+
+#divMainMenuInner .menu-option {
+    height: 1.5em;
+    line-height: 1.5em;
+    padding: 10px;
+    cursor: pointer;
+    color: white;
+}
+#divMainMenuInner .menu-option:hover {
+    background-color: lightgray;
+}
+#divMainTechLoginFrame {
+    position: absolute;
+    top: 35px;
     right: 5px;
     text-align: right;
     color: white;
@@ -664,4 +702,30 @@ text-align: center;
 
 .data-grid select {
     width: 100px;
+}
+
+/*** Computer Hub ***/
+.hub-action-frame {
+    border: 2px solid black;
+    padding: 15px;
+    border-radius: 10px;
+    background-color: aliceblue;
+    margin: 10px;
+}
+.hub-action-title {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+.hub-action-title button {
+    float: right;
+    font-size: 10px;
+    padding: 3px 8px;
+}
+.hub-action-content {
+    max-width: 50vw;
+    text-align: left;
+    display: inline-block;
+}
+#divDeployFile td input {
+    width: 100%;
 }

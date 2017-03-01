@@ -10,13 +10,6 @@ function getTechAccounts() {
     InstaTech.Socket_Main.send(JSON.stringify(request));
 }
 
-function getAllComputerGroups() {
-    var request = {
-        "Type": "GetAllComputerGroups",
-        "AuthenticationToken": InstaTech.AuthenticationToken
-    }
-    InstaTech.Socket_Main.send(JSON.stringify(request));
-}
 function refreshAccountCenter() {
     $("#tableAccountCenter tbody tr").remove();
     getTechAccounts();
@@ -185,7 +178,7 @@ function newTechAccount() {
         inputAccountKeyDown(e);
     });
     $("#tableAccountCenter").find("input:enabled").first().focus();
-    tr.onclick = rowClicked;
+    tr.onclick = accountRowClicked;
     $("#accountSaveOK").show();
     $("#accountSaveCancel").show();
 }
@@ -210,7 +203,8 @@ function deleteTechAccount() {
                 click: function () {
                     var request = {
                         "Type": "DeleteTechAccount",
-                        "UserID": id
+                        "UserID": id,
+                        "AuthenticationToken": InstaTech.AuthenticationToken
                     }
                     InstaTech.Socket_Main.send(JSON.stringify(request));
                     $(this).dialog("close");
@@ -228,7 +222,7 @@ function deleteTechAccount() {
         }
     });
 }
-function rowClicked(e) {
+function accountRowClicked(e) {
     $("#tableAccountCenter tbody tr").removeClass("selected");
     e.currentTarget.classList.add("selected");
     if (e.currentTarget.classList.contains("editing")) {
@@ -289,13 +283,15 @@ function saveTechAccount() {
     if (editRow.hasClass("new-account")) {
         var request = {
             "Type": "NewTechAccount",
-            "Account": account
+            "Account": account,
+            "AuthenticationToken": InstaTech.AuthenticationToken
         }
     }
     else {
         var request = {
             "Type": "SaveTechAccount",
-            "Account": account
+            "Account": account,
+            "AuthenticationToken": InstaTech.AuthenticationToken
         }
     }
     InstaTech.Socket_Main.send(JSON.stringify(request));
@@ -303,7 +299,7 @@ function saveTechAccount() {
 
 function populateAccountTable(e) {
     var tr = document.createElement("tr");
-    tr.onclick = rowClicked;
+    tr.onclick = accountRowClicked;
     var td = document.createElement("td");
     td.innerHTML = InstaTech.Tech_Accounts[e].UserID;
     td.setAttribute("prop", "UserID");

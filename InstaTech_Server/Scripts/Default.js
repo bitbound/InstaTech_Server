@@ -79,6 +79,40 @@ function logOutTech(e) {
     clearCachedCreds();
     InstaTech.Socket_Main.close();
 }
+function toggleMainMenu() {
+    var mainMenu = $("#divMainMenuOuter");
+    if (mainMenu.width() == 0)
+    {
+        mainMenu.width("initial");
+        mainMenu.height("initial");
+        var targetWidth = mainMenu.width();
+        var targetHeight = mainMenu.height();
+        mainMenu.width(0);
+        mainMenu.height(0);
+        mainMenu.animate({
+            "width": targetWidth,
+            "height": targetHeight
+        }, 400);
+    }
+    else
+    {
+        mainMenu.animate({
+            "width": 0,
+            "height": 0
+        }, 400);
+    }
+}
+function mouseOutMainMenu() {
+    if (InstaTech.Temp.mainMenuTimeout) {
+        window.clearTimeout(InstaTech.Temp.mainMenuTimeout);
+    }
+    InstaTech.Temp.mainMenuTimeout = window.setTimeout(function () {
+        if ($("#divMainMenuOuter").is(":visible") && !$("#svgMainMenu").is(":hover") && !$("#divMainMenuOuter").is(":hover")) {
+            toggleMainMenu();
+        }
+        delete InstaTech.Temp.mainMenuTimeout;
+    }, 2000);
+}
 function clearCachedCreds() {
     InstaTech.UserID = null;
     InstaTech.AuthenticationToken = null;

@@ -9,12 +9,6 @@
     }
 }
 
-function handleGetAllComputerGroups(e) {
-    if (e.Status == "ok") {
-        InstaTech.ComputerGroups = e.ComputerGroups;
-    }
-}
-
 function handleSaveTechAccount(e) {
     if (e.Status == "notfound") {
         var editRow = $("#divAccountCenter .editing");

@@ -1,13 +1,9 @@
-var Case = (function () {
-    function Case() {
-    }
-    return Case;
-}());
-var Tech_Account = (function () {
-    function Tech_Account() {
-    }
-    return Tech_Account;
-}());
+class Case {
+}
+class Tech_Account {
+}
+class Computer {
+}
 var AccessLevel;
 (function (AccessLevel) {
     AccessLevel[AccessLevel["Standard"] = 0] = "Standard";
@@ -18,12 +14,11 @@ var ConnectionType;
     ConnectionType[ConnectionType["Customer"] = 0] = "Customer";
     ConnectionType[ConnectionType["Technician"] = 1] = "Technician";
 })(ConnectionType || (ConnectionType = {}));
-var Main_Model = (function () {
-    function Main_Model() {
+class Main_Model {
+    constructor() {
         this.Cases = [];
     }
-    return Main_Model;
-}());
-var InstaTech = new Main_Model();
+}
+const InstaTech = new Main_Model();
 InstaTech.Temp = {};
 //# sourceMappingURL=Main_Model.js.map

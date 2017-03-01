@@ -30,6 +30,13 @@ class Tech_Account {
     ComputerGroups: string[];
     AccessLevel: AccessLevel;
 }
+class Computer {
+    ComputerName: string;
+    LastReboot: Date;
+    CurrentUser: string;
+    LastLoggedOnUser: string;
+    ComputerGroup: string;
+}
 enum AccessLevel {
     Standard,
     Admin
@@ -48,6 +55,7 @@ class Main_Model {
     Socket_Main: WebSocket;
     Cases: Case[];
     Tech_Accounts: Tech_Account[];
+    Hub_Computers: Computer[];
     Context: ConnectionType;
     LastTypingStatus: Date;
     QueueWaitTimer: null;

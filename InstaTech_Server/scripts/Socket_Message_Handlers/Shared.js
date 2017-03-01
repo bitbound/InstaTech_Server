@@ -123,3 +123,8 @@ function handleGetSupportTypes(e) {
 function handleGetSupportQueue(e) {
     $('#' + e.ElementID).val(e.SupportQueue);
 }
+function handleGetAllComputerGroups(e) {
+    if (e.Status == "ok") {
+        InstaTech.ComputerGroups = e.ComputerGroups;
+    }
+}

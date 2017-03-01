@@ -3,7 +3,6 @@
     {
         Response.Redirect(Request.Url.AbsoluteUri.ToLower().Replace("/default.cshtml", ""));
     }
-
 }
 <!DOCTYPE html>
 <html>
@@ -99,7 +98,7 @@
             </div>
             <div style="position:absolute; top: 50%; left:50%; transform:translate(-50%, -50%);font-family: sans-serif">
                 <div><strong>Connect to client:</strong></div>
-                <input id="inputSessionID" placeholder="Enter client's session ID." type="text" pattern="[0-9 ]*" onkeypress="if (event.keyCode == 13) { connectToClient() }" style="margin: 5px 0; width:175px" />
+                <input id="inputSessionID" placeholder="Enter client's session ID." type="text" value='@Request.QueryString["Computer"]' pattern="[0-9 ]*" onkeypress="if (event.keyCode == 13) { connectToClient() }" style="margin: 5px 0; width:175px" />
                 <img id="imgSearchComputers" class="link" src="~/Assets/Images/Search_64x.png" onclick="searchComputers(event)" title="Show online computers." hidden/>
                 <div id="divSearchComputers">
                     <div style="display:none">
@@ -148,7 +147,7 @@
                 <span style="margin-bottom:5px;">File Transfer:</span>
                 <button type="button" style="float:right;"  title="Transfer files to the remote computer." onclick='$("#inputFile").click()'>Upload...</button>
                 <div id="divUploadHint" style="font-size: .8em; font-family:sans-serif; color:dodgerblue; cursor:pointer" onclick='showTooltip(this, "bottom", "black", "You can also drag-and-drop files onto the window to upload them.");'>(Hint!)</div>
-                <input id="inputFile" type="file" hidden multiple onchange='transferFiles(this.files); showTooltip($("#divUploadHint"), "bottom", "seagreen", "File(s) uploaded successfully.");' />
+                <input id="inputFile" type="file" hidden multiple onchange='transferFiles(this.files)' />
             </div>
             <div id="divSendCtrlAltDel" style="margin-top: 10px; display:none">
                 <span>Send Ctrl+Alt+Del:</span>

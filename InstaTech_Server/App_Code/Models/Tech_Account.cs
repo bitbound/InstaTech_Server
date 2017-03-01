@@ -10,7 +10,7 @@ using System.Web.Helpers;
 /// </summary>
 namespace InstaTech.App_Code.Models
 {
-    public class Tech_Account
+    public class Tech_Account : ICloneable
     {
         public Tech_Account()
         {
@@ -53,6 +53,11 @@ namespace InstaTech.App_Code.Models
         public static Tech_Account Load(string UserID)
         {
             return Json.Decode<Tech_Account>(File.ReadAllText(Path.Combine(Utilities.App_Data, "Tech_Accounts", UserID + ".json")));
+        }
+
+        public object Clone()
+        {
+            return this.MemberwiseClone();
         }
     } 
 }

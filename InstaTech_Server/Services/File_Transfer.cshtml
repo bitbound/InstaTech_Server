@@ -1,21 +1,29 @@
 ﻿@{
-    var strRequest = new StreamReader(Request.InputStream).ReadToEnd();
-    var jsonRequest = Json.Decode(strRequest);
-    var di = Directory.CreateDirectory(Server.MapPath("~/App_Data/FileTransfers/"));
+    var di = Directory.CreateDirectory(Server.MapPath("~/App_Data/File_Transfers_RC/"));
 
-
-    if (jsonRequest.Type.ToString() == "Upload")
+    if (Request.RequestType == "GET")
     {
-        var strName = Guid.NewGuid().ToString().Replace("-", "");
-        var strData = jsonRequest.File.ToString().Split(",".ToCharArray())[1];
-        File.WriteAllBytes(di.FullName + strName, Convert.FromBase64String(strData));
-        Response.Write(strName);
+        var fileName = Request.QueryString[0];
+        Response.AddHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+        Response.ContentType = MimeMapping.GetMimeMapping(fileName);
+        Response.WriteFile(di.FullName + fileName);
     }
-    else if (jsonRequest.Type.ToString() == "Download")
+    else if (Request.RequestType == "POST")
     {
-        var strName = jsonRequest.RetrievalCode.ToString();
-        Response.Write(Convert.ToBase64String(File.ReadAllBytes(di.FullName + strName)));
-        File.Delete(di.FullName + strName);
+        foreach (var key in Request.Files.AllKeys)
+        {
+            var file = Request.Files[key];
+            var filName = Path.GetFileNameWithoutExtension(file.FileName);
+            var extName = Path.GetExtension(file.FileName);
+            var count = 0;
+            while (File.Exists(di.FullName + filName + extName))
+            {
+                filName = Path.GetFileNameWithoutExtension(file.FileName) + count.ToString();
+                count++;
+            }
+            file.SaveAs(di.FullName + filName + extName);
+            Response.Write(filName + extName);
+        }
     }
     // Delete files older than a day.
     foreach (var file in di.GetFiles())

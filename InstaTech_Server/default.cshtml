@@ -33,6 +33,7 @@
         <script src="~/scripts/Socket_Message_Handlers/Shared.js"></script>
         <script src="~/scripts/Socket_Message_Handlers/Accounts.js"></script>
         <script src="~/scripts/Socket_Message_Handlers/Config.js"></script>
+        <script src="~/scripts/Socket_Message_Handlers/Hub.js"></script>
         <script src="~/scripts/Controls/Customer_Chat.js"></script>
         <script src="~/scripts/Controls/Tech_Chat.js"></script>
         <script src="~/scripts/Controls/Customer_Remote.js"></script>
@@ -40,6 +41,7 @@
         <script src="~/scripts/Controls/Account_Center.js"></script>
         <script src="~/scripts/Controls/Computer_Hub.js"></script>
         <script src="~/scripts/Controls/Configuration.js"></script>
+        <script src="~/scripts/Controls/Shared.js"></script>
     </head>
     <body>
         <div id="divCustomerPortal" class="center-aligned">
@@ -81,6 +83,24 @@
         </div>
 
         <div id="divTechPortal" class="center-aligned" hidden>
+            <svg id="svgMainMenu" xmlns="http://www.w3.org/2000/svg" onclick='toggleMainMenu()' onmouseout="mouseOutMainMenu()">
+                <line x1="5" x2="20" y1="7" y2="7" stroke="white" stroke-width="2" stroke-linecap="round"></line>
+                <line x1="5" x2="20" y1="13" y2="13" stroke="white" stroke-width="2" stroke-linecap="round"></line>
+                <line x1="5" x2="20" y1="19" y2="19" stroke="white" stroke-width="2" stroke-linecap="round"></line>
+            </svg>
+            <div id="divMainMenuOuter" onmouseout="mouseOutMainMenu()">
+                <div id="divMainMenuInner">
+                    <div class="menu-option" onclick='window.open("https://instatech.org/Downloads/?scrollto=divUtilities", "_blank")'>
+                        Utilities & Scripts
+                    </div>
+                    <div class="menu-option" onclick='window.open("https://instatech.org/Contact/Bug_Report", "_blank")'>
+                        Report a Bug
+                    </div>
+                    <div class="menu-option" onclick='window.open("https://instatech.org/Contact/Feature_Request", "_blank")'>
+                        Request a Feature
+                    </div>
+                </div>
+            </div>
             <div id="divMainTechLoginFrame">
                 <div>
                     <span id="spanMainLoginStatus"><small>Not logged in.</small></span><br />

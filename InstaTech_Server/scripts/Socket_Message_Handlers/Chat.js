@@ -31,6 +31,9 @@ function handleCustomerChatLogin(e) {
             $("#divChatBoxCustomer").fadeIn(750);
         });
     }
+    else if (e.Status == "loggedin") {
+        showDialog("Submission Failed", "You are already logged in.  If you're logged in as a tech, log out before starting a customer session.");
+    }
     else {
         showDialog("Submission Error", "<p>There was a problem submitting your information.<br/><br/>Please try closing and re-opening your browser window.  If the issue persists, contact your IT support department.</p>");
     }

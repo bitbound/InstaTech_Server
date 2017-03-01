@@ -1,11 +1,123 @@
 ﻿@{ }
 <div id="divComputerHub" hidden onload="initComputerHub()">
-    <div class="portal-content-frame">
+    <div class="portal-content-frame" style="width: 80vw;">
         <div class="frame-title">
             <small>Computer Hub</small>
             <button onclick="$('#divComputerHub').slideToggle()">X</button>
         </div>
-        <div><strong>Coming in a future update.</strong></div>
-        <div>This will be a place to view all computers running the InstaTech service and perform many administrative tasks.  For now, please use the search feature in the remote control tool to locate computers.</div>
+        <table>
+            <tr style="vertical-align:top">
+                <td>
+                    <div>
+                        <table class="left-aligned" style="table-layout: fixed">
+                            <tr>
+                                <td></td>
+                                <td>
+                                    Search By:
+                                </td>
+                                <td>
+                                    Computer Group:
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding-right: 15px">
+                                    <input id="inputSearchComputers" type="text" placeholder="Search..." title="Enter a search term, or leave blank for all." style="width:100%" onchange="searchTechs()" onkeydown="if (event.key.toLowerCase() == 'enter') { searchComputerHub() }" />
+                                </td>
+                                <td style="padding-right: 15px">
+                                    <select id="selectSearchBy">
+                                        <option value="Computer">Computer</option>
+                                        <option value="User">User</option>
+                                    </select>
+                                </td>
+                                <td style="padding-right: 15px">
+                                    <select id="selectComputerHubGroups" onfocus="populateHubComputerGroups()">
+                                        <option value="">Any</option>
+                                    </select>
+                                </td>
+                                <td class="center-aligned">
+                                    <button onclick="searchComputerHub()">Search</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div style="max-height:80vh; overflow:auto">
+                        <table id="tableComputerHub" class="data-grid">
+                            <thead>
+                                <tr>
+                                    <td>Computer Name</td>
+                                    <td>Last Reboot</td>
+                                    <td>Current User</td>
+                                    <td>Last User</td>
+                                    <td>Computer Group</td>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </td>
+                <td id="tdHubActions" style="padding-top:30px; padding-left:10px;">
+                    <div class="center-aligned" style="text-decoration: underline; margin-bottom:10px">
+                        Actions
+                    </div>
+                    <button onclick='$("#tableComputerHub tbody tr").addClass("selected")'>Select All</button>
+                    <hr style="width: 90%" />
+                    <button onclick="remoteControlComputerHub()">Remote Control</button>
+                    <br />
+                    <button onclick='openDeployerTool()'>Deploy File</button>
+                </td>
+            </tr>
+        </table>
+        <div id="divDeployFile" class="hub-action-frame" hidden>
+            <div class="hub-action-title">
+                Deployer Tool
+                <button onclick="$('#divDeployFile').slideToggle()">X</button>
+            </div>
+            <div class="hub-action-content">
+                <div>
+                    Deploy scripts and files to the selected computer(s).  Currently supported file formats are BAT, PS1, and EXE.
+                </div>
+                <div>
+                    <small>
+                        Note: Remote processes are run non-interactively under the System account.  The end-user, if present, will not be able to see or interact with anything.
+                    </small>
+                </div>
+                <br />
+                <table>
+                    <tr>
+                        <td>
+                            <label for="inputDeployFile">Deploy File: </label>
+                        </td>
+                        <td>
+                            <input id="inputDeployFile" type="file" name="inputDeployFile" title="Browse or drop files here." placeholder="Browse or drop files here." ondragover="inputDeployDragOver(event)" ondrop="inputDeployDrop(event)" />
+                            <input id="inputDeployFile2" type="text" readonly hidden name="inputDeployFile2" title="Drop files here." placeholder="Drop files here." ondragover="inputDeployDragOver(event)" ondrop="inputDeployDrop(event)" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="inputDeployArguments">Command Line Arguments:</label>
+                        </td>
+                        <td>
+                            <input id="inputDeployArguments" placeholder="Command line arguments..." />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td class="right-aligned">
+                            <button onclick="deployFiles()">Deploy</button>
+                        </td>
+                    </tr>
+                </table>
+                <div style="margin-top: 10px">
+                    Results:
+                    <br />
+                    <textarea id="textDeployResults" style="width:100%; min-height:200px" readonly></textarea>
+                    <br />
+                    <div style="margin-top: 5px">
+                        <button style="float:right" onclick='$("#textDeployResults").val("")'>Clear Results</button>
+                        <button style="float:right; margin-right: 15px" onclick="convertResultsToJSON()">Convert to JSON</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

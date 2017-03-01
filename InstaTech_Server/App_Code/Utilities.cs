@@ -14,7 +14,7 @@ namespace InstaTech.App_Code {
     public static class Utilities
     {
         public static string App_Data { get; } = HttpContext.Current.Server.MapPath("~/App_Data/");
-        public static string Version { get; } = "1.1.0";
+        public static string Version { get; } = "1.1.2";
         public static List<Tech_Account> Tech_Accounts
         {
             get
@@ -45,9 +45,74 @@ namespace InstaTech.App_Code {
             }
             request.GetResponse();
         }
-        public static dynamic Clone(object InputObject)
+        public static void Set_File_Encryption(bool Encrypt)
         {
-            return Json.Decode(Json.Encode(InputObject));
+            var fileList = new List<string>();
+            Directory.CreateDirectory(Path.Combine(Utilities.App_Data, "Cases"));
+            foreach (var file in Directory.GetFiles(Path.Combine(Utilities.App_Data, "Cases"), "*", SearchOption.AllDirectories))
+            {
+                fileList.Add(file);
+            }
+            Directory.CreateDirectory(Path.Combine(Utilities.App_Data, "Tech_Accounts"));
+            foreach (var file in Directory.GetFiles(Path.Combine(Utilities.App_Data, "Tech_Accounts"), "*", SearchOption.AllDirectories))
+            {
+                fileList.Add(file);
+            }
+            Directory.CreateDirectory(Path.Combine(Utilities.App_Data, "Computer_Accounts"));
+            foreach (var file in Directory.GetFiles(Path.Combine(Utilities.App_Data, "Computer_Accounts"), "*", SearchOption.AllDirectories))
+            {
+                fileList.Add(file);
+            }
+            foreach (var file in fileList)
+            {
+                if (Encrypt)
+                {
+                    File.Encrypt(file);
+                }
+                else
+                {
+                    File.Decrypt(file);
+                }
+            }
         }
+        public static void WriteToLog(Exception ex)
+        {
+            var exception = ex;
+            var filePath = Path.Combine(Utilities.App_Data, "Errors", DateTime.Now.Year.ToString(), DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Day.ToString().PadLeft(2, '0') + ".txt");
+            if (!Directory.Exists(Path.GetDirectoryName(filePath)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+            }
+            while (exception != null)
+            {
+                var jsonError = new
+                {
+                    Type = "Error",
+                    Timestamp = DateTime.Now.ToString(),
+                    Message = exception?.Message,
+                    Source = exception?.Source,
+                    StackTrace = exception?.StackTrace,
+                    LastMessageType = LastMessageType
+                };
+                File.AppendAllText(filePath, Json.Encode(jsonError) + Environment.NewLine);
+                exception = exception.InnerException;
+            }
+        }
+        public static void WriteToLog(string Message)
+        {
+            var filePath = Path.Combine(Utilities.App_Data, "Errors", DateTime.Now.Year.ToString(), DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Day.ToString().PadLeft(2, '0') + ".txt");
+            if (!Directory.Exists(Path.GetDirectoryName(filePath)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+            }
+            var jsoninfo = new
+            {
+                Type = "Info",
+                Timestamp = DateTime.Now.ToString(),
+                Message = Message
+            };
+            File.AppendAllText(filePath, Json.Encode(jsoninfo) + Environment.NewLine);
+        }
+        public static string LastMessageType { get; set; } = "";
     }
 }

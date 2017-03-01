@@ -197,36 +197,27 @@ function updateQueueVolumes(e) {
     });
 }
 function closeTechSession(e) {
-    var dialog = document.createElement("div");
-    dialog.innerHTML = "Are you sure you want to close this session as resolved?";
-    $(dialog).dialog({
-        width: document.body.clientWidth * .5,
-        title: "Confirm Session Closure",
-        classes: { "ui-dialog-title": "center-aligned" },
-        buttons: [
-            {
-                text: "Close",
-                click: function () {
-                    var request = {
-                        "Type": "SessionEnded",
-                        "Details": "Thank you for contacting us!"
-                    };
-                    InstaTech.Socket_Main.send(JSON.stringify(request));
-                    $(this).dialog("close");
-                    $("#divChatBoxTech").slideUp();
-                }
-            },
-            {
-                text: "Cancel",
-                click: function () {
-                    $(this).dialog("close");
-                }
+    var buttons = [
+        {
+            text: "Close",
+            click: function () {
+                var request = {
+                    "Type": "SessionEnded",
+                    "Details": "Thank you for contacting us!"
+                };
+                InstaTech.Socket_Main.send(JSON.stringify(request));
+                $(this).dialog("close");
+                $("#divChatBoxTech").slideUp();
             }
-        ],
-        close: function () {
-            $(this).dialog('destroy').remove();
+        },
+        {
+            text: "Cancel",
+            click: function () {
+                $(this).dialog("close");
+            }
         }
-    });
+    ]
+    showDialogEx("Confirm Session Closure", "Are you sure you want to close this session as resolved?", buttons);
 }
 function dragOverTechChat(e) {
     e.preventDefault();
@@ -244,6 +235,7 @@ function dropOnTechChat(e) {
 }
 function transferFileTech(e) {
     for (var i = 0; i < e.length; i++) {
+        $("#divTechStatus").html("Uploading file...");
         var file = e[i];
         var strPath = "/Services/File_Transfer_Chat.cshtml";
         var fd = new FormData();
@@ -252,17 +244,16 @@ function transferFileTech(e) {
         xhr.open('POST', strPath, true);
         xhr.onload = function () {
             if (xhr.status === 200) {
+                $("#divTechStatus").html("Upload completed.");
                 var fileName = xhr.responseText;
-                var url = location.href + "Services/File_Transfer_Chat.cshtml?file=" + fileName;
+                var url = location.origin + "/Services/File_Transfer_Chat.cshtml?file=" + fileName;
                 $("#textTechInput").val('File Sharing Link: <a target="_blank" href="' + url + '">' + fileName + '</a>');
                 submitTechMessage();
             }
             else {
+                $("#divTechStatus").html("Upload failed.");
                 showDialog("Upload Failed", "File upload failed.");
             }
-        };
-        xhr.onprogress = function (e) {
-            $("#divTechStatus").html("File Upload: " + Math.round(e.loaded / e.total * 100) + "%");
         };
         xhr.send(fd);
     }
