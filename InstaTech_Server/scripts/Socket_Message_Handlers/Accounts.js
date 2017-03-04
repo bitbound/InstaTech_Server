@@ -82,6 +82,10 @@ function handleDeleteTechAccount(e) {
         showTooltip(row, "center", "red", "Account not found.  Please refresh the page.");
         return;
     }
+    else if (e.Status == "last") {
+        showTooltip(row, "center", "red", "You can't delete the last admin account.");
+        return;
+    }
     else if (e.Status == "failed") {
         showTooltip(row, "center", "red", "Failed to delete account.");
         return;

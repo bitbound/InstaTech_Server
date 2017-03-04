@@ -195,6 +195,8 @@ function initWebSocket() {
                 "ComputerName": args.Computer
             };
             socket.send(JSON.stringify(request));
+            $("#divUninstallService").show();
+            $("#divSendCtrlAltDel").show();
         }
         else if (localStorage["RememberMe"]) {
             InstaTech.UserID = localStorage["UserID"];

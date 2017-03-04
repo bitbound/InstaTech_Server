@@ -18,19 +18,19 @@ namespace InstaTech.App_Code.Socket_Handlers
     public class Socket_Main : WebSocketHandler
     {
         #region User-Defined Properties/Fields
-        public static WebSocketCollection SocketCollection { get; } = new WebSocketCollection();
+        public static List<Socket_Main> SocketCollection { get; } = new WebSocketCollection().Cast<Socket_Main>().ToList();
         public static List<Socket_Main> Customers
         {
             get
             {
-                return SocketCollection.Cast<Socket_Main>().ToList().FindAll(sc => sc.ConnectionType == ConnectionTypes.Customer);
+                return SocketCollection.FindAll(sc => sc.ConnectionType == ConnectionTypes.Customer);
             }
         }
         public static List<Socket_Main> AvailableTechs
         {
             get
             {
-                return SocketCollection.Cast<Socket_Main>().ToList().FindAll(sc => sc.ConnectionType == ConnectionTypes.Technician && sc.LoggedIntoChat == true);
+                return SocketCollection.FindAll(sc => sc.ConnectionType == ConnectionTypes.Technician && sc.LoggedIntoChat == true);
             }
         }
         public static List<Case> Open_Cases
@@ -61,7 +61,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                     }
                 }
                 var cases = new List<Case>();
-                foreach (Socket_Main sc in Socket_Main.SocketCollection.Where(sc => (sc as Socket_Main).ConnectionType == Socket_Main.ConnectionTypes.Customer && (sc as Socket_Main).Partner == null))
+                foreach (Socket_Main sc in Socket_Main.SocketCollection.Where(sc => sc.ConnectionType == Socket_Main.ConnectionTypes.Customer && sc.Partner == null))
                 {
                     cases.Add(sc.SupportCase);
                 }
@@ -255,7 +255,7 @@ namespace InstaTech.App_Code.Socket_Handlers
         #region Helper Methods
         private int GetPlaceInQueue()
         {
-            var cases = SocketCollection.Where(sock => (sock as Socket_Main).ConnectionType == ConnectionTypes.Customer && (sock as Socket_Main).Partner == null && (sock as Socket_Main)?.SupportCase?.DTCreated < SupportCase?.DTCreated);
+            var cases = SocketCollection.Where(sock => sock.ConnectionType == ConnectionTypes.Customer && sock.Partner == null && sock?.SupportCase?.DTCreated < SupportCase?.DTCreated);
             return cases.Count() + 1;
         }
         private bool AuthenticateTech(dynamic JsonData)
@@ -789,7 +789,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                 }
                 takeCase.TechUserID = TechAccount.UserID;
                 takeCase.DTReceived = DateTime.Now;
-                Partner = SocketCollection.FirstOrDefault(sc => (sc as Socket_Main)?.SupportCase?.CaseID == takeCase.CaseID) as Socket_Main;
+                Partner = SocketCollection.Find(sc => sc?.SupportCase?.CaseID == takeCase.CaseID);
                 //SupportCase = Partner.SupportCase;
                 Partner.Partner = this;
                 takeCase.Save();
@@ -1174,10 +1174,17 @@ namespace InstaTech.App_Code.Socket_Handlers
                 {
                     return;
                 }
-                var account = Utilities.Tech_Accounts.Find(ta => ta.UserID == JsonData.UserID);
+                var allAccounts = Utilities.Tech_Accounts;
+                var account = allAccounts.Find(ta => ta.UserID == JsonData.UserID);
                 if (account == null)
                 {
                     JsonData.Status = "notfound";
+                    Send(Json.Encode(JsonData));
+                    return;
+                }
+                if (account.AccessLevel == Tech_Account.Access_Levels.Admin && allAccounts.Count(acct=>acct.AccessLevel == Tech_Account.Access_Levels.Admin) == 1)
+                {
+                    JsonData.Status = "last";
                     Send(Json.Encode(JsonData));
                     return;
                 }
@@ -1553,7 +1560,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                 {
                     return;
                 }
-                var sockets = Remote_Control.SocketCollection.Cast<Remote_Control>().ToList();
+                var sockets = Remote_Control.SocketCollection;
                 List<Remote_Control> services = new List<Remote_Control>();
                 if (TechAccount.AccessLevel == Tech_Account.Access_Levels.Admin)
                 {
@@ -1632,7 +1639,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                     Send(Json.Encode(JsonData));
                     return;
                 }
-                var socket = Remote_Control.SocketCollection.FirstOrDefault(rc => (rc as Remote_Control).ComputerName == JsonData.ComputerName);
+                var socket = Remote_Control.SocketCollection.Find(rc => (rc as Remote_Control).ComputerName == JsonData.ComputerName);
                 if (socket != null)
                 {
                     (socket as Remote_Control).ComputerGroup = JsonData.ComputerGroup;
@@ -1657,7 +1664,7 @@ namespace InstaTech.App_Code.Socket_Handlers
         {
             try
             {
-                var target = Remote_Control.SocketCollection.Cast<Remote_Control>().FirstOrDefault(rc => rc.ConnectionType == Remote_Control.ConnectionTypes.ClientService && rc.ComputerName == JsonData.TargetComputer);
+                var target = Remote_Control.SocketCollection.Find(rc => rc.ConnectionType == Remote_Control.ConnectionTypes.ClientService && rc.ComputerName == JsonData.TargetComputer);
                 if (target == null)
                 {
                     JsonData.Status = "notfound";

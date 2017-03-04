@@ -57,7 +57,7 @@
             <div class="portal-button-frame">
                 @if (InstaTech.App_Code.Config.Current.Feature_Enabled_Chat)
                 {
-                    <div class='portal-option-button' opens='#divCustomerChat' opens-file='Customer_Chat.cshtml'>
+                    <div class='portal-option-button' opens='#divCustomerChat' opens-file='Customer_Chat.cshtml' title="Chat with a technician to get support.">
                         <div class='portal-option-text'>
                             <img src='~/Assets/Images/Message_16x.svg' />
                             <br/>
@@ -67,7 +67,7 @@
                 }
                 @if (InstaTech.App_Code.Config.Current.Feature_Enabled_Remote_Control)
                 {
-                    <div class='portal-option-button' opens='#divCustomerRemote' opens-file='Customer_Remote.cshtml'>
+                    <div class='portal-option-button' opens='#divCustomerRemote' opens-file='Customer_Remote.cshtml' title="Invite a technician to remotely control your computer.">
                         <div class='portal-option-text'>
                             <img src='~/Assets/Images/RemoteDesktop_64x.png' />
                             <br />
@@ -92,6 +92,9 @@
                 <div id="divMainMenuInner">
                     <div class="menu-option" onclick='window.open("https://instatech.org/Downloads/?scrollto=divUtilities", "_blank")'>
                         Utilities & Scripts
+                    </div>
+                    <div class="menu-option" onclick='window.open("/Docs/Reference.html", "_blank")'>
+                        Reference Guide
                     </div>
                     <div class="menu-option" onclick='window.open("https://instatech.org/Contact/Bug_Report", "_blank")'>
                         Report a Bug
@@ -181,7 +184,7 @@
 
                 @if (InstaTech.App_Code.Config.Current.Feature_Enabled_Chat)
                 {
-                    <div class='portal-option-button' opens='#divTechChat' opens-file='Tech_Chat.cshtml'>
+                    <div class='portal-option-button' opens='#divTechChat' opens-file='Tech_Chat.cshtml' title="Begin taking support cases via chat.">
                         <div class='portal-option-text'>
                             <img src='~/Assets/Images/Message_16x.svg' />
                             <br />
@@ -191,7 +194,7 @@
                 }
                 @if (InstaTech.App_Code.Config.Current.Feature_Enabled_Remote_Control)
                 {
-                    <div class='portal-option-button' opens='#divTechRemote' opens-file='Tech_Remote.cshtml'>
+                    <div class='portal-option-button' opens='#divTechRemote' opens-file='Tech_Remote.cshtml' title="Start a remote control session.">
                         <div class='portal-option-text'>
                             <img src='~/Assets/Images/RemoteDesktop_64x.png' />
                             <br />
@@ -201,7 +204,7 @@
                 }
                 @if (InstaTech.App_Code.Config.Current.Feature_Enabled_Computer_Hub)
                 {
-                    <div class='portal-option-button' opens='#divComputerHub' opens-file='Computer_Hub.cshtml'>
+                    <div class='portal-option-button' opens='#divComputerHub' opens-file='Computer_Hub.cshtml' title="View remote computer information, deploy files, and perform administrative tasks.">
                         <div class='portal-option-text'>
                             <img src='~/Assets/Images/ComputerSystem_256x.png' />
                             <br />
@@ -212,7 +215,7 @@
                 <br />
                 @if (InstaTech.App_Code.Config.Current.Feature_Enabled_Account_Center)
                 {
-                    <div class='portal-option-button' opens='#divAccountCenter' opens-file='Account_Center.cshtml'>
+                    <div class='portal-option-button' opens='#divAccountCenter' opens-file='Account_Center.cshtml' title="Manage InstaTech accounts.">
                         <div class='portal-option-text'>
                             <img src='~/Assets/Images/User_64x.png' />
                             <br />
@@ -222,7 +225,7 @@
                 }
                 @if (InstaTech.App_Code.Config.Current.Feature_Enabled_Configuration)
                 {
-                    <div class='portal-option-button' opens='#divConfiguration' opens-file='Configuration.cshtml'>
+                    <div class='portal-option-button' opens='#divConfiguration' opens-file='Configuration.cshtml' title="Configure your InstaTech server.">
                         <div class='portal-option-text'>
                             <img src='~/Assets/Images/Settings_256x.png' />
                             <br />

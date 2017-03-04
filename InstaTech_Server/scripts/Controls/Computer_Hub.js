@@ -5,6 +5,7 @@
 
 function searchComputerHub() {
     getAllComputerGroups();
+    $("#tableComputerHub tbody").html("");
     var request = {
         "Type": "SearchComputerHub",
         "SearchBy": $("#selectSearchBy").val(),
@@ -88,9 +89,15 @@ function openDeployerTool() {
         showDialog("Selection Required", "You must select at least one computer first.");
         return;
     }
-    $("#divDeployFile").slideToggle(function () {
-        window.scroll(null, $("#divDeployFile").offset().top);
-    });
+    if ($("#divDeployFile").is(":visible")) {
+        $("#divDeployFile").slideUp();
+    }
+    else
+    {
+        $("#divDeployFile").slideDown(function () {
+            window.scroll(null, $("#divDeployFile").offset().top);
+        });
+    }
 }
 function deployFiles() {
     if ($("#tableComputerHub tbody tr.selected").length == 0) {
@@ -101,8 +108,12 @@ function deployFiles() {
     if (typeof InstaTech.Temp.fileDeployList != "undefined" && InstaTech.Temp.fileDeployList.length > 0) {
         fileList = InstaTech.Temp.fileDeployList;
     }
-    else {
+    else if ($("#inputDeployFile")[0].files.length > 0) {
         fileList = $("#inputDeployFile")[0].files;
+    }
+    else {
+        showDialog("File Required", "You must select a file to deploy.");
+        return;
     }
     if (fileList.length > 1) {
         showDialog("File Limit Exceeded", "You can only deploy one file at a time.");
@@ -146,4 +157,8 @@ function deployFiles() {
 }
 function convertResultsToJSON() {
     $("#textDeployResults").val(JSON.stringify(InstaTech.Temp.DeployResults));
+}
+function clearDeployResults() {
+    $("#textDeployResults").val("");
+    delete InstaTech.Temp.DeployResults;
 }

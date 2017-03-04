@@ -1,5 +1,9 @@
 ﻿<div id="divCustomerChat" hidden onload="initCustomerChat()">
     <div class="portal-content-frame">
+        <div class="frame-title">
+            <small>Support Chat</small>
+            <button onclick="$('#divCustomerChat').slideToggle()">X</button>
+        </div>
         <form id="formCustomerChat" onsubmit="submitCustomerChatLogin(event)">
             <input type="hidden" name="Type" value="CustomerChatLogin" />
             <table>

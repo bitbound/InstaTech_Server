@@ -14,7 +14,10 @@ namespace InstaTech.App_Code {
     public static class Utilities
     {
         public static string App_Data { get; } = HttpContext.Current.Server.MapPath("~/App_Data/");
-        public static string Version { get; } = "1.1.2";
+        public static string Version { get; } = "1.2.0";
+        public static bool IsValid { get; set; } = true;
+        public static bool Trial_Version { get; } = false;
+        public static DateTime Trial_Start { get; } = DateTime.Parse("1/1/00 00:00");
         public static List<Tech_Account> Tech_Accounts
         {
             get
@@ -29,21 +32,32 @@ namespace InstaTech.App_Code {
         }
         public static void License_Check()
         {
-            var request = System.Net.WebRequest.CreateHttp("https://instatech.org/Services/Licence_Check.cshtml");
-            request.Method = "POST";
-            using (var rs = request.GetRequestStream())
+            try
             {
-                using (var sw = new System.IO.StreamWriter(rs))
+                var request = System.Net.WebRequest.CreateHttp("https://instatech.org/Services/Licence_Check.cshtml");
+                request.Method = "POST";
+                using (var rs = request.GetRequestStream())
                 {
-                    var content = new
+                    using (var sw = new System.IO.StreamWriter(rs))
                     {
-                        CompanyName = Config.Current.Company_Name,
-                        LicenseKey = Config.Current.License_Key
-                    };
-                    sw.Write(System.Web.Helpers.Json.Encode(content));
+                        var content = new
+                        {
+                            CompanyName = Config.Current.Company_Name,
+                            LicenseKey = Config.Current.License_Key
+                        };
+                        sw.Write(Json.Encode(content));
+                    }
+                }
+                var response = request.GetResponse();
+                using (var rs = response.GetResponseStream())
+                {
+                    using (var sr = new StreamReader(rs))
+                    {
+                        IsValid = bool.Parse(sr.ReadToEnd());
+                    }
                 }
             }
-            request.GetResponse();
+            catch { }
         }
         public static void Set_File_Encryption(bool Encrypt)
         {

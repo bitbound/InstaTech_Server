@@ -1,0 +1,130 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>InstaTech Quick Start</title>
+</head>
+<body>
+    <div class="body-frame">
+        <h1>InstaTech Quick Start Guide</h1>
+        <div>
+            Congratulations!  Your InstaTech server is installed.  But now what?  This guide contains the information you'll need to start using InstaTech.  For in-depth documentation, check out the reference guide that's mentioned later.
+        </div>
+        <h2>
+            Configuring SSL
+        </h2>
+        <div>
+            The very first thing you need to do is set up SSL on your website.  By design, InstaTech won't work without SSL encryption.  There are many options out there for SSL certificates, so you may want to do some research before committing to any one in particular.  If you're unfamiliar with SSL or IIS in general, I highly recommend doing some additional research to get comfortable using them.
+            <br />
+            <br />
+            Here are two easy (and free) ways to get an SSL certificate installed:
+            <ul>
+                <li>
+                    <strong>Use Certify.</strong> Powered by <a href="https://letsencrypt.org/" target="_blank">Let's Encrypt</a>, this is by far the easiest way to get and install a root certificate.  A root certificate means that it will be recognized by all major browsers.  The only downside to these certificates is that they expire every 90 days.  However, they're free, trusted everywhere, and Certify makes it a one-click affair to install and update them.
+                    <br />
+                    <br />
+                    Certify Page: <a href="http://certify.webprofusion.com/" target="_blank">http://certify.webprofusion.com/</a>
+                    <br />
+                    <br />
+                </li>
+                <li>
+                    <strong>Create a self-signed certificate.</strong> This should only be used for testing purposes, and only if you'll be testing it within your local network.  You should not use a self-signed certificate if you will have people outside your network visiting the site.
+                    <br />
+                    <br />
+                    With that said, creating your own certificate could be a temporary solution until you get a real certificate in place.  Here's how: <a href="https://technet.microsoft.com/en-us/library/cc753127(v=ws.10).aspx" target="_blank">https://technet.microsoft.com/en-us/library/cc753127(v=ws.10).aspx</a>
+                </li>
+            </ul>
+            For a more detailed guide on setting up SSL in IIS, here's a good article:
+            <a href="https://www.iis.net/learn/manage/configuring-security/how-to-set-up-ssl-on-iis" target="_blank">https://www.iis.net/learn/manage/configuring-security/how-to-set-up-ssl-on-iis</a>
+        </div>
+        <h2>
+            Logging In
+        </h2>
+        <div>
+            There's a built-in admin account already made, and you'll want to set the password for it as soon as possible.  The username is simply "admin", and the password is "password".  When you log in for the first time, it will prompt you to set a new password.  Passwords must be at least 8 characters long.
+            <br />
+            <br />
+            Once you're logged in, you can change the default admin username in Configuration and delete "admin", if you'd like.
+        </div>
+        <h2>
+            Navigating
+        </h2>
+        <div>
+            You'll need to navigate to the Tech Portal to log in.  When you open the InstaTech Server in your browser, you'll see the Customer Portal.  This is where customers can initiate a support chat session or download the remote control client to allow someone into their computer.  The button at the top left will switch you to the Tech Portal, and the login link will be at the top right.
+            <br /><br />
+            The website is a Single-Page Application, so you don't actually navigate to a new page when you switch portals.  However, you can still create a direct link to the Tech Portal by adding "?user=tech" to the end of the URL (e.g. "https://demo.instatech.org/?user=tech").
+            <br />
+            <br />
+            Here are the key areas you'll want to know:
+            <ul>
+                <li>
+                    <strong>https://[yourhostname]/?user=tech</strong>  Takes you directly to the Tech Portal.
+                </li>
+                <li>
+                    <strong>https://[yourhostname]/Docs/Quick_Start.html</strong>  This Quick Start guide.
+                </li>
+                <li>
+                    <strong>https://[yourhostname]/Docs/Reference.html</strong>  The full reference guide.
+                </li>
+                <li>
+                    <strong>https://[yourhostname]/Remote_Control/</strong>  Direct link to the remote control web app.
+                </li>
+                <li>
+                    <strong>https://[yourhostname]/Downloads/InstaTech_Client.exe</strong>  Direct download link for the Windows 8+ client.
+                </li>
+            </ul>
+        </div>
+        <h2>
+            Using the Remote Control
+        </h2>
+        <div>
+            There are two ways to initiate a remote session.  The first is by opening the client on the customer's computer, then entering the randomly-generated Session ID into the remote control on the technician's computer.
+            <br />
+            <br />
+            The other way is by connecting to a computer that has the InstaTech Server installed.  When the service is installed, the computer will show up in the Computer Hub and on the search utility in the remote control's Unattended mode.  Admins will see all computers, while standard technicians only see computers they have access to.  See the full reference guide to learn more about Access Levels.
+            <br />
+            <br />
+            Once connected, the things you can do are limited by the type of client to which you're connected.  If the client was opened by a standard (non-admin) Windows account, you won't be able to open anything as an admin or interact with any windows that are open in an "elevated" process.  You also can't interact with UAC prompts or the lock screen.
+            <br />
+            <br />
+            If the client was opened by an admin Windows account, you'll be able to interact with elevated processes.  To interact with UAC prompts and the lock screen, you can do a one-time service upgrade via the client's menu.
+            <br />
+            <br />
+            If you're connected to the service, you'll have unrestricted access to everything.
+            <br />
+            <br />
+            Note:  While you can technically remote into your own computer, it's not recommended.  You'll get an "infinite loop tunnel" that's difficult to explain and even more difficult to look at, and moving your cursor over the remote control window will make your mouse cursor jump to the edges of your monitor.
+        </div>
+        <h2>
+            Installing the Service
+        </h2>
+        <div>
+            The service can be installed via the menu in InstaTech_Client.exe or using the "-install" switch on the command line.  Both the client and the service EXEs will accept the -install switch.
+            <br /><br />
+            If you don't have a current method available for deploying the service to remote machines, you can try the deployer script I created at <a href="https://instatech.org/Downloads/?scrollto=divUtilities" target="_blank">https://instatech.org/Downloads/?scrollto=divUtilities</a>
+        </div>
+        <h2>
+            Going Forward
+        </h2>
+        <div>
+            For in-depth documentation on all aspects of the InstaTech Server and Client, please see the full reference guide.  If you have any questions, feel free to email me at <a href="mailto:jared@translucency.info">jared@translucency.info</a>.
+            <br /><br />
+            Thank you for choosing InstaTech!
+            <br /><br />
+            <span style="margin-left: 20px">- Jared Goodwin</span>
+        </div>
+    </div>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .body-frame {
+            margin: 5px 20px 5px 20px;
+            background-color: rgb(230, 230, 230);
+            padding: 5px 20px 20px 20px;
+        }
+        h2 {
+            margin-bottom: 5px;
+        }
+    </style>
+</body>
+</html>

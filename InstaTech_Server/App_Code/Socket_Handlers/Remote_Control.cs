@@ -13,7 +13,7 @@ namespace InstaTech.App_Code.Socket_Handlers
     {
         
         #region User-Defined Properties.
-        public static WebSocketCollection SocketCollection { get; set; } = new WebSocketCollection();
+        public static List<Remote_Control> SocketCollection { get; } = new WebSocketCollection().Cast<Remote_Control>().ToList();
         public string SessionID { get; set; }
         public Remote_Control Partner { get; set; }
         public string ComputerName { get; set; } = "";
@@ -366,7 +366,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                 }
                 else if (ConnectionType == ConnectionTypes.ClientService)
                 {
-                    var client = SocketCollection.FirstOrDefault(sock => (sock as Remote_Control).ComputerName == JsonData.ComputerName);
+                    var client = SocketCollection.Find(sock => (sock as Remote_Control).ComputerName == JsonData.ComputerName);
                     if (client != null)
                     {
                         JsonData.Status = "ServiceDuplicate";
@@ -428,7 +428,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                     return;
                 }
                 var computers = new List<string>();
-                var clients = SocketCollection.Cast<Remote_Control>().ToList().FindAll(rc => rc.ConnectionType == ConnectionTypes.ClientService);
+                var clients = SocketCollection.FindAll(rc => rc.ConnectionType == ConnectionTypes.ClientService);
                 if (TechAccount.AccessLevel == Tech_Account.Access_Levels.Admin)
                 {
                     foreach (var client in clients)
@@ -455,7 +455,7 @@ namespace InstaTech.App_Code.Socket_Handlers
         {
             try
             {
-                var client = SocketCollection.FirstOrDefault(sock => ((Remote_Control)sock).SessionID == JsonData.SessionID.ToString().Replace(" ", "") && ((Remote_Control)sock).ConnectionType == ConnectionTypes.ClientApp);
+                var client = SocketCollection.Find(sock => sock.SessionID == JsonData.SessionID.ToString().Replace(" ", "") && sock.ConnectionType == ConnectionTypes.ClientApp);
                 if (client != null)
                 {
                     if ((client as Remote_Control).Partner != null)
@@ -465,8 +465,8 @@ namespace InstaTech.App_Code.Socket_Handlers
                     }
                     else
                     {
-                        this.Partner = (Remote_Control)client;
-                        ((Remote_Control)client).Partner = this;
+                        this.Partner = client;
+                        client.Partner = this;
                         JsonData.Status = "ok";
                         Send(Json.Encode(JsonData));
                         client.Send(Json.Encode(JsonData));
@@ -488,30 +488,44 @@ namespace InstaTech.App_Code.Socket_Handlers
         {
             try
             {
-                var serviceClient = (Remote_Control)SocketCollection.FirstOrDefault(sock => ((Remote_Control)sock).ComputerName == JsonData.ComputerName.ToString().Trim().ToLower() && ((Remote_Control)sock).ConnectionType == ConnectionTypes.ClientService);
+                var serviceClient = SocketCollection.Find(sock => sock.ComputerName == JsonData.ComputerName.ToString().Trim().ToLower() && sock.ConnectionType == ConnectionTypes.ClientService);
                 if (!TechAccount.ComputerGroups.Contains(serviceClient?.ComputerGroup) && TechAccount.AccessLevel != Tech_Account.Access_Levels.Admin)
                 {
                     JsonData.Status = "unauthorized";
                     Send(Json.Encode(JsonData));
                     return;
                 }
-                var consoleClient = (Remote_Control)SocketCollection.FirstOrDefault(sock => ((Remote_Control)sock).ComputerName == JsonData.ComputerName.ToString().Trim().ToLower() && ((Remote_Control)sock).ConnectionType == ConnectionTypes.ClientConsole);
+                var consoleClient = SocketCollection.Find(sock => sock.ComputerName == JsonData.ComputerName.ToString().Trim().ToLower() && sock.ConnectionType == ConnectionTypes.ClientConsole);
                 if (consoleClient != null)
                 {
                     if (consoleClient.Partner != null)
                     {
-                        JsonData.Status = "AlreadyHasPartner";
-                        Send(Json.Encode(JsonData));
-                        return;
+                        if (consoleClient.Partner?.TechAccount?.UserID == TechAccount.UserID)
+                        {
+                            consoleClient.Partner.Close();
+                        }
+                        else
+                        {
+                            JsonData.Status = "AlreadyHasPartner";
+                            Send(Json.Encode(JsonData));
+                            return;
+                        }
                     }
                 }
                 if (serviceClient != null)
                 {
                     if (serviceClient.Partner != null)
                     {
-                        JsonData.Status = "AlreadyHasPartner";
-                        Send(Json.Encode(JsonData));
-                        return;
+                        if (serviceClient.Partner?.TechAccount?.UserID == TechAccount.UserID)
+                        {
+                            serviceClient.Partner.Close();
+                        }
+                        else
+                        {
+                            JsonData.Status = "AlreadyHasPartner";
+                            Send(Json.Encode(JsonData));
+                            return;
+                        }
                     }
                     this.Partner = serviceClient;
                     serviceClient.Partner = this;
@@ -532,7 +546,7 @@ namespace InstaTech.App_Code.Socket_Handlers
         }
         public void HandleQuickConnect(dynamic JsonData)
         {
-            var techSocket = Socket_Main.SocketCollection.Cast<Socket_Main>().FirstOrDefault(sm => sm?.TechAccount?.UserID == JsonData.UserID);
+            var techSocket = Socket_Main.SocketCollection.Find(sm => sm?.TechAccount?.UserID == JsonData.UserID);
             if (techSocket == null || techSocket.AuthenticationToken != JsonData.AuthenticationToken)
             {
                 JsonData.Status = "denied";
@@ -542,7 +556,7 @@ namespace InstaTech.App_Code.Socket_Handlers
             ConnectionType = ConnectionTypes.ViewerApp;
             TechAccount = (Tech_Account)techSocket.TechAccount.Clone();
             AuthenticationToken = techSocket.AuthenticationToken;
-            var customerSocket = SocketCollection.Cast<Remote_Control>().FirstOrDefault(rc => rc.ConnectionType == ConnectionTypes.ClientService && rc.ComputerName == JsonData.ComputerName);
+            var customerSocket = SocketCollection.Find(rc => rc.ConnectionType == ConnectionTypes.ClientService && rc.ComputerName == JsonData.ComputerName);
             if (customerSocket == null)
             {
                 JsonData.Status = "notfound";
@@ -589,7 +603,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                         break;
                     }
                     System.Threading.Thread.Sleep(200);
-                    serviceClient = (Remote_Control)SocketCollection.FirstOrDefault(sock => ((Remote_Control)sock).ComputerName == JsonData.ComputerName.ToString().Trim().ToLower() && ((Remote_Control)sock).ConnectionType == ConnectionTypes.ClientServiceOnce);
+                    serviceClient = SocketCollection.Find(sock => sock.ComputerName == JsonData.ComputerName.ToString().Trim().ToLower() && sock.ConnectionType == ConnectionTypes.ClientServiceOnce);
                 }
                 if (serviceClient != null)
                 {
@@ -607,7 +621,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                             break;
                         }
                         System.Threading.Thread.Sleep(200);
-                        consoleClient = (Remote_Control)SocketCollection.FirstOrDefault(sock => ((Remote_Control)sock).ComputerName == JsonData.ComputerName.ToString().Trim().ToLower() && ((Remote_Control)sock).ConnectionType == ConnectionTypes.ClientConsoleOnce);
+                        consoleClient = SocketCollection.Find(sock => sock.ComputerName == JsonData.ComputerName.ToString().Trim().ToLower() && sock.ConnectionType == ConnectionTypes.ClientConsoleOnce);
                     }
                     if (consoleClient != null)
                     {
@@ -648,7 +662,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                 {
                     var started = DateTime.Now;
                     var success = true;
-                    while (SocketCollection.Where(sock => ((Remote_Control)sock).ComputerName == ComputerName && ((Remote_Control)sock).ConnectionType == ConnectionTypes.ClientConsole).Count() == 0)
+                    while (SocketCollection.Where(sock => sock.ComputerName == ComputerName && sock.ConnectionType == ConnectionTypes.ClientConsole).Count() == 0)
                     {
                         System.Threading.Thread.Sleep(200);
                         if (DateTime.Now - started > TimeSpan.FromSeconds(5))
@@ -686,7 +700,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                 {
                     return;
                 }
-                var consoleClient = (Remote_Control)SocketCollection.FirstOrDefault(sock => ((Remote_Control)sock).ComputerName == JsonData.ComputerName.ToString().Trim().ToLower() && ((Remote_Control)sock).ConnectionType == ConnectionTypes.ClientConsole);
+                var consoleClient = SocketCollection.Find(sock => sock.ComputerName == JsonData.ComputerName.ToString().Trim().ToLower() && sock.ConnectionType == ConnectionTypes.ClientConsole);
                 if (consoleClient != null)
                 {
                     if (consoleClient.Partner != null)
@@ -718,7 +732,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                 Partner.Send(Json.Encode(JsonData));
                 var startTime = DateTime.Now;
                 JsonData.Status = "ok";
-                while (!SocketCollection.Cast<Remote_Control>().ToList().Exists(sock => sock.ComputerName == ComputerName && sock.ConnectionType == ConnectionTypes.ClientConsole && sock.Partner == null))
+                while (!SocketCollection.Exists(sock => sock.ComputerName == ComputerName && sock.ConnectionType == ConnectionTypes.ClientConsole && sock.Partner == null))
                 {
                     System.Threading.Thread.Sleep(200);
                     if (DateTime.Now - startTime > TimeSpan.FromSeconds(5))
@@ -737,7 +751,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                 else
                 {
                     SocketCollection.Remove(this);
-                    var newClient = (Remote_Control)SocketCollection.FirstOrDefault(sock => ((Remote_Control)sock).ComputerName == ComputerName && ((Remote_Control)sock).ConnectionType == ConnectionTypes.ClientConsole && (sock as Remote_Control).Partner == null);
+                    var newClient = SocketCollection.Find(sock => sock.ComputerName == ComputerName && sock.ConnectionType == ConnectionTypes.ClientConsole && sock.Partner == null);
                     newClient.Partner = Partner;
                     Partner.Partner = newClient;
                     JsonData.Status = "ok";
@@ -794,7 +808,7 @@ namespace InstaTech.App_Code.Socket_Handlers
         {
             try
             {
-                var sender = Socket_Main.SocketCollection.Cast<Socket_Main>().FirstOrDefault(sm => sm.ConnectionType == Socket_Main.ConnectionTypes.Technician && sm.TechAccount.UserID == JsonData.FromID);
+                var sender = Socket_Main.SocketCollection.Find(sm => sm.ConnectionType == Socket_Main.ConnectionTypes.Technician && sm.TechAccount.UserID == JsonData.FromID);
                 if (sender != null)
                 {
                     sender.Send(Json.Encode(JsonData));

@@ -4,11 +4,11 @@
 
     void Application_Start(object sender, EventArgs e)
     {
-        try
+        if (!System.Diagnostics.Process.GetCurrentProcess().ProcessName.Contains("iisexpress"))
         {
             InstaTech.App_Code.Utilities.License_Check();
         }
-        catch { }
+
         if (!System.IO.Directory.Exists(InstaTech.App_Code.Utilities.App_Data))
         {
             System.IO.Directory.CreateDirectory(InstaTech.App_Code.Utilities.App_Data);
@@ -73,7 +73,7 @@
     void Session_Start(object sender, EventArgs e)
     {
         // Code that runs when a new session is started
-        
+
     }
 
     void Session_End(object sender, EventArgs e)
@@ -86,6 +86,18 @@
     }
     void Application_BeginRequest(object sender, EventArgs e)
     {
+        if (!InstaTech.App_Code.Utilities.IsValid)
+        {
+            Response.Write("<h1>This copy of the InstaTech Server is not properly licensed.</h1><h3>A license can be purchased at <a href='https://instatech.org/Purchase/'>https://instatech.org/Purchase/</a></h3>");
+            Response.End();
+            return;
+        }
+        if (InstaTech.App_Code.Utilities.Trial_Version && DateTime.Now - InstaTech.App_Code.Utilities.Trial_Start > TimeSpan.FromDays(14))
+        {
+            Response.Write("<h1>Your InstaTech Server trial has expired.</h1><h3>A permanent license can be purchased at <a href='https://instatech.org/Purchase/'>https://instatech.org/Purchase/</a></h3>");
+            Response.End();
+            return;
+        }
         if (!Request.IsLocal && !Request.IsSecureConnection)
         {
             Response.RedirectPermanent(Request.Url.AbsoluteUri.ToLower().Replace("http://", "https://"), true);

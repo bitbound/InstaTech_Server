@@ -7,10 +7,17 @@
         </div>
         <table id="tableConfiguration">
             <tr>
+                @{
+                    <td>
+                        @if (InstaTech.App_Code.Utilities.Trial_Version)
+                        {
+                            <small>Trial Expires: @((InstaTech.App_Code.Utilities.Trial_Start + TimeSpan.FromDays(14)).ToString())</small>
+                        }
+                    </td>
+                }
                 <td>
                     <small>Server Version: @InstaTech.App_Code.Utilities.Version</small>
                 </td>
-                <td></td>
             </tr>
             <tr style="height: 10px">
                 <!-- Spacer row. -->
@@ -59,7 +66,7 @@
                     </div>
                 </td>
             </tr>
-            <tr>
+            @*<tr>
                 <td>
                     AD Enabled:
                 </td>
@@ -84,7 +91,7 @@
                 <td>
                     <input id="inputADAdminGroup" type="text" prop="AD_Admin_Group" onchange="changeStringProperty(event)" title="The Active Directory group used to determine if an account has admin-level access." />
                 </td>
-            </tr>
+            </tr>*@
             <tr>
                 <td>
                     Feature - Chat:
