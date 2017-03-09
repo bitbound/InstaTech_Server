@@ -303,7 +303,7 @@ namespace InstaTech.App_Code.Socket_Handlers
             };
             Send(Json.Encode(request));
         }
-        private void LogFileDeployment(dynamic JsonData)
+        public void LogFileDeployment(dynamic JsonData)
         {
             try
             {
@@ -314,10 +314,36 @@ namespace InstaTech.App_Code.Socket_Handlers
                 }
                 var entry = new
                 {
-                    Timestamp = DateTime.Now,
+                    Timestamp = DateTime.Now.ToString(),
                     FileName = JsonData.FileName,
                     URL = JsonData.URL,
                     Arguments = JsonData.Arguments,
+                    TargetComputer = JsonData.TargetComputer,
+                    FromID = JsonData.FromID,
+                    ExitCode = JsonData.ExitCode,
+                    Output = JsonData.Output
+                };
+                File.AppendAllText(filePath, Json.Encode(entry) + Environment.NewLine);
+            }
+            catch (Exception ex)
+            {
+                Utilities.WriteToLog(ex);
+            }
+        }
+        public void LogConsoleCommand(dynamic JsonData)
+        {
+            try
+            {
+                var filePath = Path.Combine(Utilities.App_Data, "Logs", "Console_Commands", DateTime.Now.Year.ToString(), DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Day.ToString().PadLeft(2, '0') + ".txt");
+                if (!Directory.Exists(Path.GetDirectoryName(filePath)))
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                }
+                var entry = new
+                {
+                    Timestamp = DateTime.Now.ToString(),
+                    Language = JsonData.Language,
+                    Command = Encoding.UTF8.GetString(Convert.FromBase64String(JsonData.Command)),
                     TargetComputer = JsonData.TargetComputer,
                     FromID = JsonData.FromID,
                     ExitCode = JsonData.ExitCode,
@@ -477,6 +503,18 @@ namespace InstaTech.App_Code.Socket_Handlers
                                 account.AuthenticationToken = null;
                             }
                             account.Save();
+                            if (SocketCollection.Exists(sock => sock?.TechAccount?.UserID == account.UserID))
+                            {
+                                foreach (var login in SocketCollection.FindAll(sock => sock?.TechAccount?.UserID == account.UserID))
+                                {
+                                    var request = new
+                                    {
+                                        Type = "NewLogin"
+                                    };
+                                    login.Send(Json.Encode(request));
+                                    login.Close();
+                                }
+                            }
                             TechAccount = account;
                             JsonData.Status = "ok";
                             JsonData.AuthenticationToken = AuthenticationToken;
@@ -500,6 +538,18 @@ namespace InstaTech.App_Code.Socket_Handlers
                             account.AuthenticationToken = null;
                         }
                         account.Save();
+                        if (SocketCollection.Exists(sock => sock?.TechAccount?.UserID == account.UserID))
+                        {
+                            foreach (var login in SocketCollection.FindAll(sock => sock?.TechAccount?.UserID == account.UserID))
+                            {
+                                var request = new
+                                {
+                                    Type = "NewLogin"
+                                };
+                                login.Send(Json.Encode(request));
+                                login.Close();
+                            }
+                        }
                         TechAccount = account;
                         JsonData.Status = "ok";
                         JsonData.AuthenticationToken = AuthenticationToken;
@@ -516,6 +566,18 @@ namespace InstaTech.App_Code.Socket_Handlers
                             account.BadLoginAttempts = 0;
                             account.TempPassword = "";
                             account.Save();
+                            if (SocketCollection.Exists(sock => sock?.TechAccount?.UserID == account.UserID))
+                            {
+                                foreach (var login in SocketCollection.FindAll(sock => sock?.TechAccount?.UserID == account.UserID))
+                                {
+                                    var request = new
+                                    {
+                                        Type = "NewLogin"
+                                    };
+                                    login.Send(Json.Encode(request));
+                                    login.Close();
+                                }
+                            }
                             TechAccount = account;
                             JsonData.Access = TechAccount.AccessLevel.ToString();
                             JsonData.Status = "ok";
@@ -1594,7 +1656,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                 }
                 else if (JsonData.SearchBy == "User")
                 {
-                    services.RemoveAll(rc => !rc.CurrentUser.Contains(JsonData.SearchString));
+                    services.RemoveAll(rc => !rc.CurrentUser.Contains(JsonData.SearchString) && !rc.LastLoggedOnUser.Contains(JsonData.SearchString));
                 }
                 else
                 {
@@ -1664,6 +1726,10 @@ namespace InstaTech.App_Code.Socket_Handlers
         {
             try
             {
+                if (!AuthenticateTech(JsonData))
+                {
+                    return;
+                }
                 var target = Remote_Control.SocketCollection.Find(rc => rc.ConnectionType == Remote_Control.ConnectionTypes.ClientService && rc.ComputerName == JsonData.TargetComputer);
                 if (target == null)
                 {
@@ -1678,7 +1744,38 @@ namespace InstaTech.App_Code.Socket_Handlers
                     return;
                 }
                 target.Send(Json.Encode(JsonData));
+                // Response is received on Remote_Control socket.
                 LogFileDeployment(JsonData);
+            }
+            catch (Exception ex)
+            {
+                Utilities.WriteToLog(ex);
+            }
+        }
+        public void HandleConsoleCommand(dynamic JsonData)
+        {
+            try
+            {
+                if (!AuthenticateTech(JsonData))
+                {
+                    return;
+                }
+                var target = Remote_Control.SocketCollection.Find(rc => rc.ConnectionType == Remote_Control.ConnectionTypes.ClientService && rc.ComputerName == JsonData.TargetComputer);
+                if (target == null)
+                {
+                    JsonData.Status = "notfound";
+                    Send(Json.Encode(JsonData));
+                    return;
+                }
+                if (!TechAccount.ComputerGroups.Contains(target.ComputerGroup) && TechAccount.AccessLevel != Tech_Account.Access_Levels.Admin)
+                {
+                    JsonData.Status = "denied";
+                    Send(Json.Encode(JsonData));
+                    return;
+                }
+                target.Send(Json.Encode(JsonData));
+                // Response is received on Remote_Control socket.
+                LogConsoleCommand(JsonData);
             }
             catch (Exception ex)
             {

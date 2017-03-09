@@ -723,10 +723,13 @@ text-align: center;
     padding: 3px 8px;
 }
 .hub-action-content {
-    max-width: 50vw;
     text-align: left;
     display: inline-block;
 }
 #divDeployFile td input {
     width: 100%;
+}
+#tdHubActions button {
+    width: 84px;
+    height: 48px;
 }

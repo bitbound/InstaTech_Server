@@ -1,2 +1,0 @@
-sc stop InstaTech_Service
-sc delete InstaTech_Service

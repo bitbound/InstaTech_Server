@@ -14,7 +14,7 @@ namespace InstaTech.App_Code {
     public static class Utilities
     {
         public static string App_Data { get; } = HttpContext.Current.Server.MapPath("~/App_Data/");
-        public static string Version { get; } = "1.2.0";
+        public static string Version { get; } = "1.3.1";
         public static bool IsValid { get; set; } = true;
         public static bool Trial_Version { get; } = false;
         public static DateTime Trial_Start { get; } = DateTime.Parse("1/1/00 00:00");

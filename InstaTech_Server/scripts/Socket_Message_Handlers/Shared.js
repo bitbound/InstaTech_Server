@@ -128,3 +128,7 @@ function handleGetAllComputerGroups(e) {
         InstaTech.ComputerGroups = e.ComputerGroups;
     }
 }
+function handleNewLogin(e) {
+    clearCachedCreds();
+    showDialog("Logged Out", "You have been logged out due to a login from another browser.");
+}

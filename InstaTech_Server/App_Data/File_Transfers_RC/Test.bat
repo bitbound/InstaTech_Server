@@ -1,1 +1,2 @@
-echo Here is some test echo stuff.
+cd C:\
+dir

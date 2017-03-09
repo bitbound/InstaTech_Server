@@ -1,1 +1,0 @@
-echo Here is some test echo stuff.

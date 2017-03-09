@@ -6,6 +6,7 @@ using Microsoft.Web.WebSockets;
 using System.Web.Helpers;
 using InstaTech.App_Code.Models;
 using System.IO;
+using System.Text;
 
 namespace InstaTech.App_Code.Socket_Handlers
 {
@@ -238,6 +239,19 @@ namespace InstaTech.App_Code.Socket_Handlers
                                 account.AuthenticationToken = null;
                             }
                             account.Save();
+                            if (SocketCollection.Exists(sock => sock?.TechAccount?.UserID == account.UserID))
+                            {
+                                foreach (var login in SocketCollection.FindAll(sock => sock?.TechAccount?.UserID == account.UserID))
+                                {
+                                    var request = new
+                                    {
+                                        Type = "NewLogin"
+                                    };
+                                    login.Send(Json.Encode(request));
+                                    login.Close();
+                                }
+                            }
+                            TechAccount = account;
                             JsonData.Status = "ok";
                             JsonData.AuthenticationToken = AuthenticationToken;
                             Send(Json.Encode(JsonData));
@@ -258,6 +272,18 @@ namespace InstaTech.App_Code.Socket_Handlers
                             account.AuthenticationToken = null;
                         }
                         account.Save();
+                        if (SocketCollection.Exists(sock => sock?.TechAccount?.UserID == account.UserID))
+                        {
+                            foreach (var login in SocketCollection.FindAll(sock => sock?.TechAccount?.UserID == account.UserID))
+                            {
+                                var request = new
+                                {
+                                    Type = "NewLogin"
+                                };
+                                login.Send(Json.Encode(request));
+                                login.Close();
+                            }
+                        }
                         TechAccount = account;
                         JsonData.Status = "ok";
                         JsonData.AuthenticationToken = AuthenticationToken;
@@ -272,6 +298,18 @@ namespace InstaTech.App_Code.Socket_Handlers
                             account.BadLoginAttempts = 0;
                             account.TempPassword = "";
                             account.Save();
+                            if (SocketCollection.Exists(sock => sock?.TechAccount?.UserID == account.UserID))
+                            {
+                                foreach (var login in SocketCollection.FindAll(sock => sock?.TechAccount?.UserID == account.UserID))
+                                {
+                                    var request = new
+                                    {
+                                        Type = "NewLogin"
+                                    };
+                                    login.Send(Json.Encode(request));
+                                    login.Close();
+                                }
+                            }
                             TechAccount = account;
                             JsonData.Status = "ok";
                             Send(Json.Encode(JsonData));
@@ -379,7 +417,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                         }
                         var entry = new
                         {
-                            Timestamp = DateTime.Now,
+                            Timestamp = DateTime.Now.ToString(),
                             Message = "The service may be running on two computers that have the same name.",
                             ComputerName = JsonData.ComputerName.ToString().Trim(),
                             IPAddress = WebSocketContext.UserHostAddress
@@ -812,8 +850,24 @@ namespace InstaTech.App_Code.Socket_Handlers
                 if (sender != null)
                 {
                     sender.Send(Json.Encode(JsonData));
+                    sender.LogFileDeployment(JsonData);
                 }
-                LogFileDeployment(JsonData);
+            }
+            catch (Exception ex)
+            {
+                Utilities.WriteToLog(ex);
+            }
+        }
+        public void HandleConsoleCommand(dynamic JsonData)
+        {
+            try
+            {
+                var sender = Socket_Main.SocketCollection.Find(sm => sm.ConnectionType == Socket_Main.ConnectionTypes.Technician && sm.TechAccount.UserID == JsonData.FromID);
+                if (sender != null)
+                {
+                    sender.Send(Json.Encode(JsonData));
+                    sender.LogConsoleCommand(JsonData);
+                }
             }
             catch (Exception ex)
             {
@@ -831,7 +885,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                 }
                 var entry = new
                 {
-                    Timestamp = DateTime.Now,
+                    Timestamp = DateTime.Now.ToString(),
                     HostAddress = WebSocketContext.UserHostAddress,
                     UserAgent = WebSocketContext.UserAgent,
                     ConnectionType = ConnectionType.ToString(),
@@ -855,36 +909,9 @@ namespace InstaTech.App_Code.Socket_Handlers
                 }
                 var entry = new
                 {
-                    Timestamp = DateTime.Now,
+                    Timestamp = DateTime.Now.ToString(),
                     SessionID = SessionID,
                     PartnerID = Partner?.SessionID
-                };
-                File.AppendAllText(filePath, Json.Encode(entry) + Environment.NewLine);
-            }
-            catch (Exception ex)
-            {
-                Utilities.WriteToLog(ex);
-            }
-        }
-        private void LogFileDeployment(dynamic JsonData)
-        {
-            try
-            {
-                var filePath = Path.Combine(Utilities.App_Data, "Logs", "File_Deployments", DateTime.Now.Year.ToString(), DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Day.ToString().PadLeft(2, '0') + ".txt");
-                if (!Directory.Exists(Path.GetDirectoryName(filePath)))
-                {
-                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-                }
-                var entry = new
-                {
-                    Timestamp = DateTime.Now,
-                    FileName = JsonData.FileName,
-                    URL = JsonData.URL,
-                    Arguments = JsonData.Arguments,
-                    TargetComputer = JsonData.TargetComputer,
-                    FromID = JsonData.FromID,
-                    ExitCode = JsonData.ExitCode,
-                    Output = JsonData.Output
                 };
                 File.AppendAllText(filePath, Json.Encode(entry) + Environment.NewLine);
             }

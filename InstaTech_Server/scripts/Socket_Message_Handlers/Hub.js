@@ -49,6 +49,7 @@
                 $("#tableComputerHub tbody").append(tr);
             }
         }
+        window.scroll(0, $("#tableComputerHub").offset().top);
     }
 }
 function handleSetComputerGroup(e) {
@@ -75,7 +76,22 @@ function handleFileDeploy(e) {
         InstaTech.Temp.DeployResults = InstaTech.Temp.DeployResults || [];
         InstaTech.Temp.DeployResults.push(e);
         $("#textDeployResults")[0].value += "[SUCCESS]\nComputer: " + e.TargetComputer + "\nExit Code: " + e.ExitCode + "\nOutput: " + e.Output;
-        $("#textDeployResults")[0].scrollTop = $("#textDeployResults")[0].scrollHeight;
     }
     $("#textDeployResults")[0].value += "\n-------------------------\n\n";
+    $("#textDeployResults")[0].scrollTop = $("#textDeployResults")[0].scrollHeight;
+}
+function handleConsoleCommand(e) {
+    if (e.Status == "denied") {
+        $("#textConsoleOutput")[0].value += "[FAILED]\nAccess to " + e.TargetComoputer + " denied.";
+    }
+    else if (e.Status == "notfound") {
+        $("#textConsoleOutput")[0].value += "[FAILED]\nComputer " + e.TargetComoputer + " wasn't found.";
+    }
+    else if (e.Status == "ok") {
+        InstaTech.Temp.DeployResults = InstaTech.Temp.DeployResults || [];
+        InstaTech.Temp.DeployResults.push(e);
+        $("#textConsoleOutput")[0].value += "[SUCCESS]\nComputer: " + e.TargetComputer + "\nExit Code: " + e.ExitCode + "\nOutput: " + e.Output;
+    }
+    $("#textConsoleOutput")[0].value += "\n-------------------------\n\n";
+    $("#textConsoleOutput")[0].scrollTop = $("#textConsoleOutput")[0].scrollHeight;
 }

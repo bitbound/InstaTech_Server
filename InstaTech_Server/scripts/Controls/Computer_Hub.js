@@ -99,6 +99,7 @@ function openDeployerTool() {
         });
     }
 }
+
 function deployFiles() {
     if ($("#tableComputerHub tbody tr.selected").length == 0) {
         showDialog("Selection Required", "You must select at least one computer first.");
@@ -143,7 +144,8 @@ function deployFiles() {
                     "URL": url,
                     "Arguments": $("#inputDeployArguments").val().trim(),
                     "TargetComputer": elem.innerHTML,
-                    "FromID": InstaTech.UserID
+                    "FromID": InstaTech.UserID,
+                    "AuthenticationToken": InstaTech.AuthenticationToken
                 };
                 InstaTech.Socket_Main.send(JSON.stringify(request));
             })
@@ -161,4 +163,59 @@ function convertResultsToJSON() {
 function clearDeployResults() {
     $("#textDeployResults").val("");
     delete InstaTech.Temp.DeployResults;
+}
+function openHubConsole() {
+    if ($("#tableComputerHub tbody tr.selected").length == 0) {
+        showDialog("Selection Required", "You must select at least one computer first.");
+        return;
+    }
+    if ($("#divHubConsole").is(":visible")) {
+        $("#divHubConsole").slideUp();
+    }
+    else {
+        $("#divHubConsole").slideDown(function () {
+            window.scroll(null, $("#divHubConsole").offset().top);
+        });
+    }
+}
+function inputConsoleKeyPress(e) {
+    if (e.key.toLowerCase() == "enter") {
+        hubConsoleSubmit();
+    }
+}
+function hubConsoleSubmit(e) {
+    if ($("#tableComputerHub tbody tr.selected").length == 0) {
+        showDialog("Selection Required", "You must select at least one computer first.");
+        return;
+    }
+    var command = $("#inputHubConsole").val();
+    $("#inputHubConsole").val("");
+    var language;
+    if ($("#radioConsoleModePS").is(":checked")) {
+        language = "PowerShell";
+    }
+    else if ($("#radioConsoleModeBAT").is(":checked")) {
+        language = "Batch";
+    }
+    else {
+        showDialog("Script Language Required", "You must select a scripting language.");
+        return;
+    }
+    var request = {
+        "Type": "ConsoleCommand",
+        "Language": language,
+        "Command": btoa(command)
+    }
+    var targetElements = $("#tableComputerHub tbody tr.selected td[prop='ComputerName'");
+    targetElements.each(function (index, elem) {
+        var request = {
+            "Type": "ConsoleCommand",
+            "Language": language,
+            "Command": btoa(command),
+            "TargetComputer": elem.innerHTML,
+            "FromID": InstaTech.UserID,
+            "AuthenticationToken": InstaTech.AuthenticationToken
+        };
+        InstaTech.Socket_Main.send(JSON.stringify(request));
+    })
 }

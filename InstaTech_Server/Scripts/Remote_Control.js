@@ -483,6 +483,11 @@ function initWebSocket() {
                         console.log("RTC connection failed.  Falling back to websocket communication.");
                         socket.send(JSON.stringify(request));
                     });
+                    break;
+                case "NewLogin":
+                    clearCachedCreds();
+                    showDialog("Logged Out", "You have been logged out due to a login from another browser.");
+                    break;
                 default:
                     break;
             }
