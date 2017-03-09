@@ -183,13 +183,48 @@ function inputConsoleKeyPress(e) {
         hubConsoleSubmit();
     }
 }
+function inputConsoleKeyDown(e) {
+    if (e.key.toLowerCase() == "up" || e.key.toLowerCase() == "arrowup") {
+        if (InstaTech.Temp.ConsoleHistoryPosition != undefined) {
+            if (InstaTech.Temp.ConsoleHistory[InstaTech.Temp.ConsoleHistoryPosition - 1] != undefined) {
+                $("#inputHubConsole").val(InstaTech.Temp.ConsoleHistory[InstaTech.Temp.ConsoleHistoryPosition - 1]);
+                InstaTech.Temp.ConsoleHistoryPosition--;
+            }
+        }
+    }
+    else if (e.key.toLowerCase() == "down" || e.key.toLowerCase() == "arrowdown") {
+        if (InstaTech.Temp.ConsoleHistoryPosition != undefined) {
+            if (InstaTech.Temp.ConsoleHistory[InstaTech.Temp.ConsoleHistoryPosition + 1] != undefined) {
+                $("#inputHubConsole").val(InstaTech.Temp.ConsoleHistory[InstaTech.Temp.ConsoleHistoryPosition + 1]);
+                InstaTech.Temp.ConsoleHistoryPosition++;
+            }
+            else
+            {
+                if (InstaTech.Temp.ConsoleHistoryPosition == InstaTech.Temp.ConsoleHistory.length - 1) {
+                    $("#inputHubConsole").val("");
+                    InstaTech.Temp.ConsoleHistoryPosition++;
+                }
+            }
+        }
+    }
+    else if (e.key.toLowerCase() == "esc" || e.key.toLowerCase() == "escape") {
+        $("#inputHubConsole").val("");
+        InstaTech.Temp.ConsoleHistoryPosition = InstaTech.Temp.ConsoleHistory.length;
+    }
+}
 function hubConsoleSubmit(e) {
     if ($("#tableComputerHub tbody tr.selected").length == 0) {
         showDialog("Selection Required", "You must select at least one computer first.");
         return;
     }
+    if ($("#inputHubConsole").val().trim() == "") {
+        return;
+    }
     var command = $("#inputHubConsole").val();
     $("#inputHubConsole").val("");
+    InstaTech.Temp.ConsoleHistory = InstaTech.Temp.ConsoleHistory || [];
+    InstaTech.Temp.ConsoleHistory.push(command);
+    InstaTech.Temp.ConsoleHistoryPosition = InstaTech.Temp.ConsoleHistory.length;
     var language;
     if ($("#radioConsoleModePS").is(":checked")) {
         language = "PowerShell";
