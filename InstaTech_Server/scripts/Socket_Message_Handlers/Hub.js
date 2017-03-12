@@ -67,10 +67,10 @@ function handleSetComputerGroup(e) {
 }
 function handleFileDeploy(e) {
     if (e.Status == "denied") {
-        $("#textDeployResults")[0].value += "[FAILED]\nAccess to " + e.TargetComoputer + " denied.";
+        $("#textDeployResults")[0].value += "[FAILED]\nAccess to " + e.TargetComputer + " denied.";
     }
     else if (e.Status == "notfound") {
-        $("#textDeployResults")[0].value += "[FAILED]\nComputer " + e.TargetComoputer + " wasn't found.";
+        $("#textDeployResults")[0].value += "[FAILED]\nComputer " + e.TargetComputer + " wasn't found.";
     }
     else if (e.Status == "ok") {
         InstaTech.Temp.DeployResults = InstaTech.Temp.DeployResults || [];
@@ -82,16 +82,27 @@ function handleFileDeploy(e) {
 }
 function handleConsoleCommand(e) {
     if (e.Status == "denied") {
-        $("#textConsoleOutput")[0].value += "[FAILED]\nAccess to " + e.TargetComoputer + " denied.";
+        $("#textConsoleOutput")[0].value += "[" + e.TargetComputer  + "]\nAccess to denied.\n";
     }
     else if (e.Status == "notfound") {
-        $("#textConsoleOutput")[0].value += "[FAILED]\nComputer " + e.TargetComoputer + " wasn't found.";
+        $("#textConsoleOutput")[0].value += "[" + e.TargetComputer + "]\nComputer wasn't found.\n";
     }
     else if (e.Status == "ok") {
-        InstaTech.Temp.DeployResults = InstaTech.Temp.DeployResults || [];
-        InstaTech.Temp.DeployResults.push(e);
-        $("#textConsoleOutput")[0].value += "[SUCCESS]\nComputer: " + e.TargetComputer + "\nExit Code: " + e.ExitCode + "\nOutput: " + e.Output;
+        $("#textConsoleOutput")[0].value += "[" + e.TargetComputer + "]: " + e.Output + "\n";
     }
-    $("#textConsoleOutput")[0].value += "\n-------------------------\n\n";
+    //$("#textConsoleOutput")[0].value += "\n-------------------------\n\n";
+    $("#textConsoleOutput")[0].scrollTop = $("#textConsoleOutput")[0].scrollHeight;
+}
+function handleNewConsole(e) {
+    if (e.Status == "denied") {
+        $("#textConsoleOutput")[0].value += "[" + e.TargetComputer + "]\nAccess to denied.\n";
+    }
+    else if (e.Status == "notfound") {
+        $("#textConsoleOutput")[0].value += "[" + e.TargetComputer + "]\nComputer wasn't found.\n";
+    }
+    else if (e.Status == "ok") {
+        $("#textConsoleOutput")[0].value += "[" + e.TargetComputer + "]: New console session started.\n";
+    }
+    //$("#textConsoleOutput")[0].value += "\n-------------------------\n\n";
     $("#textConsoleOutput")[0].scrollTop = $("#textConsoleOutput")[0].scrollHeight;
 }

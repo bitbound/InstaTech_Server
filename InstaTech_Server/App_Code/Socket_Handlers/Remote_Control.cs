@@ -874,6 +874,22 @@ namespace InstaTech.App_Code.Socket_Handlers
                 Utilities.WriteToLog(ex);
             }
         }
+        public void HandleNewConsole(dynamic JsonData)
+        {
+            try
+            {
+                var sender = Socket_Main.SocketCollection.Find(sm => sm.ConnectionType == Socket_Main.ConnectionTypes.Technician && sm.TechAccount.UserID == JsonData.FromID);
+                if (sender != null)
+                {
+                    sender.Send(Json.Encode(JsonData));
+                }
+            }
+            catch (Exception ex)
+            {
+                Utilities.WriteToLog(ex);
+            }
+
+        }
         private void LogConnection()
         {
             try

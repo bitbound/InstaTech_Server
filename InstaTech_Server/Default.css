@@ -725,6 +725,7 @@ text-align: center;
 .hub-action-content {
     text-align: left;
     display: inline-block;
+    width:90%;
 }
 #divDeployFile td input {
     width: 100%;

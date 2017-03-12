@@ -346,7 +346,6 @@ namespace InstaTech.App_Code.Socket_Handlers
                     Command = Encoding.UTF8.GetString(Convert.FromBase64String(JsonData.Command)),
                     TargetComputer = JsonData.TargetComputer,
                     FromID = JsonData.FromID,
-                    ExitCode = JsonData.ExitCode,
                     Output = JsonData.Output
                 };
                 File.AppendAllText(filePath, Json.Encode(entry) + Environment.NewLine);
@@ -1776,6 +1775,35 @@ namespace InstaTech.App_Code.Socket_Handlers
                 target.Send(Json.Encode(JsonData));
                 // Response is received on Remote_Control socket.
                 LogConsoleCommand(JsonData);
+            }
+            catch (Exception ex)
+            {
+                Utilities.WriteToLog(ex);
+            }
+        }
+        public void HandleNewConsole(dynamic JsonData)
+        {
+            try
+            {
+                if (!AuthenticateTech(JsonData))
+                {
+                    return;
+                }
+                var target = Remote_Control.SocketCollection.Find(rc => rc.ConnectionType == Remote_Control.ConnectionTypes.ClientService && rc.ComputerName == JsonData.TargetComputer);
+                if (target == null)
+                {
+                    JsonData.Status = "notfound";
+                    Send(Json.Encode(JsonData));
+                    return;
+                }
+                if (!TechAccount.ComputerGroups.Contains(target.ComputerGroup) && TechAccount.AccessLevel != Tech_Account.Access_Levels.Admin)
+                {
+                    JsonData.Status = "denied";
+                    Send(Json.Encode(JsonData));
+                    return;
+                }
+                target.Send(Json.Encode(JsonData));
+                // Response is received on Remote_Control socket.
             }
             catch (Exception ex)
             {

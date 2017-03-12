@@ -132,7 +132,6 @@
                 <button onclick="$('#divHubConsole').slideToggle()">X</button>
             </div>
             <div class="hub-action-content">
-                <div style="width:75vw">
                     <div class="link" onclick="$(this).next().slideToggle()">Click for info.</div>
                     <div hidden>
                         <div>
@@ -180,11 +179,11 @@
                         <tr>
                             <td>
                                 <button type="button" onclick='$("#textConsoleOutput").val("")'>Clear Output</button>
+                                <button type="button" onclick='sendNewConsole()'>New Session</button>
                             </td>
                             <td></td>
                         </tr>
                     </table>
-                </div>
             </div>
         </div>
     </div>
