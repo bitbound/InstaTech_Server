@@ -7,14 +7,15 @@ using System.Web.Helpers;
 using InstaTech.App_Code.Models;
 using System.IO;
 using System.Text;
+using System.Drawing;
 
 namespace InstaTech.App_Code.Socket_Handlers
 {
     public class Remote_Control : WebSocketHandler
     {
-        
+
         #region User-Defined Properties.
-        public static List<Remote_Control> SocketCollection { get; } = new WebSocketCollection().Cast<Remote_Control>().ToList();
+        public static List<Remote_Control> SocketCollection { get; } = new List<Remote_Control>();
         public string SessionID { get; set; }
         public Remote_Control Partner { get; set; }
         public string ComputerName { get; set; } = "";

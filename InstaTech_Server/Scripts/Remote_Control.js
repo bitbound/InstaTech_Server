@@ -237,13 +237,15 @@ function initWebSocket() {
             }
             byteArray = new Uint8Array(e.data);
             var length = byteArray.length;
-            imgX = Number(byteArray[length - 4] * 100 + byteArray[length - 3]);
-            imgY = Number(byteArray[length - 2] * 100 + byteArray[length - 1]);
-            url = window.URL.createObjectURL(new Blob([byteArray.subarray(0, length - 4)]));
+            // Get the XY coordinate of the top-left of the image based on the last 6 bytes appended to the array.
+            imgX = Number((byteArray[length - 6] * 10000) + (byteArray[length - 5] * 100) + byteArray[length - 4]);
+            imgY = Number((byteArray[length - 3] * 10000) + (byteArray[length - 2] * 100) + byteArray[length - 1]);
+            url = window.URL.createObjectURL(new Blob([byteArray.subarray(0, length - 6)]));
             img = document.createElement("img");
             img.onload = function () {
                 context.drawImage(img, imgX, imgY, img.width, img.height);
                 window.URL.revokeObjectURL(url);
+                socket.send('{"Type":"FrameReceived"}');
             };
             img.src = url;
         }

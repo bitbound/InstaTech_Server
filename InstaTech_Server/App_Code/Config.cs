@@ -14,7 +14,7 @@ namespace InstaTech.App_Code
         public string Company_Name { get; set; } = "InstaTech";
 
         // Your server license provided by InstaTech.
-        public string License_Key { get; } = "";
+        public string License_Key { get; } = "Trial-";
 
         // This is the single, default admin account that will be created on first start.
         // The temporary password will be "password".  You can use this account to create

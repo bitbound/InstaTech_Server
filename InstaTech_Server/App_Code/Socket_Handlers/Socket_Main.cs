@@ -18,7 +18,7 @@ namespace InstaTech.App_Code.Socket_Handlers
     public class Socket_Main : WebSocketHandler
     {
         #region User-Defined Properties/Fields
-        public static List<Socket_Main> SocketCollection { get; } = new WebSocketCollection().Cast<Socket_Main>().ToList();
+        public static List<Socket_Main> SocketCollection { get; } = new List<Socket_Main>();
         public static List<Socket_Main> Customers
         {
             get
