@@ -952,7 +952,7 @@ $(document).ready(function () {
         if (e.button == 2 && $(":focus").length == 0) {
             e.preventDefault();
         }
-        if ($("#divMenu").is(":visible") && !$("#imgMenu").is(":hover") && !$("#divMenu").is(":hover")) {
+        if ($("#divMenu").is(":visible") && !$("#divMenuButtonWrapper").is(":hover") && !$("#divMenu").is(":hover")) {
             toggleMenu();
         }
     });

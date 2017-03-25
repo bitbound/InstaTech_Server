@@ -122,23 +122,25 @@
         </div>
     </div>
     <div id="divMain" hidden>
-        <img id="imgMenu" src="/Assets/Images/MenuDown.png" onclick="toggleMenu()" />
+        <div id="divMenuButtonWrapper" onclick="toggleMenu()">
+            <img id="imgMenu" src="/Assets/Images/MenuDown.png" />
+        </div>
         <div id="divMenu">
             <div style="font-weight: bold; margin: -5px -10px 15px -10px; padding: 5px 0 5px 0; text-align:center; background-color:rgb(25,25,25); color:white">Options</div>
             <div>
-                <span>Refresh screen:</span>
+                <span>Refresh Screen:</span>
                 <button id="buttonRefresh" title="Refresh the entire screen." onclick="sendRefreshRequest()">
                     <img src="/Assets/Images/Refresh_16x.svg" style="height:20px; width:20px" />
                 </button>
             </div>
             <div style="margin-top: 20px;">
-                <span>Scale to fit:</span>
+                <span>Scale to Fit:</span>
                 <div id="divScaleToFit" status="on" class="switch-outer" onclick="toggleScaleToFit()" title="Scales the images to fit the width of your browser.">
                     <div class="switch-inner"></div>
                 </div>
             </div>
             <div style="margin-top: 20px;">
-                <span>Follow cursor:</span>
+                <span>Follow Cursor:</span>
                 <div id="divFollowCursor" status="on" class="switch-outer" onclick="toggleFollowCursor()" title="When the cursor is moved to the edge of the browser window, the screen will scroll to follow it.">
                     <div class="switch-inner"></div>
                 </div>
@@ -297,7 +299,7 @@
             border: 1px solid dimgray;
         }
         #imgMenu {
-            position:fixed;
+            position: absolute;
             left: 50%;
             transform: translateX(-50%);
             width: 30px;
@@ -306,9 +308,23 @@
             transition-property: transform;
             transition-duration: .4s;
         }
-
-        #imgMenu:hover {
-            border: 1px groove deepskyblue;
+        #divMenuButtonWrapper {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: pointer;
+            width: 100px;
+            height: 28px;
+            background-color: lightsteelblue;
+            border-left: 1px solid white;
+            border-bottom: 1px solid white;
+            border-right: 1px solid white;
+        }
+        #divMenuButtonWrapper:hover {
+            border-left: 1px groove deepskyblue;
+            border-bottom: 1px groove deepskyblue;
+            border-right: 1px groove deepskyblue;
             background-color: paleturquoise;
         }
         #imgMenu.rotated180 {
