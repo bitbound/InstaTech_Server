@@ -1,6 +1,5 @@
 var context = {};
 var socket = {};
-var rtcConnection;
 var img;
 var byteArray;
 var imageData;
@@ -328,7 +327,7 @@ function initWebSocket() {
                 case "Connect":
                     $("#divStatus").text("");
                     if (jsonMessage.Status == "ok") {
-                        // Initialize RTC and attempt to connect.
+                        // Attempt to connect.
                         requestCapture();
                         $("#divConnect").hide();
                         $("#divMain").show();
@@ -456,36 +455,6 @@ function initWebSocket() {
                         showTooltip($("#divUninstallService"), "right", "green", "Service uninstalled successfully.");
                     }
                     break;
-                case "RTCCandidate":
-                    rtcConnection.addIceCandidate(new RTCIceCandidate(jsonMessage.Candidate));
-                    break;
-                case "RTCOffer":
-                    if (jsonMessage.Status = "Denied") {
-                        var request = {
-                            "Type": "CaptureScreen",
-                            "Source": "WebSocket"
-                        };
-                        console.log("RTC unsupported by client.  Falling back to websocket communication.");
-                        socket.send(JSON.stringify(request));
-                    }
-                    break;
-                case "RTCAnswer":
-                    var answer = JSON.parse(atob(jsonMessage.Answer));
-                    rtcConnection.setRemoteDescription(answer, function () {
-                        var request = {
-                            "Type": "CaptureScreen",
-                        };
-                        console.log("RTC descriptions set successfully.  Requesting video via RTC.");
-                        socket.send(JSON.stringify(request));
-                    }, function (error) {
-                        var request = {
-                            "Type": "CaptureScreen",
-                            "Source": "WebSocket"
-                        };
-                        console.log("RTC connection failed.  Falling back to websocket communication.");
-                        socket.send(JSON.stringify(request));
-                    });
-                    break;
                 case "NewLogin":
                     clearCachedCreds();
                     showDialog("Logged Out", "You have been logged out due to a login from another browser.");
@@ -502,67 +471,11 @@ function disconnect() {
     socket.close();
 }
 function requestCapture() {
-    if (typeof RTCPeeerConnection == "undefined")
-    {
-        var request = {
-            "Type": "CaptureScreen",
-            "Source": "WebSocket",
-        };
-        console.log("RTC unsupported by browser.  Falling back to websocket communication.");
-        socket.send(JSON.stringify(request));
-        return;
-    }
-    rtcConnection = new RTCPeerConnection({
-        iceServers: [
-            {
-                urls: [
-                    "stun:play.after-game.net",
-                    "stun:stun.stunprotocol.org",
-                    "stun:stun.l.google.com:19302",
-                    "stun:stun1.l.google.com:19302",
-                ]
-            }
-        ]
-    });
-    rtcConnection.onicecandidate = function (evt) {
-        if (evt.candidate) {
-            socket.send(JSON.stringify({
-                'Type': 'RTCCandidate',
-                'Candidate': evt.candidate
-            }));
-        }
+    var request = {
+        "Type": "CaptureScreen"
     };
-    rtcConnection.ontrack = function (evt) {
-        $("#videoRemoteControl").show();
-        $("#videoRemoteControl")[0].src = URL.createObjectURL(evt.streams[0]);
-    };
-    rtcConnection.createOffer(function (offer) {
-        // Success callback.
-        rtcConnection.setLocalDescription(offer, function () {
-            // Success callback.
-            var request = {
-                "Type": "RTCOffer",
-                "Offer": btoa(JSON.stringify(rtcConnection.localDescription)),
-            };
-            socket.send(JSON.stringify(request));
-        }, function (error) {
-            // Failure callback.
-            var request = {
-                "Type": "CaptureScreen",
-                "Source": "WebSocket",
-            };
-            console.log("RTC connection failed.  Falling back to websocket communication.");
-            socket.send(JSON.stringify(request));
-        });
-    }, function (error) {
-        // Failure callback.
-        var request = {
-            "Type": "CaptureScreen",
-            "Source": "WebSocket",
-        };
-        console.log("RTC connection failed.  Falling back to websocket communication.");
-        socket.send(JSON.stringify(request));
-    }, { 'offerToReceiveVideo': true });
+    socket.send(JSON.stringify(request));
+    return;
 }
 function sendRefreshRequest() {
     var request = {
