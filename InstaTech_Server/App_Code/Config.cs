@@ -50,7 +50,7 @@ namespace InstaTech.App_Code
 
         // Determines the default client version of the remote control app that will be downloaded.
         // Values: Windows, Windows Service, Mac, or Linux.
-        public string Default_RC_Download { get; set; } = "Windows 8+";
+        public string Default_RC_Download { get; set; } = "Windows";
         // The download paths for each remote control client version.
         public Dictionary<string, string> RC_Download_Paths { get; set; } = new Dictionary<string, string>()
         {
