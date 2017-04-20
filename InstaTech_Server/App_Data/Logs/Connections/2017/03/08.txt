@@ -1,2 +1,0 @@
-{"Timestamp":"3/8/2017 10:47:38 PM","HostAddress":"::1","UserAgent":null,"ConnectionType":"ClientService","SessionID":null}
-{"Timestamp":"3/8/2017 10:52:21 PM","HostAddress":"::1","UserAgent":null,"ConnectionType":"ClientService","SessionID":null}

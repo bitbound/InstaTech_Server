@@ -7,14 +7,13 @@
         </div>
         <table id="tableConfiguration">
             <tr>
-                @{
-                    <td>
-                        @if (InstaTech.App_Code.Utilities.Trial_Version)
-                        {
-                            <small>Trial Expires: @((InstaTech.App_Code.Utilities.Trial_Start + TimeSpan.FromDays(14)).ToString())</small>
-                        }
-                    </td>
-                }
+                <td>
+                    <!--Removed trial check for open-source release.-->
+                    @*@if (InstaTech.App_Code.Utilities.Trial_Version)
+                    {
+                        <small>Trial Expires: @((InstaTech.App_Code.Utilities.Trial_Start + TimeSpan.FromDays(14)).ToString())</small>
+                    }*@
+                </td>
                 <td>
                     <small>Server Version: @InstaTech.App_Code.Utilities.Version</small>
                 </td>
@@ -30,14 +29,15 @@
                     <input id="inputCompanyName" type="text" prop="Company_Name" onchange="changeStringProperty(event)" title="The company name that will appear on the main pages." />
                 </td>
             </tr>
-            <tr>
+            <!--Removed license key for open-source release.-->
+            @*<tr>
                 <td>
                     License Key:
                 </td>
                 <td>
                     <input id="inputLicenseKey" type="text" readonly disabled />
                 </td>
-            </tr>
+            </tr>*@
             <tr>
                 <td>
                     Default Admin:

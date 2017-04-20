@@ -63,28 +63,51 @@ form button[type="submit"] {
     float: right;
 }
 
-/** Site-Wide Elements ***/
-#divLoading {
+/*** Loading Frame ***/
+.loading-frame {
     position: fixed;
-    top:0;
+    background-color: rgba(0, 0, 0, 0.8);
     left: 0;
-    bottom:0;
+    top: 0;
     right: 0;
-    z-index: 2;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255,255,255,.25);
-    font-size: 24px;
-    font-weight: bold;
-    text-align: center;
-    color: white;
+    bottom: 0;
 }
-#divLoading div {
-    position: fixed;
-    top: 50%;
+
+.loading-track {
+    height: 50px;
+    display: inline-block;
+    position: absolute;
+    top: calc(50% - 50px);
     left: 50%;
-    transform: translate(-50%, -50%);
 }
+
+.loading-dot {
+    height: 5px;
+    width: 5px;
+    background-color: white;
+    border-radius: 100%;
+    opacity: 0;
+}
+
+.loading-dot-animated {
+    animation-name: loading-dot-animated;
+    animation-direction: alternate;
+    animation-duration: .75s;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+}
+
+@keyframes loading-dot-animated {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/** Site-Wide Elements ***/
 #svgMainMenu {
     position: absolute;
     top: 5px;

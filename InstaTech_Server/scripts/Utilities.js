@@ -113,3 +113,29 @@ function showTooltip(objPlacementTarget, strPlacementDirection, strColor, strMes
         });
     }, strMessage.length * 50);
 }
+
+function showLoading() {
+    var frame = document.createElement("div");
+    frame.classList.add("loading-frame");
+    frame.id = "divLoadingFrame";
+    for (var i = 0; i < 10; i++) {
+        var track = document.createElement("div");
+        track.classList.add("loading-track");
+        var dot = document.createElement("div");
+        dot.classList.add("loading-dot");
+        track.style.transform = "rotate(" + String(i * 36) + "deg)";
+        track.appendChild(dot);
+        frame.appendChild(track);
+    }
+    document.body.appendChild(frame);
+    var wait = 0;
+    $(frame).find(".loading-dot").each(function (index, elem) {
+        window.setTimeout(function () {
+            elem.classList.add("loading-dot-animated");
+        }, wait);
+        wait += 150;
+    });
+};
+function removeLoading() {
+    $("#divLoadingFrame").remove();
+};

@@ -18,10 +18,10 @@ $(document).ready(function () {
         }
     };
     $(document).ajaxStart(function () {
-        $("#divLoading").show();
+        showLoading();
     });
     $(document).ajaxStop(function () {
-        $("#divLoading").hide();
+        removeLoading();
     });
     setPortalButtonHandlers();
     if (window.location.search.toLocaleLowerCase().search("user=tech") > -1)

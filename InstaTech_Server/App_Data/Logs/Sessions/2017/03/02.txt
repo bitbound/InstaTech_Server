@@ -1,4 +1,0 @@
-{"Timestamp":"\/Date(1488487490293)\/","SessionID":null,"PartnerID":null}
-{"Timestamp":"\/Date(1488487490841)\/","SessionID":null,"PartnerID":null}
-{"Timestamp":"\/Date(1488491205963)\/","SessionID":null,"PartnerID":null}
-{"Timestamp":"\/Date(1488491206518)\/","SessionID":null,"PartnerID":null}
