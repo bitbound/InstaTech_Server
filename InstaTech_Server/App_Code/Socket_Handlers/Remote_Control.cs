@@ -470,14 +470,14 @@ namespace InstaTech.App_Code.Socket_Handlers
                 var clients = SocketCollection.FindAll(rc => rc.ConnectionType == ConnectionTypes.ClientService);
                 if (TechAccount.AccessLevel == Tech_Account.Access_Levels.Admin)
                 {
-                    foreach (var client in clients)
+                    foreach (var client in clients.Where(client=>client.ComputerName.Contains(JsonData.Input.ToString())))
                     {
                         computers.Add(client.ComputerName);
                     }
                 }
                 else
                 {
-                    foreach (var client in clients.Where(rc=>TechAccount.ComputerGroups.Contains(rc.ComputerGroup)))
+                    foreach (var client in clients.Where(rc=>TechAccount.ComputerGroups.Contains(rc.ComputerGroup) && rc.ComputerName.Contains(JsonData.Input.ToString())))
                     {
                         computers.Add(client.ComputerName);
                     }

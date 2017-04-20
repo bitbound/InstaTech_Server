@@ -54,7 +54,7 @@ function populateHubComputerGroups(e) {
         }, 200)
         return;
     }
-    if (InstaTech.ComputerGroups.length > $("#selectComputerHubGroups").children().length)
+    if (InstaTech.ComputerGroups.length >= $("#selectComputerHubGroups").children().length)
     {
         $("#selectComputerHubGroups").html("<option value=''>Any</option>");
         for (var i = 0; i < InstaTech.ComputerGroups.length; i++) {

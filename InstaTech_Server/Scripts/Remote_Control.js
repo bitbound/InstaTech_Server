@@ -25,6 +25,7 @@ var lastCursorOffsetX;
 var lastCursorOffsetY;
 var isTouchScreen = false;
 var args = {};
+var searchCallback;
 
 function submitTechMainLogin(e) {
     if (e) {
@@ -145,37 +146,8 @@ function connectToClient() {
         socket.send(JSON.stringify(request));
     }
 }
-function searchComputers(e) {
-    if ($("#divSearchComputers > div").is(":visible"))
-    {
-        $("#divSearchComputers > div").slideUp();
-    }
-    else
-    {
-        var request = {
-            "Type": "SearchComputers",
-            "AuthenticationToken": InstaTech.AuthenticationToken
-        };
-        socket.send(JSON.stringify(request));
-    }
-}
-function filterComputers() {
-    var searchStr = $("#inputFilterComputers").val();
-    $("#selectComputers").children().each(function (index, elem) {
-        if (elem.innerHTML.search(searchStr) == -1)
-        {
-            elem.setAttribute("hidden", true);
-        }
-        else
-        {
-            elem.removeAttribute("hidden");
-        }
-    })
-}
-function selectComputer() {
-    $("#inputSessionID").val($("#selectComputers").val());
-    $("#divSearchComputers > div").slideUp();
-}
+
+
 function initWebSocket() {
     if (window.location.host.search("localhost") > -1) {
         socket = new WebSocket("ws://" + location.host + "/Services/Remote_Control_Socket.cshtml");
@@ -422,7 +394,7 @@ function initWebSocket() {
                         requestCapture();
                     }
                     else if (jsonMessage.Status == "failed") {
-                        showDialog("Capture Failed", "The client switched to a desktop, most likely to the lock screen or a UAC prompt, and screen capture failed.");
+                        showDialog("Capture Failed", "The client computer switched desktops (default, logon, or UAC), and screen capture failed.  Please connect again.");
                         $("#divStatus").text("Capture failed.");
                     }
                     break;
@@ -431,16 +403,7 @@ function initWebSocket() {
                     socket.close();
                     break;
                 case "SearchComputers":
-                    var selectEle = document.getElementById("selectComputers");
-                    selectEle.innerHTML = "";
-                    jsonMessage.Computers.forEach(function (value, index) {
-                        var option = document.createElement("option");
-                        option.value = value;
-                        option.innerHTML = value;
-                        selectEle.options.add(option);
-                    });
-                    $("#inputFilterComputers").val("");
-                    $("#divSearchComputers > div").slideDown();
+                    searchCallback(jsonMessage.Computers);
                     break;
                 case "Bounds":
                     context.canvas.height = jsonMessage.Height;
@@ -494,10 +457,12 @@ function toggleScaleToFit() {
     if ($("#divScaleToFit").attr("status") == "off") {
         $("#divScaleToFit").attr("status", "on");
         $(".input-surface").css("width", "100%");
+        $(".input-surface").css("height", "calc(100vh - 55px)");
     }
     else {
         $("#divScaleToFit").attr("status", "off");
         $(".input-surface").css("width", "auto");
+        $(".input-surface").css("height", "auto");
     }
 }
 function toggleFollowCursor() {
@@ -600,7 +565,6 @@ $(document).ready(function () {
         if (e.currentTarget.id == "divInteractive") {
             document.getElementById("inputSessionID").setAttribute("placeholder", "Enter client's session ID.");
             document.getElementById("inputSessionID").setAttribute("pattern", "[0-9 ]*");
-            $("#imgSearchComputers").hide();
         }
         else
         {
@@ -609,7 +573,6 @@ $(document).ready(function () {
                 showDialog("Login Required", "You must be logged in to start an unattended access sessions.");
                 return;
             }
-            $("#imgSearchComputers").show();
             document.getElementById("inputSessionID").setAttribute("placeholder", "Enter client's PC name.");
             document.getElementById("inputSessionID").removeAttribute("pattern");
         }
@@ -905,5 +868,22 @@ $(document).ready(function () {
         }
         transferFiles(e.dataTransfer.files);
     };
+    $("#inputSessionID").autocomplete({
+        source: function (data, response) {
+            
+            if ($("#divUnattended").is(".selected"))
+            {
+                searchCallback = response;
+                var request = {
+                    "Type": "SearchComputers",
+                    "Input": data.term,
+                    "AuthenticationToken": InstaTech.AuthenticationToken
+                };
+                socket.send(JSON.stringify(request)); 
+            }
+        },
+        delay: 300
+        
+    })
     initWebSocket();
 });

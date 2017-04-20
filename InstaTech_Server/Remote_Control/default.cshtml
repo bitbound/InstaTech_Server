@@ -97,16 +97,7 @@
             </div>
             <div style="position:absolute; top: 50%; left:50%; transform:translate(-50%, -50%);font-family: sans-serif">
                 <div><strong>Connect to client:</strong></div>
-                <input id="inputSessionID" placeholder="Enter client's session ID." type="text" value='@Request.QueryString["Computer"]' pattern="[0-9 ]*" onkeypress="if (event.keyCode == 13) { connectToClient() }" style="margin: 5px 0; width:175px" />
-                <img id="imgSearchComputers" class="link" src="~/Assets/Images/Search_64x.png" onclick="searchComputers(event)" title="Show online computers." hidden/>
-                <div id="divSearchComputers">
-                    <div style="display:none">
-                        <input id="inputFilterComputers" placeholder="Filter..." style="width:145px" oninput="filterComputers()" onchange="filterComputers();" />
-                        <select id="selectComputers" size="6" style="width:150px" onchange="selectComputer()">
-
-                        </select>
-                    </div>
-                </div>
+                <input id="inputSessionID" class="ui-autocomplete-input" placeholder="Enter client's session ID." type="text" value='@Request.QueryString["Computer"]' pattern="[0-9 ]*" onkeypress="if (event.keyCode == 13) { connectToClient() }" style="margin: 5px 0; width:175px" />
                 <br />
                 <div style="text-align:right">
                     <button id="buttonConnect" onclick="connectToClient()">Connect</button>
@@ -333,6 +324,7 @@
         }
         .input-surface {
             width: 100%;
+            height: calc(100vh - 55px);
             margin-top: 30px;
             border: 1px groove gray;
             background-color: lightgray;
