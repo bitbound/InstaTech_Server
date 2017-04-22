@@ -1337,6 +1337,9 @@ namespace InstaTech.App_Code.Socket_Handlers
                     case "Active_Directory_Enabled":
                         Config.Current.Active_Directory_Enabled = JsonData.Value;
                         break;
+                    case "Session_Recording":
+                        Config.Current.Session_Recording = JsonData.Value;
+                        break;
                     case "AD_Tech_Group":
                         Config.Current.Active_Directory_Tech_Group = JsonData.Value;
                         break;

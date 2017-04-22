@@ -7,7 +7,6 @@ using System.Web.Helpers;
 using InstaTech.App_Code.Models;
 using System.IO;
 using System.Text;
-using System.Drawing;
 
 namespace InstaTech.App_Code.Socket_Handlers
 {
@@ -95,9 +94,17 @@ namespace InstaTech.App_Code.Socket_Handlers
         }
         public override void OnMessage(byte[] message)
         {
+            if (Config.Current.Session_Recording && Partner != null)
+            {
+                var videoFolder = Directory.CreateDirectory($@"{Utilities.App_Data}\Logs\Recordings\{Partner?.TechAccount?.UserID ?? Partner?.SessionID}\{DateTime.Now.Year.ToString()}\{DateTime.Now.Month.ToString().PadLeft(2, '0')}\{DateTime.Now.Day.ToString().PadLeft(2, '0')}\");
+                var videoFile = Path.Combine(videoFolder.FullName, Partner?.SessionID + ".itr");
+                var base64 = Convert.ToBase64String(message);
+                File.AppendAllText(videoFile, $"{DateTime.Now.ToString("MM/dd/yyyy hh:mm:ss.fff tt")},{base64}{Environment.NewLine}");
+            }
             if (Partner != null)
             {
                 Partner.Send(message);
+                
             }
         }
         public override void OnMessage(string message)
@@ -804,6 +811,16 @@ namespace InstaTech.App_Code.Socket_Handlers
             {
                 Utilities.WriteToLog(ex);
             }
+        }
+        public void HandleBounds(dynamic JsonData)
+        {
+            if (Config.Current.Session_Recording)
+            {
+                var videoFolder = Directory.CreateDirectory($@"{Utilities.App_Data}\Logs\Recordings\{Partner?.TechAccount?.UserID ?? Partner?.SessionID}\{DateTime.Now.Year.ToString()}\{DateTime.Now.Month.ToString().PadLeft(2, '0')}\{DateTime.Now.Day.ToString().PadLeft(2, '0')}\");
+                var videoFile = Path.Combine(videoFolder.FullName, Partner?.SessionID + ".itr");
+                File.AppendAllText(videoFile, $"{JsonData.Width},{JsonData.Height}{Environment.NewLine}");
+            }
+            Partner.Send(Json.Encode(JsonData));
         }
         public void HandleCtrlAltDel(dynamic JsonData)
         {

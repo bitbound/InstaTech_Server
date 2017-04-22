@@ -26,6 +26,8 @@ namespace InstaTech.App_Code
 
         // Use file encryption for files saved on the server.
         public bool File_Encryption { get; set; } = true;
+        // Record the video of remote control sessions.
+        public bool Session_Recording { get; set; } = false;
 
         // Whether to enable Active Directory tools and features.
         public bool Active_Directory_Enabled { get; set; } = false;

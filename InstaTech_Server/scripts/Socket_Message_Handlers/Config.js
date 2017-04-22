@@ -11,6 +11,7 @@
         $("#inputDefaultAdmin").val(config.Default_Admin);
         $("#toggleDemoMode").attr("on", config.Demo_Mode);
         $("#toggleFileEncryption").attr("on", config.File_Encryption);
+        $("#toggleSessionRecording").attr("on", config.Session_Recording);
         $("#toggleADEnabled").attr("on", config.Active_Directory_Enabled);
         $("#inputADTechGroup").val(config.Active_Directory_Tech_Group);
         $("#toggleFeatureChat").attr("on", config.Feature_Enabled_Chat);
