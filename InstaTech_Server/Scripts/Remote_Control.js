@@ -116,7 +116,6 @@ function connectToClient() {
     }
     context.canvas.width = 1;
     context.canvas.height = 1;
-    connected = true;
     $("#divStatus").text("Connecting...");
 
     var request = {

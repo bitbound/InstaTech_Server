@@ -44,6 +44,8 @@ namespace InstaTech.App_Code.Socket_Handlers
         }
         public override void OnOpen()
         {
+            var random = new Random();
+            SessionID = random.Next(0, 999).ToString().PadLeft(3, '0') + random.Next(0, 999).ToString().PadLeft(3, '0');
             SocketCollection.Add(this);
         }
         public override void OnClose()
@@ -97,7 +99,7 @@ namespace InstaTech.App_Code.Socket_Handlers
             if (Config.Current.Session_Recording && Partner != null)
             {
                 var videoFolder = Directory.CreateDirectory($@"{Utilities.App_Data}\Logs\Recordings\{Partner?.TechAccount?.UserID ?? Partner?.SessionID}\{DateTime.Now.Year.ToString()}\{DateTime.Now.Month.ToString().PadLeft(2, '0')}\{DateTime.Now.Day.ToString().PadLeft(2, '0')}\");
-                var videoFile = Path.Combine(videoFolder.FullName, Partner?.SessionID + ".itr");
+                var videoFile = Path.Combine(videoFolder.FullName, Partner.SessionID + ".itr");
                 var base64 = Convert.ToBase64String(message);
                 File.AppendAllText(videoFile, $"{DateTime.Now.ToString("MM/dd/yyyy hh:mm:ss.fff tt")},{base64}{Environment.NewLine}");
             }
@@ -396,9 +398,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                     {
                         ComputerName = JsonData.ComputerName.ToString().Trim().ToLower();
                     }
-                    var random = new Random();
-                    var sessionID = random.Next(0, 999).ToString().PadLeft(3, '0') + " " + random.Next(0, 999).ToString().PadLeft(3, '0');
-                    SessionID = sessionID.Replace(" ", "");
+                    var sessionID = SessionID.Substring(0, 3) + " " + SessionID.Substring(3, 3);
                     var request = new
                     {
                         Type = "SessionID",
