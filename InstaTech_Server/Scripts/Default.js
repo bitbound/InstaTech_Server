@@ -103,6 +103,10 @@ function toggleMainMenu() {
     }
 }
 function mouseOutMainMenu() {
+    var mainMenu = $("#divMainMenuOuter");
+    if (mainMenu.width() == 0) {
+        return;
+    }
     if (InstaTech.Temp.mainMenuTimeout) {
         window.clearTimeout(InstaTech.Temp.mainMenuTimeout);
     }

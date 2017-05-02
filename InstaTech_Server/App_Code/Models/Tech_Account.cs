@@ -19,7 +19,7 @@ namespace InstaTech.App_Code.Models
         public string LastName { get; set; } = "";
         public string UserID { get; set; }
         public string HashedPassword { get; set; } = "";
-        public string AuthenticationToken { get; set; }
+        public List<AuthenticationToken> AuthenticationTokens { get; set; } = new List<AuthenticationToken>();
         public string TempPassword { get; set; } = "";
         public int BadLoginAttempts { get; set; } = 0;
         public DateTime LastBadLogin { get; set; }
