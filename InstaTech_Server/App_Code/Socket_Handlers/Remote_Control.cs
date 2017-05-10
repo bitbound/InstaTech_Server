@@ -597,7 +597,7 @@ namespace InstaTech.App_Code.Socket_Handlers
         public void HandleQuickConnect(dynamic JsonData)
         {
             var techSocket = Socket_Main.SocketCollection.Find(sm => sm?.TechAccount?.UserID == JsonData.UserID);
-            if (techSocket == null || techSocket.AuthenticationTokens != JsonData.AuthenticationToken)
+            if (techSocket == null || !techSocket.AuthenticationTokens.Exists(at=>at.Token == JsonData.AuthenticationToken))
             {
                 JsonData.Status = "denied";
                 Send(Json.Encode(JsonData));
@@ -605,7 +605,7 @@ namespace InstaTech.App_Code.Socket_Handlers
             }
             ConnectionType = ConnectionTypes.ViewerApp;
             TechAccount = (Tech_Account)techSocket.TechAccount.Clone();
-            AuthenticationTokens = techSocket.AuthenticationTokens;
+            AuthenticationTokens.AddRange(techSocket.AuthenticationTokens);
             var customerSocket = SocketCollection.Find(rc => rc.ConnectionType == ConnectionTypes.ClientService && rc.ComputerName == JsonData.ComputerName);
             if (customerSocket == null)
             {
@@ -629,7 +629,7 @@ namespace InstaTech.App_Code.Socket_Handlers
             {
                 Type = "ConnectUnattended",
                 ComputerName = customerSocket.ComputerName,
-                AuthenticationToken = AuthenticationTokens
+                AuthenticationToken = JsonData.AuthenticationToken
             };
             customerSocket.Send(Json.Encode(request));
             LogSession();
