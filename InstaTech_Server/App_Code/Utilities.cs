@@ -30,35 +30,7 @@ namespace InstaTech.App_Code {
                 return accounts;
             }
         }
-        public static void License_Check()
-        {
-            try
-            {
-                var request = System.Net.WebRequest.CreateHttp("https://instatech.org/Services/Licence_Check.cshtml");
-                request.Method = "POST";
-                using (var rs = request.GetRequestStream())
-                {
-                    using (var sw = new System.IO.StreamWriter(rs))
-                    {
-                        var content = new
-                        {
-                            CompanyName = Config.Current.Company_Name,
-                            LicenseKey = Config.Current.License_Key
-                        };
-                        sw.Write(Json.Encode(content));
-                    }
-                }
-                var response = request.GetResponse();
-                using (var rs = response.GetResponseStream())
-                {
-                    using (var sr = new StreamReader(rs))
-                    {
-                        IsValid = bool.Parse(sr.ReadToEnd());
-                    }
-                }
-            }
-            catch { }
-        }
+
         public static void Set_File_Encryption(bool Encrypt)
         {
             var fileList = new List<string>();

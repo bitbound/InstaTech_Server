@@ -8,7 +8,36 @@
     <div class="body-frame">
         <h1>InstaTech Quick Start Guide</h1>
         <div>
-            Congratulations!  Your InstaTech server is installed.  But now what?  This guide contains the information you'll need to start using InstaTech.  For in-depth documentation, check out the reference guide that's mentioned later.
+            Congratulations!  Your InstaTech server is installed.  But now what?  This guide contains the information you'll need to start using InstaTech.  For in-depth documentation, check out the <a href="Reference.html">Reference Guide</a>.
+        </div>
+        <h2>
+            Overview
+        </h2>
+        <div>
+            <strong>First Steps:</strong>
+            <ul>
+                <li>
+                    Install SSL certificate.
+                </li>
+                <li>
+                    Log into Tech Portal with "admin" account and set new password.
+                </li>
+                <li>
+                    Create a new account in Account Center, if desired.
+                </li>
+            </ul>
+            <strong>Starting a Remote Session:</strong>
+            <ul>
+                <li>
+                    Download client on remote computer (i.e. https://[yourhostname]/Downloads/InstaTech_Client.exe).
+                </li>
+                <li>
+                    Enter code on Remote Control page (i.e. https://[yourhostname]/Remote_Control/).
+                </li>
+                <li>
+                    Install service from client's menu, if unattended access is desired.
+                </li>
+            </ul>
         </div>
         <h2>
             Configuring SSL
@@ -41,7 +70,7 @@
             Logging In
         </h2>
         <div>
-            There's a built-in admin account already made, and you'll want to set the password for it as soon as possible.  The username is simply "admin", and the password is "password".  When you log in for the first time, it will prompt you to set a new password.  Passwords must be at least 8 characters long.
+            The first thing you'll want to do is set a password for the built-in admin account.  When you open InstaTech Server, the main page is the Customer Portal.  Click the "Tech Portal" link at the top left, then click "Log In" at the top right.  The username is simply "admin", and the password is "password".  When you log in for the first time, it will prompt you to set a new password.  Passwords must be at least 8 characters long.
             <br />
             <br />
             Once you're logged in, you can change the default admin username in Configuration and delete "admin", if you'd like.
@@ -50,7 +79,7 @@
             Navigating
         </h2>
         <div>
-            You'll need to navigate to the Tech Portal to log in.  When you open the InstaTech Server in your browser, you'll see the Customer Portal.  This is where customers can initiate a support chat session or download the remote control client to allow someone into their computer.  The button at the top left will switch you to the Tech Portal, and the login link will be at the top right.
+            The customer portal is where customers can initiate a support chat session or download the remote control client to allow someone into their computer.  It's the main page so it's the easiest for customers to find.
             <br /><br />
             The website is a Single-Page Application, so you don't actually navigate to a new page when you switch portals.  However, you can still create a direct link to the Tech Portal by adding "?user=tech" to the end of the URL (e.g. "https://demo.instatech.org/?user=tech").
             <br />
@@ -102,6 +131,21 @@
             The service can be installed via the menu in InstaTech_Client.exe or using the "-install" switch on the command line.  Both the client and the service EXEs will accept the -install switch.
             <br /><br />
             If you don't have a current method available for deploying the service to remote machines, you can try the deployer script I created at <a href="https://instatech.org/Downloads/?scrollto=divUtilities" target="_blank">https://instatech.org/Downloads/?scrollto=divUtilities</a>
+        </div>
+        <h2>
+            Shared Hosting
+        </h2>
+        <div>
+            If you extracted the files for shared hosting, you should have a ZIP file on your desktop.  The ZIP file contains everything that needs to be put into the root of your website.
+        </div>
+        <br />
+        <div>
+            You will need to go through your hosting provider to install an SSL certificate.  You'll also need to make sure they have the following features enabled:
+            <ul>
+                <li>ASP.NET 4.5</li>
+                <li>Web Socket Protocol</li>
+                <li>Request Filtering</li>
+            </ul>
         </div>
         <h2>
             Going Forward

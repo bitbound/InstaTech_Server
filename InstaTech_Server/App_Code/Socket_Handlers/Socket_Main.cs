@@ -409,6 +409,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                     {
                         TechAccount.AuthenticationTokens.AddRange(AuthenticationTokens);
                     }
+                    ConnectionType = ConnectionTypes.Technician;
                     TechAccount.Save();
                     JsonData.Status = "ok";
                     JsonData.Access = TechAccount.AccessLevel.ToString();
@@ -489,6 +490,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                             {
                                 account.AuthenticationTokens.Add(authToken);
                             }
+                            ConnectionType = ConnectionTypes.Technician;
                             account.Save();
                             if (SocketCollection.Exists(sock => sock?.TechAccount?.UserID == account.UserID))
                             {
@@ -520,6 +522,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                         {
                             account.AuthenticationTokens.Add(authToken);
                         }
+                        ConnectionType = ConnectionTypes.Technician;
                         account.Save();
                         if (SocketCollection.Exists(sock => sock?.TechAccount?.UserID == account.UserID))
                         {
@@ -551,6 +554,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                             {
                                 account.AuthenticationTokens.Add(authToken);
                             }
+                            ConnectionType = ConnectionTypes.Technician;
                             account.Save();
                             account.BadLoginAttempts = 0;
                             account.TempPassword = "";
@@ -1064,7 +1068,7 @@ namespace InstaTech.App_Code.Socket_Handlers
         {
             try
             {
-                var lockCase = Open_Cases.Find(ca => ca.CaseID == int.Parse(JsonData.CaseID));
+                var lockCase = Open_Cases.Find(ca => ca.CaseID == JsonData.CaseID);
                 if (lockCase == null)
                 {
                     JsonData.Status = "taken";
@@ -1131,6 +1135,11 @@ namespace InstaTech.App_Code.Socket_Handlers
                 }
                 JsonData.Status = "ok";
                 JsonData.TechAccounts = Utilities.Tech_Accounts;
+                foreach (Tech_Account account in JsonData.TechAccounts)
+                {
+                    account.HashedPassword = null;
+                    account.AuthenticationTokens.Clear();
+                }
                 Send(Json.Encode(JsonData));
             }
             catch (Exception ex)
@@ -1155,7 +1164,15 @@ namespace InstaTech.App_Code.Socket_Handlers
                 }
                 try
                 {
-                    account = Json.Decode<Tech_Account>(Json.Encode(JsonData.Account));
+                    var newAccount = Json.Decode<Tech_Account>(Json.Encode(JsonData.Account));
+                    foreach (System.Reflection.PropertyInfo prop in typeof(Tech_Account).GetProperties())
+                    {
+                        if (prop.Name == "AuthenticationTokens" || prop.Name == "HashedPassword")
+                        {
+                            continue;
+                        }
+                        prop.SetValue(account, prop.GetValue(newAccount));
+                    }
                     account.Save();
                     JsonData.Status = "ok";
                     Send(Json.Encode(JsonData));

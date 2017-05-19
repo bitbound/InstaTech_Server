@@ -4,12 +4,6 @@
 
     void Application_Start(object sender, EventArgs e)
     {
-        // Removed license check for open-source release.
-        //if (!System.Diagnostics.Process.GetCurrentProcess().ProcessName.Contains("iisexpress"))
-        //{
-        //    InstaTech.App_Code.Utilities.License_Check();
-        //}
-
         if (!System.IO.Directory.Exists(InstaTech.App_Code.Utilities.App_Data))
         {
             System.IO.Directory.CreateDirectory(InstaTech.App_Code.Utilities.App_Data);

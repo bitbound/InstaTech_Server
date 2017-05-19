@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <title>InstaTech Quick Start</title>
+    <title>InstaTech Reference Guide</title>
     <meta name="viewport" content="width=600" />
 </head>
 <body>
@@ -11,11 +11,357 @@
             Looking for the <a href="Quick_Start.html">Quick Start Guide</a>?
         </div>
         <h2>
-            Coming soon!
+            Table of Contents
         </h2>
-        <div>
-            For now, please see the Quick Start guide or contact <a href="mailto:jared@translucency.info">jared@translucency.info</a>.
-        </div>
+        <ol>
+            <li>
+                <a href="#h2Building">Building</a>
+                <ul>
+                    <li>
+                        Using the Package Builder
+                    </li>
+                    <li>
+                        Building from Source
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#h2IIS">IIS Setup</a>
+                <ul>
+                    <li>
+                        Required Features
+                    </li>
+                    <li>
+                        Firewalls
+                    </li>
+                    <li>
+                        SSL Certificates
+                    </li>
+                    <li>
+                        Shared Hosting
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#h2CustomerPortal">The Customer Portal</a>
+                <ul>
+                    <li>
+                        Support Chat
+                    </li>
+                    <li>
+                        Remote Session
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#h2TechPortal">The Technician Portal</a>
+                <ul>
+                    <li>
+                        Support Chat
+                    </li>
+                    <li>
+                        Remote Session
+                    </li>
+                    <li>
+                        Computer Hub
+                    </li>
+                    <li>
+                        Account Center
+                    </li>
+                    <li>
+                        Configuration
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#h2RemoteControl">The Remote Control</a>
+                <ul>
+                    <li>
+                        A Note About UAC and Windows Logon
+                    </li>
+                    <li>
+                        Interactive vs. Unattended
+                    </li>
+                    <li>
+                        Menu Options
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#h2Recording">Session Recording</a>
+            </li>
+            <li>
+                <a href="#h2LogFiles">Log Files</a>
+            </li>
+            <li>
+                <a href="#h2Utilities">Utilities and Scripts</a>
+            </li>
+        </ol>
+        <br />
+        <hr />
+        <br />
+        <h2 id="h2Building">
+            1. Building
+        </h2>
+        <h3>Using the Package Builder</h3>
+        <p>
+            The Package Builder, which can be found at <a target="_blank" href="https://instatech.org/Downloads">https://instatech.org/Downloads</a>, is the easiest way to get an InstaTech server running.  It has a form that consists of two fields.  The company name is used for the title on the Customer and Tech Portals, and the host name should be the server where InstaTech will be installed.  The clients will be modified to connect to that host, then recompiled and packaged in the installer.
+        </p>
+        <p>
+            The InstaTech server must be installed in its own IIS site.  It can't be in a virtual directory of another site.  You can use a subdomain, though.
+        </p>
+        <p>
+            Once finished, you'll be provided a download link for the installer.  The installer needs to be run on the server using administrator credentials.  Follow the prompts through the installation.  After it's finished, you may be prompted to reboot, then you can move down to the IIS Setup section.
+        </p>
+        <h3>
+            Building from Source
+        </h3>
+        <p>
+            When building from source, you'll be working with two solutions: InstaTech_Server and InstaTech_Client.  First, go into InstaTech_Server and find /App_Code/Config.cs.  This file contains all the configuration properties.  The main thing you want to change is the Company Name.  Afterward, build and deploy the site.
+        </p>
+        <p>
+            Next, go into InstaTech_Client, which has multiple projects within it.  You need to change the host name that each client will connect to and replace it with your server name.  In the .NET clients, there's a preprocessor directive at the top of the file that will say "#define Deploy" or "#define DEBUG".
+        </p>
+        <p>
+            Make sure the preprocessor directive reads "#define Deploy", and modify the appropriate variable later in the file.
+        </p>
+        <p>
+            Host names are defined in the following files and need to be changed:
+        </p>
+        <ul>
+            <li>
+                /InstaTech_Client/MainWindow.xaml.cs
+            </li>
+            <li>
+                /InstaTech_Service/Socket.cs
+            </li>
+            <li>
+                /InstaTech_CP/app/main.js
+            </li>
+        </ul>
+        <p>
+            Once the host names are changed, recompile the clients.  The cross-platform clients are built with <a target="_blank" href="http://electron.atom.io">Electron</a> and packaged with <a target="_blank" href="https://github.com/electron-userland/electron-builder">electron-builder</a>.  See their sites for documentation.
+        </p>
+        <p>
+            Create a folder named "Downloads" at the root of the website, then put your clients within it.
+        </p>
+        <h2 id="h2IIS">
+            2. IIS Setup
+        </h2>
+        <h3>
+            Required Features
+        </h3>
+        <p>
+            The following features must be installed on your IIS server:
+        </p>
+        <ul>
+            <li>ASP.NET 4.5</li>
+            <li>Web Socket Protocol</li>
+            <li>Request Filtering</li>
+        </ul>
+        <p>
+            The Package Builder installer will install these features for you.
+        </p>
+        <p>
+            If you have the Linux or Mac versions available for download, you must also set a MIME type of "application/octet-stream" for the file type.  For example, you can use the following PowerShell command to set the MIME type for AppImage files:
+        </p>
+        <p>
+            Add-WebConfigurationProperty -Filter //staticContent  -Name Collection -Value @{fileExtension='.AppImage'; mimeType='application/octet-stream'}
+        </p>
+        <h3>
+            Firewalls
+        </h3>
+        <p>
+            Inbound traffic for HTTP (port 80) and HTTPS (port 443) must be allowed through the firewall.  There are built-in rules for these within Windows Firewall that can be enabled.  The ports must also be opened/forwarded in any other firewalls or routers between the server and the internet.
+        </p>
+        <p>
+            The Package Builder installer will configure Windows Firewall for you.
+        </p>
+        <h3>
+            SSL Certificates
+        </h3>
+        <p>
+            InstaTech requires an SSL certificate to be installed and working.  You must have a domain or subdomain pointing at your server's IP address.  A very fast and easy way of install an SSL certificate is a program called Certify, which can be found here: <a target="_blank" href="http://certify.webprofusion.com/">http://certify.webprofusion.com/</a>
+        </p>
+        <p>
+            Certify will automatically acquire a Let's Encrypt SSL certificate and install it for you.  There are other Let's Encrypt clients available as well.
+        </p>
+        <p>
+            You can use online SSL tests to make sure your SSL certificate is installed properly, such as the one at <a target="_blank" href="https://www.digicert.com/help/">https://www.digicert.com/help/</a>
+        </p>
+        <h3>
+            Shared Hosting
+        </h3>
+        <p>
+            InstaTech should work on shared hosting, provided all the above requirements are met.  The installer provides an option to extract the files instead of installing them locally.  It will place a ZIP file on your desktop that contains all the files that need to be uploaded to your website.
+        </p>
+        <h2 id="h2CustomerPortal">
+            3. The Customer Portal
+        </h2>
+        <p>
+            The Customer Portal is the main page on the InstaTech Server.  You can switch back and forth between the Customer and Technician portals using the button at the top-left.
+        </p>
+        <h3>
+            Support Chat
+        </h3>
+        <p>
+            Customers can start a support chat session by filling out and submitting this form.  The Category and Type fields are pulled from the Support_Categories property in Config.cs.  To add, change, or remove categories, you can directly edit Config.cs or use the Configuration section in the tech portal.
+        </p>
+        <p>
+            Once logged in, the customer will be placed in queue to wait for a technician to pick up the support case.
+        </p>
+        <h3>
+            Remote Control
+        </h3>
+        <p>
+            The Remote Control button displays instructions for starting a remote session.  The default download is the Windows WPF client.  Once downloaded and run, the customer would give the session code to the technician, who can then connect.
+        </p>
+        <h2 id="h2TechPortal">
+            4. The Technician Portal
+        </h2>
+        <p>
+            The Technician Portal can be accessed by clicking the button at the top-left of the main page, or by appending "?user=tech" to the site's URL (e.g. https://[yourhostname]/?user=tech).  You will need to log in before any options will be available.  Admin accounts will have more options than technician accounts.
+        </p>
+        <h3>
+            Support Chat
+        </h3>
+        <p>
+            On the technician side, this is where you'd view and respond to customer cases.  After clicking the Enter button, you'll see a list of all cases, sorted into their respective queues.  The Exit Chat button at the top-right will remove you from the list of available techs and close the chat interface.
+        </p>
+        <p>
+            Click on a queue to see the cases within it, then click a case to see the details.  The following buttons are available from the case details:
+        </p>
+        <ul>
+            <li>
+                <strong>Move</strong> - If the case is in the wrong queue, you can use this to put it into a different one.
+            </li>
+            <li>
+                <strong>Lock</strong> - Temporarily lock the case, which prevents other techs from taking it.  This is used to give you time to read the details before taking it.
+            </li>
+            <li>
+                <strong>Take</strong> - Assign yourself to the case and begin chatting with the customer.
+            </li>
+        </ul>
+        <p>
+            Once you take the case, you will begin chatting with the customer, and the following buttons will be available:
+        </p>
+        <ul>
+            <li>
+                <strong>Transfer File</strong> - Send a file to the customer.  It will appear as a link in the chat window.
+            </li>
+            <li>
+                <strong>Send to Queue</strong> - Take yourself off the case and send it back to the queue.
+            </li>
+            <li>
+                <strong>Close Session</strong> - Mark the case as resolved and close the chat session.
+            </li>
+        </ul>
+        <h3>
+            Remote Session
+        </h3>
+        <p>
+            Remote Session has a download link for the clients, in case you need them, and a shortcut to the remote control page.  The remote control is discussed later.
+        </p>
+        <h3>
+            Computer Hub
+        </h3>
+        <p>
+            The Computer Hub is where you can search for and interact with computers that have the InstaTech Service installed.  You can search by computer or user name, or leave it blank to search for all computers.  You can select a specific computer group to narrow your search.
+        </p>
+        <p>
+            Once you have results in the table, you can select one or more computers.  Hold Ctrl or Shift while clicking to select multiple computers, or click Select All to select all in the results table.  You can only Remote Control one computer at a time, but Deploy File and Interactive Console can be used on multiple computers at once.
+        </p>
+        <p>
+            You can also change a computer's group via the drop-down menu.  Computer groups are talked about more in the Configuration section.
+        </p>
+        <ul>
+            <li>
+                <strong>Remote Control</strong> - Opens the remote control page in a new tab and immediately connects to the selected computer.  Can only be used on one computer at a time.
+            </li>
+            <li>
+                <strong>Deploy File</strong> - Deploy a BAT, PS1, or EXE file to all selected computers.  The process will be run under the System account in session 0.
+            </li>
+            <li>
+                <strong>Interactive Console</strong> - This allows you to send PowerShell and CMD commands interactively to all selected computers.
+            </li>
+        </ul>
+        <h3>
+            Account Center
+        </h3>
+        <p>
+            This is where you can create, delete, and edit accounts for the InstaTech Server.
+        </p>
+        <p>
+            Set the temp password if you need to reset an account's password.  Afterward, when you log in with the temp password, you'll be prompted to create a new one.
+        </p>
+        <p>
+            An account can be assigned to one or more computer groups.  Hold Ctrl while clicking to select multiple.  For admins, this doesn't do anything.  For technicians, this determines which computers they'll be able to control in the Computer Hub.
+        </p>
+        <p>
+            Access Level determines what the account has access to.  Admins have access to everything.  Technicians will not have access to the Account Center or Configuration, and they can only interact with computers that are in one of their computer groups.
+        </p>
+        <h3>
+            Configuration
+        </h3>
+        <p>
+            This is where you can configure various aspects of the server.  The configuration data is saved in "/App_Data/Config.json".  Below are the details for each option.
+        </p>
+        <ul>
+            <li>
+                <strong>Company Name</strong> - Determines the name that appears in the title area of the customer and tech portals.
+            </li>
+            <li>
+                <strong>Default Admin</strong> - The name of the first administrator account that gets created automatically on first run.
+            </li>
+            <li>
+                <strong>Demo Mode</strong> - Do not use in production.  When enabled, a demo admin account will be available for anyone to use.  When logging into the support chat, simple bots will interact with you.
+            </li>
+            <li>
+                <strong>File Encryption</strong> - Files related to accounts and cases will be encrypted using System.IO.File.Encrypt method.
+            </li>
+            <li>
+                <strong>Session Recording</strong> - Remote control sessions will be recorded and saved to "/App_Data/Logs/Recordings/".  The ITR files can be played back with the InstaTech Player, which is available on the <a target="_blank" href="https://instatech.org/Downloads/?scrollto=divUtilities">InstaTech Downloads page</a>.
+            </li>
+            <li>
+                <strong>Feature - XYZ</strong> - Determines which main buttons appear on the customer and tech portals.
+            </li>
+            <li>
+                <strong>Email Settings</strong> - These settings will be used to send automated emails, such as for the "Forgot Password" system.
+            </li>
+            <li>
+                <strong>Default RC Download</strong> - The remote control client that's selected by default in the Remote Session window.
+            </li>
+            <li>
+                <strong>Support Categories, Types, and Queues</strong> - These are the categories available to customers when starting a support chat session.  Categories are the first selection.  Types are sub-categories that fall within a major category.  The queue is where the category/type combination will be grouped into in the technician view.
+            </li>
+            <li>
+                <strong>Computer Groups</strong> - Computers that have the service installed can be organized into groups.  The groups in this list will be available in the Computer Hub when assigning computers to a group.
+            </li>
+        </ul>
+        <h2 id="h2RemoteControl">
+            5. The Remote Control
+        </h2>
+        <p>
+            The Remote Control can be found at https://[yourhostname]/Remote_Control/.  There's also a link to it from the Remote Session button in the tech portal.
+        </p>
+        <h3>
+            A Note About UAC and Windows Logon
+        </h3>
+        <p>
+
+        </p>
+        <h2 id="h2Recording">
+            6. Session Recording
+        </h2>
+
+        <h2 id="h2LogFiles">
+            7. Log Files
+        </h2>
+
+        <h2 id="h2Utilities">
+            8. Utilities and Scripts
+        </h2>
+
     </div>
     <style>
         body {
