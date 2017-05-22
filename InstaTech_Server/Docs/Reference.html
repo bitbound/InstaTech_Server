@@ -88,6 +88,20 @@
                 </ul>
             </li>
             <li>
+                <a href="#h2Clients">The Client Applications</a>
+                <ul>
+                    <li>
+                        Windows Client
+                    </li>
+                    <li>
+                        Windows Service
+                    </li>
+                    <li>
+                        Cross-Platform Client (Electron Version)
+                    </li>
+                </ul>
+            </li>
+            <li>
                 <a href="#h2Recording">Session Recording</a>
             </li>
             <li>
@@ -100,6 +114,8 @@
         <br />
         <hr />
         <br />
+
+
         <h2 id="h2Building">
             1. Building
         </h2>
@@ -140,11 +156,14 @@
             </li>
         </ul>
         <p>
-            Once the host names are changed, recompile the clients.  The cross-platform clients are built with <a target="_blank" href="http://electron.atom.io">Electron</a> and packaged with <a target="_blank" href="https://github.com/electron-userland/electron-builder">electron-builder</a>.  See their sites for documentation.
+            Once the host names are changed, recompile the clients.  The cross-platform clients are built with <a target="_blank" href="http://electron.atom.io">Electron</a> and packaged with <a target="_blank" href="https://github.com/electron-userland/electron-builder">electron-builder</a>.  See their sites for documentation.  You will need Node.js tools installed to work with the Electron project in Visual Studio.  Each version (Windows/Mac/Linux) needs to be built on its respective OS.
         </p>
         <p>
             Create a folder named "Downloads" at the root of the website, then put your clients within it.
         </p>
+
+
+
         <h2 id="h2IIS">
             2. IIS Setup
         </h2>
@@ -195,6 +214,9 @@
         <p>
             InstaTech should work on shared hosting, provided all the above requirements are met.  The installer provides an option to extract the files instead of installing them locally.  It will place a ZIP file on your desktop that contains all the files that need to be uploaded to your website.
         </p>
+
+
+
         <h2 id="h2CustomerPortal">
             3. The Customer Portal
         </h2>
@@ -216,6 +238,9 @@
         <p>
             The Remote Control button displays instructions for starting a remote session.  The default download is the Windows WPF client.  Once downloaded and run, the customer would give the session code to the technician, who can then connect.
         </p>
+
+
+
         <h2 id="h2TechPortal">
             4. The Technician Portal
         </h2>
@@ -338,6 +363,9 @@
                 <strong>Computer Groups</strong> - Computers that have the service installed can be organized into groups.  The groups in this list will be available in the Computer Hub when assigning computers to a group.
             </li>
         </ul>
+
+
+
         <h2 id="h2RemoteControl">
             5. The Remote Control
         </h2>
@@ -348,20 +376,244 @@
             A Note About UAC and Windows Logon
         </h3>
         <p>
-
+            The actions you're able to perform while connected to a remote computer is limited by the privilege level of the client process.  Most people are familiar with UAC and elevating a process by choosing "Run as administrator."  However, when determining if an application is allowed to simulate keystrokes and mouse input in various situations, it gets more complicated.
         </p>
-        <h2 id="h2Recording">
-            6. Session Recording
+        <p>
+            See the below bullet points for the short version.  Here are the details, for those who are interested.  The environment in which a process is run within Windows consists of three layers: the session, the window station, and the desktop.  That is, each session can contain window stations, each window station can contain desktops, and each desktop can have processes running in it.
+        </p>
+        <p>
+            Starting with Windows Vista, all services are run in session 0.  This is called session 0 isolation.  When a user logs into Windows, they get a new session.  It starts with session 1 and increments for each new logon.
+        </p>
+        <p>
+            You can see the session number by adding the Session ID column to Task Manager under Details tab.  The desktop you're used to seeing and where you launch applications is in Session[>0]\WinSta0\Default.  That's some session greater than 0, window station 0, Default desktop.
+        </p>
+        <p>
+            There are also Winlogon and Secure desktops.  There can only be one active desktop at a time.  When the fullscreen UAC window appears (if it's set to "dim" your desktop), or when you switch to the logon screen, your default desktop gets set to inactive, and the other desktop becomes active.
+        </p>
+        <p>
+            Applications running in one desktop can't interact with a different desktop.  It must switch desktops, or close and be re-launched in the new desktop.
+        </p>
+        <p>
+            Moreover, an application requires special privileges to interact with the Windows logon desktop or the secure desktop.  The required privileges are higher than simply "Running as administrator".  In fact, only services have the necessary privileges to do so.
+        </p>
+        <p>
+            The catch is, services (which run in session 0), can't interact with the UI at all unless they have a special certificate purchased from Microsoft.  These are typically reserved for accessibility applications, such as screen readers.
+        </p>
+        <p>
+            The way around this is to have a service launch another process in the user's session, in the active desktop, with the necessary rights.  That is why you'll see two instances of InstaTech_Service.exe running when you're connected, with one in session 0 and the other in the user's session.
+        </p>
+        <p>
+            All this leads up to the below behaviors and restrictions, depending on how the InstaTech Client is launched.  The Windows client will attempt to launch with administrative rights if the user's account is an administrator.  Otherwise, it will launch as a standard user without prompting.
+        </p>
+        <ul>
+            <li>
+                <strong>Standard Process</strong> - This would be if a standard user ran the Windows client without administrative rights.  When connected, you wouldn't be able to perform any tasks requiring elevation, interact with UAC or logon screens, or upgrade to service.  If a UAC prompt appears, you be stuck until the user closes it.
+            </li>
+            <li>
+                <strong>Elevated Process</strong> - If the process was "Run as administrator", you would be able to perform certain administrative tasks, depending on the UAC level.  If UAC is set to prompt, you won't be able to interact with the prompt.  By default, the client will automatically close the UAC window and advise that you upgrade to a service.  If UAC is set to not prompt, you will be able to perform all administrative tasks.  You still can't interact with UAC windows or the logon screen, however.
+            </li>
+            <li>
+                <strong>Service Process</strong> - If connected via Unattended Mode to an installed service, or if you performed a one-time upgrade, you will be able to interact with everything.
+            </li>
+        </ul>
+        <h3>
+            Interactive vs. Unattended
+        </h3>
+        <p>
+            Interactive Mode is selected by default on the remote control page.  In this mode, it expects a session ID that the client will automatically generate when opened.  As such, a user must be present at the remote computer.
+        </p>
+        <p>
+            With Unattended Mode selected, a computer name is expected.  Only computers with the service installed can be connected to in this way.  The input box will autocomplete with available computer names once you start typing, if a match is found.
+        </p>
+        <h3>
+            Menu Options
+        </h3>
+        <p>
+            The slide-down menu at the top of the remote control screen contains additional features.
+        </p>
+        <ul>
+            <li>
+                <stronng>Refresh Screen</stronng> - If there's a rendering error in the browser, partial frames can sometimes get left behind.  Refresh Screen will redraw the entire screen to clear things up.
+            </li>
+            <li>
+                <strong>Scale to Fit</strong> - The image will be scaled to fit your browser window, both horizontally and vertically.  Turning this off will cause the image to be rendered at the actual resolution of the remote desktop.
+            </li>
+            <li>
+                <strong>Follow Cursor</strong> - If Scale to Fit is off, and the image is larger than the browser window, the browser will scroll automatically when the cursor nears the edges of the window.
+            </li>
+            <li>
+                <strong>File Transfer</strong> - Transfers a file and opens the parent directory.  You can also drag-and-drop files onto the remote control window.
+            </li>
+            <li>
+                <strong>Send Ctrl + Alt + Del (Service Only)</strong> - Sends the Ctrl + Alt + Del command.  Only available when connected to the service.
+            </li>
+            <li>
+                <strong>Uninstall Service (Service Only)</strong> - Uninstalls the service on the remote computer.
+            </li>
+            <li>
+                <strong>Send Clipboard</strong> - Paste text into the box, which will be transferred to the remote computer's clipboard.
+            </li>
+            <li>
+                <strong>Disconnect</strong> - End the remote session.
+            </li>
+        </ul>
+
+
+        <h2 id="h2Clients">
+            6. The Client Applications
         </h2>
+        <h3>
+            Windows Client
+        </h3>
+        <p>
+            The Windows client is compatible with Windows 7, 8, and 10.  When launched, it provides a 6-digit code that can be entered into the remote control to connect.  The Windows service is embedded in the EXE and can be installed from this client.
+        </p>
+        <p>
+            <strong>Command Line Arguments:</strong>
+        </p>
+        <ul>
+            <li>
+                -install = Extracts the Windows service and installs (or upgrades) it.
+            </li>
+            <li>
+                -uninstall = Removes the Windows service, if installed.
+            </li>
+        </ul>
+        <p>
+            <strong>Main Interface:</strong>
+        </p>
+        <ul>
+            <li>
+                Session ID: A randomly generated code that can be used to connect to the client from the remote control.  Click to copy it to the clipboard.
+            </li>
+            <li>
+                Agent Status: Shows whether a technician is connected.  Click to disconnect a technician, if present.
+            </li>
+            <li>
+                Files Transferred: The number of files transferred this session.  Click to open folder and view files.
+            </li>
+        </ul>
+        <p>
+            <strong>Menu Options:</strong>
+        </p>
+        <ul>
+            <li>
+                Upgrade to Service: Only available if a technician is connected.  Performs a one-time installation of the service and reconnects the remote control to it, allowing for interaction with UAC and logon screens.  After the session is over, the service is uninstalled.
+            </li>
+            <li>
+                Open Viewer: Opens the remote control web page in the computer's default browser.
+            </li>
+            <li>
+                Unattended Access: Opens another window that allows you to install, start, stop, and remove the service.
+            </li>
+            <li>
+                Handle UAC: If enabled, UAC prompts will be closed automatically if they come up.  Otherwise, you wouldn't be able to get rid of it.  Upgrade to a service to interact with UAC prompts.
+            </li>
+            <li>
+                About: View more information about InstaTech Client.
+            </li>
+        </ul>
+        <h3>
+            Windows Service
+        </h3>
+        <p>
+            The Windows service is compatible with Windows 7, 8, and 10.  It's embedded in the Windows client, but can be installed on its own as well.  It must be installed from an elevated command prompt or process.
+        </p>
+        <p>
+            <strong>Command Line Arguments:</strong>
+        </p>
+        <ul>
+            <li>
+                -install = Extracts the Windows service and installs (or upgrades) it.
+            </li>
+            <li>
+                -uninstall = Removes the Windows service, if installed.
+            </li>
+        </ul>
+        <h3>
+            Cross-Platform Client (Electron Version)
+        </h3>
+        <p>
+            The cross-platform client is built with Electron and runs on Windows, Mac, or Linux.  It must be built from the OS that it targets.  While it can be used on Windows, the native Windows client is recommended.  This client does not contain the Windows service.
+        </p>
+        <p>
+            <strong>Main Interface:</strong>
+        </p>
+        <ul>
+            <li>
+                Session ID: A randomly generated code that can be used to connect to the client from the remote control.  Click to copy it to the clipboard.
+            </li>
+            <li>
+                Agent Status: Shows whether a technician is connected.  Click to disconnect a technician, if present.
+            </li>
+            <li>
+                Files Transferred: The number of files transferred this session.  Click to open folder and view files.
+            </li>
+        </ul>
+        <p>
+            <strong>Menu Options:</strong>
+        </p>
+        <ul>
+            <li>
+                Open Viewer: Opens the remote control web page in the computer's default browser.
+            </li>
+            <li>
+                About: View more information about InstaTech Client.
+            </li>
+        </ul>
+        <h2 id="h2Recording">
+            7. Session Recording
+        </h2>
+        <p>
+            Session recording can be enabled in the Configuration window in the tech portal.  If enabled, remote control sessions will be saved in "/App_Data/Logs/Recordings/" as an ITR file.  These files can be played back using the InstaTech Player, which is available on the <a target="_blank" href="https://instatech.org/Downloads/?scrollto=divUtilities">InstaTech Downloads page</a>.
+        </p>
+
 
         <h2 id="h2LogFiles">
-            7. Log Files
+            8. Log Files
         </h2>
+        <p>
+            Numerous log files are kept by the clients and the server.  They can be useful for diagnosing issues or for general information.  Below are the locations of various logs.
+        </p>
+        <ul>
+            <li>
+                InstaTech Client (Windows and Cross-Platform): %temp%\InstaTech_Client_Logs.txt
+            </li>
+            <li>
+                InstaTech Service: C:\Users\Public\Documents\InstaTech_Service_Logs.txt
+            </li>
+            <li>
+                Support Cases: /App_Data/Cases/
+            </li>
+            <li>
+                Computer Accounts: /App_Data/Computer_Accounts/
+            </li>
+            <li>
+                Unhandled Server Errors: /App_Data/Errors/
+            </li>
+            <li>
+                Remote Sessions (where connection between client and remote control completed): /App_Data/Logs/Connections/
+            </li>
+            <li>
+                Remote Session Recordings: /App_Data/Logs/Recordings/
+            </li>
+            <li>
+                Remote Sessions (where client initially connected): /App_Data/Logs/Sessions/
+            </li>
+            <li>
+                Technician Accounts: /App_Data/Tech_Accounts/
+            </li>
+            <li>
+                Errors Related to WebSockets: /App_Data/WebSocket_Errors/
+            </li>
+        </ul>
 
         <h2 id="h2Utilities">
-            8. Utilities and Scripts
+            9. Utilities and Scripts
         </h2>
-
+        <p>
+            As new utilities and scripts related to InstaTech are developed, they'll be published on the <a target="_blank" href="https://instatech.org/Downloads/?scrollto=divUtilities">InstaTech Downloads page</a>.
+        </p>
     </div>
     <style>
         body {

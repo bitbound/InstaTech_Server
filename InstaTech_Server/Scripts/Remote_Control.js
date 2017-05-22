@@ -771,7 +771,7 @@ $(document).ready(function () {
             }
             modKeyDown = false;
             var key = e.key;
-            var modifers = [];
+            var modifiers = [];
             // Need special handling for these characters on Windows.
             if (key.search("[%^+{}]") > -1)
             {
@@ -780,21 +780,21 @@ $(document).ready(function () {
             else
             {
                 if (e.altKey) {
-                    modifers.push("Alt");
+                    modifiers.push("Alt");
                 }
                 if (e.ctrlKey) {
-                    modifers.push("Control");
+                    modifiers.push("Control");
                 }
                 if (e.shiftKey) {
                     if (key != "%" && key != "^" && key != "+") {
-                        modifers.push("Shift")
+                        modifiers.push("Shift")
                     }
                 }
             }
             var request = {
                 "Type": "KeyPress",
                 "Key": key,
-                "Modifiers": modifers
+                "Modifiers": modifiers
             };
             socket.send(JSON.stringify(request));
         }
@@ -817,6 +817,7 @@ $(document).ready(function () {
                     var request = {
                         "Type": "KeyPress",
                         "Key": key,
+                        "Modifiers": []
                     };
                     socket.send(JSON.stringify(request));
                 }
