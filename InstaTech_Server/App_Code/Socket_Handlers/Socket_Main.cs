@@ -119,7 +119,9 @@ namespace InstaTech.App_Code.Socket_Handlers
             
             if (jsonMessage == null || String.IsNullOrEmpty(jsonMessage?.Type))
             {
-                throw new Exception("Type is null within Socket_Main.OnMessage.");
+                var error = new Exception("Type is null within Socket_Main.OnMessage.");
+                Utilities.WriteToLog(error);
+                throw error;
             }
             var methodHandler = Type.GetType("InstaTech.App_Code.Socket_Handlers.Socket_Main").GetMethods().FirstOrDefault(mi => mi.Name == "Handle" + jsonMessage.Type);
             if (methodHandler != null)

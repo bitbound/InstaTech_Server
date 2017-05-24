@@ -115,7 +115,9 @@ namespace InstaTech.App_Code.Socket_Handlers
 
             if (jsonMessage == null || String.IsNullOrEmpty(jsonMessage?.Type))
             {
-                throw new Exception("Type is null within Remote_Control.OnMessage.");
+                var error = new Exception("Type is null within Remote_Control.OnMessage.");
+                Utilities.WriteToLog(error);
+                throw error;
             }
             var methodHandler = Type.GetType("InstaTech.App_Code.Socket_Handlers.Remote_Control").GetMethods().FirstOrDefault(mi => mi.Name == "Handle" + jsonMessage.Type);
             if (methodHandler != null)
@@ -438,7 +440,14 @@ namespace InstaTech.App_Code.Socket_Handlers
                     }
                     ComputerName = JsonData.ComputerName.ToString().Trim().ToLower();
                     CurrentUser = JsonData?.CurrentUser?.ToString()?.Trim()?.ToLower() ?? "";
-                    LastReboot = DateTime.Parse(JsonData.LastReboot);
+                    DateTime lastReboot;
+                    if (JsonData.LastReboot is String)
+                    {
+                        if (DateTime.TryParse(JsonData.LastReboot, out lastReboot))
+                        {
+                            LastReboot = lastReboot;
+                        }
+                    }
                     Load();
                 }
                 else if (ConnectionType == ConnectionTypes.ClientServiceOnce)
@@ -462,7 +471,13 @@ namespace InstaTech.App_Code.Socket_Handlers
             {
                 ComputerName = JsonData.ComputerName.ToString().Trim().ToLower();
                 CurrentUser = JsonData?.CurrentUser?.ToString()?.Trim()?.ToLower() ?? "";
-                LastReboot = DateTime.Parse(JsonData.LastReboot);
+                DateTime lastReboot;
+                if (JsonData.LastReboot is String) {
+                    if (DateTime.TryParse(JsonData.LastReboot, out lastReboot))
+                    {
+                        LastReboot = lastReboot;
+                    }
+                }
                 Save();
             }
             catch (Exception ex)

@@ -1,11 +1,10 @@
-﻿using InstaTech.App_Code.Models;
-using InstaTech.App_Code.Socket_Handlers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Helpers;
+using InstaTech.App_Code.Models;
 
 namespace InstaTech.App_Code {
     /// <summary>
@@ -15,9 +14,7 @@ namespace InstaTech.App_Code {
     {
         public static string App_Data { get; } = HttpContext.Current.Server.MapPath("~/App_Data/");
         public static string Version { get; } = "1.7.2";
-        public static bool IsValid { get; set; } = true;
-        public static bool Trial_Version { get; } = false;
-        public static DateTime Trial_Start { get; } = DateTime.Parse("1/1/00 00:00");
+
         public static List<Tech_Account> Tech_Accounts
         {
             get
