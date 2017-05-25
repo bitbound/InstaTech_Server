@@ -81,23 +81,20 @@
     }
     void Application_BeginRequest(object sender, EventArgs e)
     {
-        // Removed license and trial check for open-source release.
-        //if (!InstaTech.App_Code.Utilities.IsValid)
-        //{
-        //    Response.Write("<h1>This copy of the InstaTech Server is not properly licensed.</h1><h3>A license can be purchased at <a href='https://instatech.org/Purchase/'>https://instatech.org/Purchase/</a></h3>");
-        //    Response.End();
-        //    return;
-        //}
-        //if (InstaTech.App_Code.Utilities.Trial_Version && DateTime.Now - InstaTech.App_Code.Utilities.Trial_Start > TimeSpan.FromDays(14))
-        //{
-        //    Response.Write("<h1>Your InstaTech Server trial has expired.</h1><h3>A permanent license can be purchased at <a href='https://instatech.org/Purchase/'>https://instatech.org/Purchase/</a></h3>");
-        //    Response.End();
-        //    return;
-        //}
-        if (!Request.IsLocal && !Request.IsSecureConnection)
+        if (!Request.IsSecureConnection)
         {
-            Response.RedirectPermanent(Request.Url.AbsoluteUri.ToLower().Replace("http://", "https://"), true);
-            return;
+            try
+            {
+                var request = System.Net.WebRequest.CreateHttp(Request.Url.AbsoluteUri.ToLower().Replace("http://", "https://"));
+                var response = (System.Net.HttpWebResponse)request.GetResponse();
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    Response.RedirectPermanent(Request.Url.AbsoluteUri.ToLower().Replace("http://", "https://"), true);
+                }
+            }
+            catch
+            {
+            }
         }
     }
 </script>

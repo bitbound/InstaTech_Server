@@ -1,36 +1,3 @@
-$(document).ready(function () {
-    window.onerror = function (messageOrEvent, source, lineno, colno, error) {
-        var ex = {};
-        ex.msg = messageOrEvent;
-        ex.lineno = lineno;
-        ex.colno = colno;
-        ex.source = source;
-        ex.error = error;
-        var strError = JSON.stringify(ex);
-        sendClientError(strError);
-    };
-    if (!init()) {
-        return;
-    }
-    window.onbeforeunload = function () {
-        if (InstaTech.Socket_Main.readyState == 1 && location.host.search("localhost") == -1) {
-            return "Navigating away from this page will end your current session.  Are you sure you want to leave?";
-        }
-    };
-    $(document).ajaxStart(function () {
-        showLoading();
-    });
-    $(document).ajaxStop(function () {
-        removeLoading();
-    });
-    setPortalButtonHandlers();
-    if (window.location.search.toLocaleLowerCase().search("user=tech") > -1)
-    {
-        $("#divCustomerPortal").hide();
-        $("#divTechPortal").show();
-
-    }
-});
 function init() {
     if (typeof WebSocket == "undefined") {
         $(".portal-button-frame").remove();
@@ -38,9 +5,7 @@ function init() {
         return false;
     }
     try {
-        var protocol = location.protocol.replace("http:", "ws:").replace("https:", "wss:") + "//";
-        var hostAndPath = (location.host + location.pathname).replace("//", "")
-        InstaTech.Socket_Main = new WebSocket((protocol + hostAndPath + "/Services/Main_Socket.cshtml"));
+        InstaTech.Socket_Main = new WebSocket(location.origin.replace("http", "ws") + "/Services/Main_Socket.cshtml");
         setMainSocketHandlers();
         return true;
     }
@@ -57,8 +22,7 @@ function switchToTechPortal() {
     });
 }
 function submitTechMainLogin(e) {
-    if (e)
-    {
+    if (e) {
         e.preventDefault();
     }
     var formData = {};
@@ -79,43 +43,54 @@ function logOutTech(e) {
     clearCachedCreds();
     InstaTech.Socket_Main.close();
 }
-function toggleMainMenu() {
-    var mainMenu = $("#divMainMenuOuter");
-    if (mainMenu.width() == 0)
-    {
-        mainMenu.width("initial");
-        mainMenu.height("initial");
-        var targetWidth = mainMenu.width();
-        var targetHeight = mainMenu.height();
-        mainMenu.width(0);
-        mainMenu.height(0);
-        mainMenu.animate({
+
+function toggleMenu(menu) {
+    var targetMenu;
+    if (menu == "main") {
+        targetMenu = $("#divMainMenuOuter");
+    }
+    else if (menu == "notify") {
+        targetMenu = $("#divNotifyMenuOuter");
+    }
+    if (targetMenu.width() == 0) {
+        targetMenu.width("initial");
+        targetMenu.height("initial");
+        var targetWidth = targetMenu.width();
+        var targetHeight = targetMenu.height();
+        targetMenu.width(0);
+        targetMenu.height(0);
+        targetMenu.animate({
             "width": targetWidth,
             "height": targetHeight
         }, 400);
     }
-    else
-    {
-        mainMenu.animate({
+    else {
+        targetMenu.animate({
             "width": 0,
             "height": 0
         }, 400);
     }
 }
-function mouseOutMainMenu() {
-    var mainMenu = $("#divMainMenuOuter");
-    if (mainMenu.width() == 0) {
+function mouseOutMenu(menu) {
+    var targetMenu;
+    if (menu == "main") {
+        targetMenu = $("#divMainMenuOuter");
+    }
+    else if (menu == "notify") {
+        targetMenu = $("#divNotifyMenuOuter");
+    }
+    if (targetMenu.width() == 0) {
         return;
     }
-    if (InstaTech.Temp.mainMenuTimeout) {
-        window.clearTimeout(InstaTech.Temp.mainMenuTimeout);
+    if (InstaTech.Temp.menuTimeout) {
+        window.clearTimeout(InstaTech.Temp.menuTimeout);
     }
-    InstaTech.Temp.mainMenuTimeout = window.setTimeout(function () {
+    InstaTech.Temp.menuTimeout = window.setTimeout(function (menu) {
         if ($("#divMainMenuOuter").is(":visible") && !$("#svgMainMenu").is(":hover") && !$("#divMainMenuOuter").is(":hover")) {
-            toggleMainMenu();
+            toggleMenu(menu);
         }
-        delete InstaTech.Temp.mainMenuTimeout;
-    }, 2000);
+        delete InstaTech.Temp.menuTimeout;
+    }, 2000, menu);
 }
 function clearCachedCreds() {
     InstaTech.UserID = null;
@@ -129,7 +104,7 @@ function setMainLoginFrame() {
     $("#aMainTechLogIn").hide();
     $("#aMainTechLogOut").show();
 }
-function forgotPasswordMain(e){
+function forgotPasswordMain(e) {
     if ($("#inputTechMainUserID").val().length == 0) {
         showDialog("User ID Required", "You must first enter a user ID into the form before you can reset the password.");
         return;
@@ -249,3 +224,150 @@ function setMainSocketHandlers() {
         $("#divMainTechLoginFrame").remove();
     };
 }
+function addNotification(strButtonInnerHTML, functionClickAction) {
+    document.getElementById("divNotifyMenuOuter").removeAttribute("hidden");
+    document.getElementById("imgNotifyMenu").removeAttribute("hidden");
+    var notify = document.createElement("div");
+    notify.innerHTML = strButtonInnerHTML;
+    notify.classList.add("menu-option");
+    notify.onclick = functionClickAction;
+    document.getElementById("divNotifyMenuInner").appendChild(notify);
+}
+function checkVersion() {
+    var thisVersion = $('meta[name="version"]')[0].content;
+    $.get("https://instatech.org/Services/Get_Server_Version.cshtml", function (data) {
+        if (data != thisVersion && data != "0.0.0") {
+            addNotification("New Version", function () {
+                var buttons = [
+                    {
+                        text: "OK",
+                        click: function (e) {
+                            $(e.currentTarget).parent().remove();
+                            $("#divBuildMessages").slideDown(function () {
+                                $("#textBuildMessages")[0].value = "";
+                                var addText = function addText(strMessage) {
+                                    $("#textBuildMessages")[0].value += "\n" + strMessage;
+                                    $("#textBuildMessages")[0].scrollTop = $("#textBuildMessages")[0].scrollHeight;
+                                };
+                                try {
+                                    $("#textBuildMessages")[0].value += "Connecting to build service.";
+                                    socket = new WebSocket("wss://instatech.org/Widgets/Package_Builder.cshtml");
+                                    socket.onopen = function () {
+                                        addText("Connected.  Sending build information.");
+                                        var request = {
+                                            "Type": "BuildInformation",
+                                            "CompanyName": $('meta[name="company-name"]')[0].content,
+                                            "HostName": location.host
+                                        }
+                                        socket.send(JSON.stringify(request));
+                                    }
+                                    socket.onclose = function () {
+                                        addText("Connection closed.");
+                                        $("#divBuildForm input").attr("disabled", false);
+                                        $("#divBuildForm button").attr("disabled", false);
+                                    }
+                                    socket.onerror = function (e) {
+                                        addText("WebSocket Error: " + e);
+                                    }
+                                    socket.onmessage = function (e) {
+                                        
+                                        var jsonData = JSON.parse(e.data);
+                                        switch (jsonData.Type) {
+                                            case "BuildInformation":
+                                                if (jsonData.Status == "ok") {
+                                                    addText("Build information received.");
+                                                }
+                                                else if (jsonData.Status == "invalid") {
+                                                    addText("\nInvalid characters in host name.  It must be the root of the website and not within a virtual folder.");
+                                                }
+                                                else if (jsonData.Status == "null") {
+                                                    addText("\nCompany name and host name are required.");
+                                                }
+                                                break;
+                                            case "QueueUpdate":
+                                                addText("Place in queue: " + jsonData.Place);
+                                                break;
+                                            case "StatusUpdate":
+                                                addText(jsonData.Message);
+                                                break;
+                                            case "BuildCompleted":
+                                                var link = document.createElement("a");
+                                                link.href = 'https://instatech.org/Services/Downloader/?id=' + jsonData.DownloadID;
+                                                link.target = "_blank";
+                                                link.innerHTML = 'https://instatech.org/Services/Downloader/?id=' + jsonData.DownloadID;
+                                                link.style.color = "highlight";
+                                                $("#divBuildCompleted h4").append(link);
+                                                $("#divBuildCompleted").fadeIn();
+                                                break;
+                                            default:
+                                        }
+                                    }
+                                }
+                                catch (ex) {
+                                    addText("Error: " + ex);
+                                }
+                            });
+                        }
+                    },
+                    {
+                        text: "Cancel",
+                        click: function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                ];
+                var buildMessagesHTML = '<div id="divBuildMessages" style="margin-top: 10px;" hidden>\
+                    <textarea id="textBuildMessages" readonly style="width:100%; height:150px"></textarea>\
+                </div>\
+                <div id="divBuildCompleted" hidden>\
+                    <h4>\
+                        Build Completed!\
+                        <br /><br />\
+                        Download: \
+                    </h4>\
+                </div>\
+                '
+                showDialogEx("New Version Available", "A new version is available.  Would you like to download it now?<br/>" + buildMessagesHTML, buttons);
+            })
+        }
+    })
+}
+
+$(document).ready(function () {
+    window.onerror = function (messageOrEvent, source, lineno, colno, error) {
+        var ex = {};
+        ex.msg = messageOrEvent;
+        ex.lineno = lineno;
+        ex.colno = colno;
+        ex.source = source;
+        ex.error = error;
+        var strError = JSON.stringify(ex);
+        sendClientError(strError);
+    };
+    if (!init()) {
+        return;
+    }
+    window.onbeforeunload = function () {
+        if (InstaTech.Socket_Main.readyState == 1 && location.host.search("localhost") == -1) {
+            return "Navigating away from this page will end your current session.  Are you sure you want to leave?";
+        }
+    };
+    $(document).ajaxStart(function () {
+        showLoading();
+    });
+    $(document).ajaxStop(function () {
+        removeLoading();
+    });
+    setPortalButtonHandlers();
+    if (window.location.search.toLocaleLowerCase().search("user=tech") > -1)
+    {
+        $("#divCustomerPortal").hide();
+        $("#divTechPortal").show();
+    }
+    if (location.protocol == "http:") {
+        addNotification("SSL Error", function () {
+            showDialog("Connection Not Secure", "Your connection is not secure.  SSL isn't configured properly on this server.<br/><br/>See the Quick Start and Reference guides for helpful tips on configuring SSL.");
+        })
+    }
+    checkVersion();
+});

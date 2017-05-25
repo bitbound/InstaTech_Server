@@ -133,18 +133,51 @@ form button[type="submit"] {
     height: 0;
 }
 #divMainMenuInner {
+    font-weight: bold;
     background-color: dimgray;
     border: 2px solid white;
 }
 
-#divMainMenuInner .menu-option {
+#imgNotifyMenu {
+    position: absolute;
+    top: 5px;
+    right: 55px;
+    height: 25px;
+    width: 25px;
+    margin-left: 10px;
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+}
+
+#imgNotifyMenu:hover {
+    background-color: lightgray;
+}
+
+#divNotifyMenuOuter {
+    position: absolute;
+    top: 35px;
+    right: 85px;
+    z-index: 4;
+    overflow: hidden;
+    width: 0;
+    height: 0;
+}
+
+#divNotifyMenuInner {
+    font-weight: bold;
+    background-color: dimgray;
+    border: 2px solid white;
+}
+
+.menu-option {
     height: 1.5em;
     line-height: 1.5em;
     padding: 10px;
     cursor: pointer;
     color: white;
 }
-#divMainMenuInner .menu-option:hover {
+.menu-option:hover {
     background-color: lightgray;
 }
 #divMainTechLoginFrame {

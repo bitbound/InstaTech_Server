@@ -440,13 +440,9 @@ namespace InstaTech.App_Code.Socket_Handlers
                     }
                     ComputerName = JsonData.ComputerName.ToString().Trim().ToLower();
                     CurrentUser = JsonData?.CurrentUser?.ToString()?.Trim()?.ToLower() ?? "";
-                    DateTime lastReboot;
-                    if (JsonData.LastReboot is String)
+                    if (JsonData.LastReboot != null)
                     {
-                        if (DateTime.TryParse(JsonData.LastReboot, out lastReboot))
-                        {
-                            LastReboot = lastReboot;
-                        }
+                        LastReboot = JsonData.LastReboot;
                     }
                     Load();
                 }
@@ -471,11 +467,10 @@ namespace InstaTech.App_Code.Socket_Handlers
             {
                 ComputerName = JsonData.ComputerName.ToString().Trim().ToLower();
                 CurrentUser = JsonData?.CurrentUser?.ToString()?.Trim()?.ToLower() ?? "";
-                DateTime lastReboot;
-                if (JsonData.LastReboot is String) {
-                    if (DateTime.TryParse(JsonData.LastReboot, out lastReboot))
+                if (JsonData.LastReboot != null) {
+                    if (JsonData.LastReboot != null)
                     {
-                        LastReboot = lastReboot;
+                        LastReboot = JsonData.LastReboot;
                     }
                 }
                 Save();

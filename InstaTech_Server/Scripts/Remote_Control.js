@@ -148,12 +148,7 @@ function connectToClient() {
 
 
 function initWebSocket() {
-    if (window.location.host.search("localhost") > -1) {
-        socket = new WebSocket("ws://" + location.host + "/Services/Remote_Control_Socket.cshtml");
-    }
-    else {
-        socket = new WebSocket("wss://" + location.host + "/Services/Remote_Control_Socket.cshtml");
-    }
+    socket = new WebSocket(location.origin.replace("http", "ws") + "/Services/Remote_Control_Socket.cshtml");
     socket.binaryType = "arraybuffer";
     socket.onopen = function (e) {
         if (window.location.search.search("AuthenticationToken") > -1) {

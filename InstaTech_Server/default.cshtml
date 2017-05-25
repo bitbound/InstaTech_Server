@@ -19,6 +19,8 @@
         <meta name="viewport" content="width=600, user-scalable=no" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="company-name" content="@InstaTech.App_Code.Config.Current.Company_Name" />
+        <meta name="version" content="@InstaTech.App_Code.Utilities.Version" />
         <link href="~/Default.css" rel="stylesheet" />
         <link href="~/scripts/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
         <link href="~/scripts/jquery-ui/jquery-ui.theme.min.css" rel="stylesheet" />
@@ -83,12 +85,12 @@
         </div>
 
         <div id="divTechPortal" class="center-aligned" hidden>
-            <svg id="svgMainMenu" xmlns="http://www.w3.org/2000/svg" onclick='toggleMainMenu()' onmouseout="mouseOutMainMenu()">
+            <svg id="svgMainMenu" xmlns="http://www.w3.org/2000/svg"  onclick='toggleMenu("main")' onmouseout='mouseOutMenu("main")'>
                 <line x1="5" x2="20" y1="7" y2="7" stroke="white" stroke-width="2" stroke-linecap="round"></line>
                 <line x1="5" x2="20" y1="13" y2="13" stroke="white" stroke-width="2" stroke-linecap="round"></line>
                 <line x1="5" x2="20" y1="19" y2="19" stroke="white" stroke-width="2" stroke-linecap="round"></line>
             </svg>
-            <div id="divMainMenuOuter" onmouseout="mouseOutMainMenu()">
+            <div id="divMainMenuOuter" onmouseout='mouseOutMenu("main")'>
                 <div id="divMainMenuInner">
                     <div class="menu-option" onclick='window.open("https://instatech.org/Downloads/?scrollto=divUtilities", "_blank")'>
                         Utilities & Scripts
@@ -102,6 +104,12 @@
                     <div class="menu-option" onclick='window.open("https://instatech.org/Contact/Feature_Request", "_blank")'>
                         Request a Feature
                     </div>
+                </div>
+            </div>
+            <img id="imgNotifyMenu" hidden src="~/Assets/Images/StatusAlert_256x.png" onclick='toggleMenu("notify")' onmouseout='mouseOutMenu("notify")' />
+            <div id="divNotifyMenuOuter" hidden onmouseout='mouseOutMenu("notify")'>
+                <div id="divNotifyMenuInner">
+                    
                 </div>
             </div>
             <div id="divMainTechLoginFrame">

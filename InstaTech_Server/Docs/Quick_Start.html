@@ -43,26 +43,20 @@
             Configuring SSL
         </h2>
         <div>
-            The very first thing you need to do is set up SSL on your website.  By design, InstaTech won't work without SSL encryption.  There are many options out there for SSL certificates, so you may want to do some research before committing to any one in particular.  If you're unfamiliar with SSL or IIS in general, I highly recommend doing some additional research to get comfortable using them.
+            The first thing you want to do is set up SSL on your website.  InstaTech will work without an SSL certificate, but it's very important that you have one installed properly before using it in production.
             <br />
             <br />
-            Here are two easy (and free) ways to get an SSL certificate installed:
-            <ul>
-                <li>
-                    <strong>Use Certify.</strong> Powered by <a href="https://letsencrypt.org/" target="_blank">Let's Encrypt</a>, this is by far the easiest way to get and install a root certificate.  A root certificate means that it will be recognized by all major browsers.  The only downside to these certificates is that they expire every 90 days.  However, they're free, trusted everywhere, and Certify makes it a one-click affair to install and update them.
-                    <br />
-                    <br />
-                    Certify Page: <a href="http://certify.webprofusion.com/" target="_blank">http://certify.webprofusion.com/</a>
-                    <br />
-                    <br />
-                </li>
-                <li>
-                    <strong>Create a self-signed certificate.</strong> This should only be used for testing purposes, and only if you'll be testing it within your local network.  You should not use a self-signed certificate if you will have people outside your network visiting the site.
-                    <br />
-                    <br />
-                    With that said, creating your own certificate could be a temporary solution until you get a real certificate in place.  Here's how: <a href="https://technet.microsoft.com/en-us/library/cc753127(v=ws.10).aspx" target="_blank">https://technet.microsoft.com/en-us/library/cc753127(v=ws.10).aspx</a>
-                </li>
-            </ul>
+            There are many options out there for SSL certificates, so you may want to do some research before committing to any one in particular.  If you're unfamiliar with SSL or IIS in general, I highly recommend doing some additional research to get comfortable using them.
+            <br />
+            <br />
+            The easiest (and free) way to install an SSL certificate is with <strong>Certify</strong>.
+            <br />
+            <br />
+            Powered by <a href="https://letsencrypt.org/" target="_blank">Let's Encrypt</a>, Certify will automatically register, install, and maintain a root certificate.  A root certificate means that it will be trusted by all major browsers.  Certify can even create a scheduled task to renew your certificate automatically before it expires.
+            <br />
+            <br />
+            Certify Page: <a href="https://certifytheweb.com" target="_blank">https://certifytheweb.com</a>
+            <br /><br />
             For a more detailed guide on setting up SSL in IIS, here's a good article:
             <a href="https://www.iis.net/learn/manage/configuring-security/how-to-set-up-ssl-on-iis" target="_blank">https://www.iis.net/learn/manage/configuring-security/how-to-set-up-ssl-on-iis</a>
         </div>
