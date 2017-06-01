@@ -152,6 +152,7 @@ function initWebSocket() {
     socket.binaryType = "arraybuffer";
     socket.onopen = function (e) {
         if (window.location.search.search("AuthenticationToken") > -1) {
+            showLoading();
             InstaTech.AuthenticationToken = args.AuthenticationToken;
             var request = {
                 "Type": "QuickConnect",
@@ -372,6 +373,9 @@ function initWebSocket() {
                         requestCapture();
                         $("#divConnect").hide();
                         $("#divMain").show();
+                        if (window.location.search.search("AuthenticationToken") > -1) {
+                            removeLoading();
+                        }
                     }
                     else if (jsonMessage.Status == "failed") {
                         showDialog("Connection Failed", "Failed to connect to the remote computer.");
