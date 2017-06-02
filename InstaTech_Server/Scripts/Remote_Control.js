@@ -526,6 +526,7 @@ function transferFiles(fileList) {
     }
 }
 function sendUninstall(e) {
+    disconnectRequested = true;
     var request = {
         "Type": "UninstallService"
     }
