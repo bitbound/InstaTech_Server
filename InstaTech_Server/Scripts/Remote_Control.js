@@ -24,6 +24,7 @@ var followingCursor;
 var lastCursorOffsetX;
 var lastCursorOffsetY;
 var isTouchScreen = false;
+var disconnectRequested = false;
 var args = {};
 var searchCallback;
 
@@ -107,6 +108,7 @@ function switchToCustomerPortal() {
     });
 }
 function connectToClient() {
+    disconnectRequested = false;
     if (socket.readyState == WebSocket.CLOSED || socket.readyState == WebSocket.CLOSING)
     {
         $("#divStatus").text("Reconnecting...");
@@ -146,7 +148,6 @@ function connectToClient() {
     }
 }
 
-
 function initWebSocket() {
     socket = new WebSocket(location.origin.replace("http", "ws") + "/Services/Remote_Control_Socket.cshtml");
     socket.binaryType = "arraybuffer";
@@ -180,7 +181,7 @@ function initWebSocket() {
         $("#divConnect").show();
         $("#divStatus").text("Session closed.");
         // Prevent reconnection of quick connect from Computer Hub.
-        if (window.location.search.search("AuthenticationToken") > -1) {
+        if (window.location.search.search("AuthenticationToken") > -1 && disconnectRequested) {
             window.close();
         }
         else
@@ -417,7 +418,7 @@ function initWebSocket() {
                     }
                     break;
                 case "NewLogin":
-                    clearCachedCreds();
+                    logOutTech();
                     showDialog("Logged Out", "You have been logged out due to a login from another browser.");
                     break;
                 default:
@@ -428,6 +429,7 @@ function initWebSocket() {
     };
 }
 function disconnect() {
+    disconnectRequested = true;
     toggleMenu();
     socket.close();
 }
