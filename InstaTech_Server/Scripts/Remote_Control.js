@@ -526,12 +526,27 @@ function transferFiles(fileList) {
     }
 }
 function sendUninstall(e) {
-    disconnectRequested = true;
-    var request = {
-        "Type": "UninstallService"
-    }
-    socket.send(JSON.stringify(request));
-    showTooltip($("#divUninstallService"), "right", "green", "Sending uninstall request...");
+    var buttons = [
+        {
+            text: "Yes",
+            click: function () {
+                disconnectRequested = true;
+                var request = {
+                    "Type": "UninstallService"
+                }
+                socket.send(JSON.stringify(request));
+                showTooltip($("#divUninstallService"), "right", "green", "Sending uninstall request...");
+                $(this).dialog("close");
+            }
+        },
+        {
+            text: "No",
+            click: function () {
+                $(this).dialog("close");
+            }
+        }
+    ];
+    showDialogEx("Confirm Uninstall", "Are you sure you want to uninstall the service from this computer?", buttons);
 }
 function scrollToCursor() {
     if ($(":hover").length > 0 && $("#divFollowCursor").attr("status") == "on" && isTouchScreen == false)
