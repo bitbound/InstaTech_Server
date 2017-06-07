@@ -53,6 +53,8 @@ class Main_Model {
     AuthenticationToken: string;
     LoggedIn: boolean;
     Socket_Main: WebSocket;
+    Socket_Port: string;
+    Secure_Socket_Port: string;
     Cases: Case[];
     Tech_Accounts: Tech_Account[];
     Hub_Computers: Computer[];
@@ -63,6 +65,22 @@ class Main_Model {
     PartnerLastName: string;
     ComputerGroups: string[];
     Temp: {};
+    get HostAndPort():string {
+        var hostAndPort = location.host;
+        if (this.Secure_Socket_Port != "443") {
+            if (location.protocol.search("https") > -1) {
+                hostAndPort = location.hostname + ":" + this.Secure_Socket_Port;
+            }
+        }
+        if (this.Socket_Port != "80") {
+            if (location.protocol.search("https") == -1) {
+                hostAndPort = location.hostname + ":" + this.Socket_Port;
+            }
+        }
+        return hostAndPort;
+    }
 }
 const InstaTech = new Main_Model();
+InstaTech.Socket_Port = "80";
+InstaTech.Secure_Socket_Port = "443";
 InstaTech.Temp = {};

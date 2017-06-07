@@ -149,7 +149,7 @@ function connectToClient() {
 }
 
 function initWebSocket() {
-    socket = new WebSocket(location.origin.replace("http", "ws") + "/Services/Remote_Control_Socket.cshtml");
+    socket = new WebSocket(location.protocol.replace("http", "ws") + "//" + InstaTech.HostAndPort + "/Services/Remote_Control_Socket.cshtml");
     socket.binaryType = "arraybuffer";
     socket.onopen = function (e) {
         if (window.location.search.search("AuthenticationToken") > -1) {
@@ -195,7 +195,22 @@ function initWebSocket() {
         $("#videoRemoteControl").hide();
         $("#divConnect").show();
         $("#divStatus").text("Session closed due to an error.");
-        initWebSocket();
+        var buttons = [
+            {
+                text: "Yes",
+                click: function () {
+                    initWebSocket();
+                    $(this).dialog("close");
+                }
+            },
+            {
+                text: "No",
+                click: function () {
+                    $(this).dialog("close");
+                }
+            }
+        ];
+        showDialogEx("WebSocket Error", "A WebSocket error occurred.  Do you want to try to reconnect?", buttons);
     };
     socket.onmessage = function (e) {
         if (e.data instanceof ArrayBuffer) {
@@ -571,7 +586,9 @@ function scrollToCursor() {
         followingCursor = false;
     }
 }
+
 $(document).ready(function () {
+    
     window.location.search.replace("?", "").split("&").forEach(function (value, index) {
         var split = value.split("=");
         args[split[0]] = split[1];

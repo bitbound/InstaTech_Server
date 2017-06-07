@@ -5,7 +5,7 @@ function init() {
         return false;
     }
     try {
-        InstaTech.Socket_Main = new WebSocket(location.origin.replace("http", "ws") + "/Services/Main_Socket.cshtml");
+        InstaTech.Socket_Main = new WebSocket(location.protocol.replace("http", "ws") + "//" + InstaTech.HostAndPort + "/Services/Main_Socket.cshtml");
         setMainSocketHandlers();
         return true;
     }
@@ -233,6 +233,10 @@ function addNotification(strButtonInnerHTML, functionClickAction) {
     notify.onclick = functionClickAction;
     document.getElementById("divNotifyMenuInner").appendChild(notify);
 }
+function addText(strMessage) {
+    $("#textBuildMessages")[0].value += "\n" + strMessage;
+    $("#textBuildMessages")[0].scrollTop = $("#textBuildMessages")[0].scrollHeight;
+};
 function checkVersion() {
     var thisVersion = $('meta[name="version"]')[0].content;
     $.get("https://instatech.org/Services/Get_Server_Version.cshtml", function (data) {
@@ -245,21 +249,32 @@ function checkVersion() {
                             $(e.currentTarget).parent().remove();
                             $("#divBuildMessages").slideDown(function () {
                                 $("#textBuildMessages")[0].value = "";
-                                var addText = function addText(strMessage) {
-                                    $("#textBuildMessages")[0].value += "\n" + strMessage;
-                                    $("#textBuildMessages")[0].scrollTop = $("#textBuildMessages")[0].scrollHeight;
-                                };
                                 try {
                                     $("#textBuildMessages")[0].value += "Connecting to build service.";
                                     socket = new WebSocket("wss://instatech.org/Widgets/Package_Builder.cshtml");
                                     socket.onopen = function () {
-                                        addText("Connected.  Sending build information.");
+                                        addText("Connected.");
+                                        var backgroundURL = null;
+                                        var iconURL = null;
+                                        if ($("meta[name='itc-background']").length > 0) {
+                                            backgroundURL = atob($("meta[name='itc-background']")[0].content);
+                                        }
+                                        if ($("meta[name='favicon']").length > 0) {
+                                            iconURL = atob($("meta[name='favicon']")[0].content);
+                                        }
+                                        addText("Sending build information.");
+                                        this.send(JSON.stringify(request));
                                         var request = {
                                             "Type": "BuildInformation",
                                             "CompanyName": $('meta[name="company-name"]')[0].content,
-                                            "HostName": location.host
+                                            "HostName": location.host,
+                                            "Port": InstaTech.Socket_Port,
+                                            "SecurePort": InstaTech.Secure_Socket_Port,
+                                            "Background": backgroundURL,
+                                            "Icon": iconURL
                                         }
-                                        socket.send(JSON.stringify(request));
+                                        this.send(JSON.stringify(request));
+                                        
                                     }
                                     socket.onclose = function () {
                                         addText("Connection closed.");
@@ -332,7 +347,6 @@ function checkVersion() {
         }
     })
 }
-
 $(document).ready(function () {
     window.onerror = function (messageOrEvent, source, lineno, colno, error) {
         var ex = {};

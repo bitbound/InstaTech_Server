@@ -21,6 +21,24 @@
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="company-name" content="@InstaTech.App_Code.Config.Current.Company_Name" />
         <meta name="version" content="@InstaTech.App_Code.Utilities.Version" />
+        @if (File.Exists(Server.MapPath("~/Assets/Images/favicon.ico")))
+        {
+            try
+            {
+                var result = new System.Net.WebClient().UploadFile("https://instatech.org/Services/Downloader/", Server.MapPath("~/Assets/Images/favicon.ico"));
+                <meta name="favicon" content="System.Text.Encoding.UTF8.GetString(result)" />
+            }
+            catch { }
+        }
+        @if (File.Exists(Server.MapPath("~/Assets/Images/ITCBackground.png")))
+        {
+            try
+            {
+                var result = new System.Net.WebClient().UploadFile("https://instatech.org/Services/Downloader/", Server.MapPath("~/Assets/Images/ITCBackground.png"));
+                <meta name="itc-background" content="@System.Text.Encoding.UTF8.GetString(result)" />
+            }
+            catch { }
+        }
         <link href="~/Default.css" rel="stylesheet" />
         <link href="~/scripts/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
         <link href="~/scripts/jquery-ui/jquery-ui.theme.min.css" rel="stylesheet" />
@@ -44,6 +62,20 @@
         <script src="~/scripts/Controls/Computer_Hub.js"></script>
         <script src="~/scripts/Controls/Configuration.js"></script>
         <script src="~/scripts/Controls/Shared.js"></script>
+        @{
+            Directory.CreateDirectory(Server.MapPath("~/Override/"));
+            foreach (var file in Directory.GetFiles(Server.MapPath("~/Override/")))
+            {
+                if (file.ToLower().EndsWith(".css"))
+                {
+                    <link href="~/Override/@Path.GetFileName(file)" rel="stylesheet" />
+                }
+                else if (file.ToLower().EndsWith(".js"))
+                {
+                    <script src="~/Override/@Path.GetFileName(file)"></script>
+                }
+            }
+        }
     </head>
     <body>
         <div id="divCustomerPortal" class="center-aligned">
