@@ -628,6 +628,10 @@ namespace InstaTech.App_Code.Socket_Handlers
                     SupportType = JsonData.SupportType,
                     Details = JsonData.Details
                 };
+                if (SupportCase.SupportCategory == "Other")
+                {
+                    SupportCase.SupportType = "Other";
+                }
                 ConnectionType = ConnectionTypes.Customer;
                 SupportCase.Save();
                 JsonData.Status = "ok";
