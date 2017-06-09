@@ -48,6 +48,7 @@ function submitTechMainLogin(e) {
 }
 function logOutTech(e) {
     clearCachedCreds();
+    disconnectRequested = true;
     socket.close();
     $("#spanMainLoginStatus").html("<small>Not logged in.</small>");
     $("#inputTechMainPassword").val("");
@@ -414,6 +415,7 @@ function initWebSocket() {
                     break;
                 case "ClientUpdating":
                     showDialog("Client Updating", "The client is self-updating.  Please try connecting again in a moment.");
+                    disconnectRequested = true;
                     socket.close();
                     break;
                 case "SearchComputers":
