@@ -986,11 +986,19 @@ namespace InstaTech.App_Code.Socket_Handlers
                 File.WriteAllText(Path.Combine(di.FullName, ComputerName + ".json"), Json.Encode(ca));
                 if (Config.Current.File_Encryption)
                 {
-                    File.Encrypt(Path.Combine(di.FullName, ComputerName + ".json"));
+                    try
+                    {
+                        File.Encrypt(Path.Combine(di.FullName, ComputerName + ".json"));
+                    }
+                    catch { }
                 }
                 else
                 {
-                    File.Decrypt(Path.Combine(di.FullName, ComputerName + ".json"));
+                    try
+                    {
+                        File.Decrypt(Path.Combine(di.FullName, ComputerName + ".json"));
+                    }
+                    catch { }
                 }
             }
             catch (Exception ex)

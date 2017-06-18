@@ -50,11 +50,20 @@ namespace InstaTech.App_Code {
             {
                 if (Encrypt)
                 {
-                    File.Encrypt(file);
+                    try
+                    {
+                        File.Encrypt(file);
+                    }
+                    catch { }
                 }
                 else
                 {
-                    File.Decrypt(file);
+                    try
+                    {
+                        File.Decrypt(file);
+                    }
+                    catch { }
+
                 }
             }
         }

@@ -95,11 +95,20 @@ namespace InstaTech.App_Code.Models
             File.WriteAllText(path, Json.Encode(this));
             if (Config.Current.File_Encryption)
             {
-                File.Encrypt(path);
+                // TODO: Encryption fails when account doesn't have write access to entire path.  Find workaround.
+                try
+                {
+                    File.Encrypt(path);
+                }
+                catch { }
             }
             else
             {
-                File.Decrypt(path);
+                try
+                {
+                    File.Decrypt(path);
+                }
+                catch { }
             }
         }
         public static Case Load (string CaseID)

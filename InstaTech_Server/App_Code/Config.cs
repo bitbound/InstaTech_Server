@@ -23,7 +23,7 @@ namespace InstaTech.App_Code
         public bool Demo_Mode { get; set; } = false;
 
         // Use file encryption for files saved on the server.
-        public bool File_Encryption { get; set; } = true;
+        public bool File_Encryption { get; set; } = false;
         // Record the video of remote control sessions.
         public bool Session_Recording { get; set; } = false;
 

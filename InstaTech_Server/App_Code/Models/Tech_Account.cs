@@ -43,11 +43,19 @@ namespace InstaTech.App_Code.Models
             File.WriteAllText(path, Json.Encode(this));
             if (Config.Current.File_Encryption)
             {
-                File.Encrypt(path);
+                try
+                {
+                    File.Encrypt(path);
+                }
+                catch { }
             }
             else
             {
-                File.Decrypt(path);
+                try
+                {
+                    File.Decrypt(path);
+                }
+                catch { }
             }
         }
         public static Tech_Account Load(string UserID)
