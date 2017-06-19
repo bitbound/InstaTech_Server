@@ -822,7 +822,7 @@ $(document).ready(function () {
                     modifiers.push("Control");
                 }
                 if (e.shiftKey) {
-                    if (key.search("[%^+{}()]") > -1 && key.length > 1) {
+                    if (key.length > 1) {
                         modifiers.push("Shift")
                     }
                 }
