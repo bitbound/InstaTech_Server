@@ -809,7 +809,7 @@ $(document).ready(function () {
             var key = e.key;
             var modifiers = [];
             // Need special handling for these characters on Windows.
-            if (key.search("[%^+{}]") > -1)
+            if (key.search("[%^+{}()]") > -1)
             {
                 key = "{" + key + "}";
             }
@@ -822,7 +822,7 @@ $(document).ready(function () {
                     modifiers.push("Control");
                 }
                 if (e.shiftKey) {
-                    if (key != "%" && key != "^" && key != "+") {
+                    if (key.search("[%^+{}()]") > -1 && key.length > 1) {
                         modifiers.push("Shift")
                     }
                 }
