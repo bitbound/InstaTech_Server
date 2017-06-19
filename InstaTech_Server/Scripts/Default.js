@@ -239,7 +239,7 @@ function addText(strMessage) {
 };
 function checkVersion() {
     var thisVersion = $('meta[name="version"]')[0].content;
-    $.get("https://instatech.org/Services/Get_Server_Version.cshtml", function (data) {
+    $.get("https://instatech.azurewebsites.net/Services/Get_Server_Version.cshtml", function (data) {
         if (data != thisVersion && data != "0.0.0") {
             addNotification("New Version", function () {
                 var buttons = [
@@ -307,9 +307,9 @@ function checkVersion() {
                                                 break;
                                             case "BuildCompleted":
                                                 var link = document.createElement("a");
-                                                link.href = 'https://instatech.org/Services/Downloader/?id=' + jsonData.DownloadID;
+                                                link.href = 'https://instatech.azurewebsites.net/Services/Downloader/?id=' + jsonData.DownloadID;
                                                 link.target = "_blank";
-                                                link.innerHTML = 'https://instatech.org/Services/Downloader/?id=' + jsonData.DownloadID;
+                                                link.innerHTML = 'https://instatech.azurewebsites.net/Services/Downloader/?id=' + jsonData.DownloadID;
                                                 link.style.color = "highlight";
                                                 $("#divBuildCompleted h4").append(link);
                                                 $("#divBuildCompleted").fadeIn();
