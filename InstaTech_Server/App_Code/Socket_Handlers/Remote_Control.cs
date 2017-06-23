@@ -438,13 +438,14 @@ namespace InstaTech.App_Code.Socket_Handlers
                         };
                         File.AppendAllText(filePath, Json.Encode(entry) + Environment.NewLine);
                     }
+                    Load();
                     ComputerName = JsonData.ComputerName.ToString().Trim().ToLower();
                     CurrentUser = JsonData?.CurrentUser?.ToString()?.Trim()?.ToLower() ?? "";
                     if (JsonData.LastReboot != null)
                     {
                         LastReboot = JsonData.LastReboot;
                     }
-                    Load();
+                    Save();
                 }
                 else if (ConnectionType == ConnectionTypes.ClientServiceOnce)
                 {
