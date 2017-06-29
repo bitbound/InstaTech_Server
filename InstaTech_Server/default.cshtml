@@ -63,16 +63,18 @@
         <script src="~/scripts/Controls/Configuration.js"></script>
         <script src="~/scripts/Controls/Shared.js"></script>
         @{
-            Directory.CreateDirectory(Server.MapPath("~/Override/"));
-            foreach (var file in Directory.GetFiles(Server.MapPath("~/Override/")))
+            if (Directory.Exists(Server.MapPath("~/Override/")))
             {
-                if (file.ToLower().EndsWith(".css"))
+                foreach (var file in Directory.GetFiles(Server.MapPath("~/Override/")))
                 {
-                    <link href="~/Override/@Path.GetFileName(file)" rel="stylesheet" />
-                }
-                else if (file.ToLower().EndsWith(".js"))
-                {
-                    <script src="~/Override/@Path.GetFileName(file)"></script>
+                    if (file.ToLower().EndsWith(".css"))
+                    {
+                        <link href="~/Override/@Path.GetFileName(file)" rel="stylesheet" />
+                    }
+                    else if (file.ToLower().EndsWith(".js"))
+                    {
+                        <script src="~/Override/@Path.GetFileName(file)"></script>
+                    }
                 }
             }
         }
