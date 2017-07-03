@@ -22,7 +22,7 @@ namespace InstaTech.App_Code.Socket_Handlers
         public DateTime LastReboot { get; set; }
         public string CurrentUser { get; set; } = "";
         public string LastLoggedOnUser { get; set; } = "";
-        public List<AuthenticationToken> AuthenticationTokens { get; set; } = new List<AuthenticationToken>();
+        public List<string> AuthenticationTokens { get; set; } = new List<string>();
         public int BadLoginAttempts { get; set; } = 0;
         public Tech_Account TechAccount { get; set; }
         public ConnectionTypes? ConnectionType { get; set; }
@@ -50,6 +50,7 @@ namespace InstaTech.App_Code.Socket_Handlers
         }
         public override void OnClose()
         {
+            SocketCollection.Remove(this);
             if (Partner != null)
             {
                 var request = new
@@ -62,11 +63,29 @@ namespace InstaTech.App_Code.Socket_Handlers
                 Partner = null;
 
             }
-            SocketCollection.Remove(this);
+            if (ConnectionType == ConnectionTypes.ClientService)
+            {
+                Save();
+            }
         }
         public override void OnError()
         {
             SocketCollection.Remove(this);
+            if (Partner != null)
+            {
+                var request = new
+                {
+                    Type = "PartnerError"
+                };
+                Partner.Send(Json.Encode(request));
+                Partner.Close();
+                Partner.Partner = null;
+                Partner = null;
+            }
+            if (ConnectionType == ConnectionTypes.ClientService)
+            {
+                Save();
+            }
             var filePath = Path.Combine(Utilities.App_Data, "WebSocket_Errors", DateTime.Now.Year.ToString(), DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Day.ToString().PadLeft(2, '0') + ".txt");
             if (!Directory.Exists(Path.GetDirectoryName(filePath)))
             {
@@ -82,17 +101,6 @@ namespace InstaTech.App_Code.Socket_Handlers
             };
             var error = Json.Encode(jsonError) + Environment.NewLine;
             File.AppendAllText(filePath, error);
-            if (Partner != null)
-            {
-                var request = new
-                {
-                    Type = "PartnerError"
-                };
-                Partner.Send(Json.Encode(request));
-                Partner.Close();
-                Partner.Partner = null;
-                Partner = null;
-            }
         }
         public override void OnMessage(byte[] message)
         {
@@ -152,7 +160,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                 }
                 if (Config.Current.Demo_Mode && JsonData.UserID.ToLower() == "demo" && JsonData.Password == "tech")
                 {
-                    var authToken = new AuthenticationToken() { Token = Guid.NewGuid().ToString().Replace("-", ""), LastUsed = DateTime.Now };
+                    var authToken = Guid.NewGuid().ToString().Replace("-", "");
                     AuthenticationTokens.Add(authToken);
                     TechAccount = new Tech_Account()
                     {
@@ -168,7 +176,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                     }
                     TechAccount.Save();
                     JsonData.Status = "ok";
-                    JsonData.AuthenticationToken = authToken.Token;
+                    JsonData.AuthenticationToken = authToken;
                     Send(Json.Encode(JsonData));
                     return;
                 }
@@ -190,7 +198,11 @@ namespace InstaTech.App_Code.Socket_Handlers
                         return;
                     }
                     Tech_Account account = Json.Decode<Tech_Account>(File.ReadAllText(Utilities.App_Data + "Tech_Accounts\\" + JsonData.UserID + ".json"));
-                    account.AuthenticationTokens.RemoveAll(at => DateTime.Now - at.LastUsed > TimeSpan.FromDays(30));
+                    while (account.AuthenticationTokens.Count > 10)
+                    {
+                        account.AuthenticationTokens.RemoveAt(0);
+                    }
+                    
                     if (account.BadLoginAttempts >= 3)
                     {
                         if (DateTime.Now - account.LastBadLogin > TimeSpan.FromMinutes(10))
@@ -236,7 +248,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                         }
                         else
                         {
-                            var authToken = new AuthenticationToken() { Token = Guid.NewGuid().ToString().Replace("-", ""), LastUsed = DateTime.Now };
+                            var authToken = Guid.NewGuid().ToString().Replace("-", "");
                             AuthenticationTokens.Add(authToken);
                             account.TempPassword = "";
                             account.HashedPassword = Crypto.HashPassword(JsonData.ConfirmNewPassword);
@@ -261,14 +273,14 @@ namespace InstaTech.App_Code.Socket_Handlers
                             TechAccount = account;
                             JsonData.Status = "ok";
                             JsonData.Access = TechAccount.AccessLevel.ToString();
-                            JsonData.AuthenticationToken = authToken.Token;
+                            JsonData.AuthenticationToken = authToken;
                             Send(Json.Encode(JsonData));
                             return;
                         }
                     }
                     if (Crypto.VerifyHashedPassword(account.HashedPassword, JsonData.Password))
                     {
-                        var authToken = new AuthenticationToken() { Token = Guid.NewGuid().ToString().Replace("-", ""), LastUsed = DateTime.Now };
+                        var authToken = Guid.NewGuid().ToString().Replace("-", "");
                         AuthenticationTokens.Add(authToken);
                         account.BadLoginAttempts = 0;
                         account.TempPassword = "";
@@ -292,16 +304,16 @@ namespace InstaTech.App_Code.Socket_Handlers
                         TechAccount = account;
                         JsonData.Status = "ok";
                         JsonData.Access = TechAccount.AccessLevel.ToString();
-                        JsonData.AuthenticationToken = authToken.Token;
+                        JsonData.AuthenticationToken = authToken;
                         Send(Json.Encode(JsonData));
                         return;
                     }
                     if (!String.IsNullOrEmpty(JsonData.AuthenticationToken))
                     {
-                        if (AuthenticationTokens.Exists(at=>at.Token == JsonData.AuthenticationToken) || account.AuthenticationTokens.Exists(at=>at.Token == JsonData.AuthenticationToken))
+                        if (AuthenticationTokens.Contains(JsonData.AuthenticationToken) || account.AuthenticationTokens.Contains(JsonData.AuthenticationToken))
                         {
-                            var authToken = new AuthenticationToken() { Token = Guid.NewGuid().ToString().Replace("-", ""), LastUsed = DateTime.Now };
-                            account.AuthenticationTokens.RemoveAll(at => at.Token == JsonData.AuthenticationToken);
+                            var authToken = Guid.NewGuid().ToString().Replace("-", "");
+                            account.AuthenticationTokens.Remove(JsonData.AuthenticationToken);
                             AuthenticationTokens.Add(authToken);
                             if (JsonData.RememberMe == true)
                             {
@@ -326,7 +338,7 @@ namespace InstaTech.App_Code.Socket_Handlers
                             TechAccount = account;
                             JsonData.Status = "ok";
                             JsonData.Access = TechAccount.AccessLevel.ToString();
-                            JsonData.AuthenticationToken = authToken.Token;
+                            JsonData.AuthenticationToken = authToken;
                             Send(Json.Encode(JsonData));
                         }
                         else
@@ -438,13 +450,13 @@ namespace InstaTech.App_Code.Socket_Handlers
                         };
                         File.AppendAllText(filePath, Json.Encode(entry) + Environment.NewLine);
                     }
-                    Load();
                     ComputerName = JsonData.ComputerName.ToString().Trim().ToLower();
                     CurrentUser = JsonData?.CurrentUser?.ToString()?.Trim()?.ToLower() ?? "";
                     if (JsonData.LastReboot != null)
                     {
                         LastReboot = JsonData.LastReboot;
                     }
+                    Load();
                     Save();
                 }
                 else if (ConnectionType == ConnectionTypes.ClientServiceOnce)
@@ -466,7 +478,7 @@ namespace InstaTech.App_Code.Socket_Handlers
         {
             try
             {
-                ComputerName = JsonData.ComputerName.ToString().Trim().ToLower();
+                ComputerName = JsonData?.ComputerName?.ToString()?.Trim()?.ToLower() ?? ComputerName ?? "";
                 CurrentUser = JsonData?.CurrentUser?.ToString()?.Trim()?.ToLower() ?? "";
                 if (JsonData.LastReboot != null) {
                     if (JsonData.LastReboot != null)
@@ -607,8 +619,8 @@ namespace InstaTech.App_Code.Socket_Handlers
         }
         public void HandleQuickConnect(dynamic JsonData)
         {
-            var techSocket = Socket_Main.SocketCollection.Find(sm => sm?.TechAccount?.UserID == JsonData.UserID);
-            if (techSocket == null || !techSocket.AuthenticationTokens.Exists(at=>at.Token == JsonData.AuthenticationToken))
+            var techSocket = Socket_Main.SocketCollection.Find(sm => sm?.TechAccount?.UserID.ToLower() == JsonData?.UserID.ToLower());
+            if (techSocket == null || !techSocket?.AuthenticationTokens?.Contains(JsonData?.AuthenticationToken))
             {
                 JsonData.Status = "denied";
                 Send(Json.Encode(JsonData));
@@ -857,7 +869,7 @@ namespace InstaTech.App_Code.Socket_Handlers
         {
             try
             {
-                if (!AuthenticationTokens.Exists(at=>at.Token == JsonData.AuthenticationToken))
+                if (!AuthenticationTokens.Contains(JsonData.AuthenticationToken))
                 {
                     var response = new
                     {
@@ -978,7 +990,8 @@ namespace InstaTech.App_Code.Socket_Handlers
                     return;
                 }
                 var di = Directory.CreateDirectory(Path.Combine(Utilities.App_Data, "Computer_Accounts"));
-                var ca = new Computer_Account() { ComputerGroup = ComputerGroup };
+                var ca = new Computer_Account();
+                ca.ComputerGroup = ComputerGroup;
                 if (!String.IsNullOrWhiteSpace(CurrentUser))
                 {
                     LastLoggedOnUser = CurrentUser;

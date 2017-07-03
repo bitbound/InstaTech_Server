@@ -13,7 +13,7 @@ namespace InstaTech.App_Code {
     public static class Utilities
     {
         public static string App_Data { get; } = HttpContext.Current.Server.MapPath("~/App_Data/");
-        public static string Version { get; } = "1.8.2";
+        public static string Version { get; } = "1.8.3";
 
         public static List<Tech_Account> Tech_Accounts
         {
@@ -69,33 +69,25 @@ namespace InstaTech.App_Code {
         }
         public static void WriteToLog(Exception ex)
         {
-            try
+            var exception = ex;
+            var filePath = Path.Combine(Utilities.App_Data, "Errors", DateTime.Now.Year.ToString(), DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Day.ToString().PadLeft(2, '0') + ".txt");
+            if (!Directory.Exists(Path.GetDirectoryName(filePath)))
             {
-                var exception = ex;
-                var filePath = Path.Combine(Utilities.App_Data, "Errors", DateTime.Now.Year.ToString(), DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Day.ToString().PadLeft(2, '0') + ".txt");
-                if (!Directory.Exists(Path.GetDirectoryName(filePath)))
-                {
-                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-                }
-                while (exception != null)
-                {
-                    var jsonError = new
-                    {
-                        Type = "Error",
-                        Timestamp = DateTime.Now.ToString(),
-                        Message = exception?.Message,
-                        Source = exception?.Source,
-                        StackTrace = exception?.StackTrace,
-                        LastMessageType = LastMessageType
-                    };
-                    File.AppendAllText(filePath, Json.Encode(jsonError) + Environment.NewLine);
-                    exception = exception.InnerException;
-                }
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
             }
-            catch (Exception ex2)
+            while (exception != null)
             {
-                // TODO: Report this somehow.
-                //HttpContext.Current.Response.Write("There was an error when trying to write to the log files.  Please check the folder and file permissions within App_Data." + Environment.NewLine + Environment.NewLine + "Error: " + Json.Encode(ex2));
+                var jsonError = new
+                {
+                    Type = "Error",
+                    Timestamp = DateTime.Now.ToString(),
+                    Message = exception?.Message,
+                    Source = exception?.Source,
+                    StackTrace = exception?.StackTrace,
+                    LastMessageType = LastMessageType
+                };
+                File.AppendAllText(filePath, Json.Encode(jsonError) + Environment.NewLine);
+                exception = exception.InnerException;
             }
         }
         public static void WriteToLog(string Message)

@@ -251,7 +251,7 @@ function checkVersion() {
                                 $("#textBuildMessages")[0].value = "";
                                 try {
                                     $("#textBuildMessages")[0].value += "Connecting to build service.";
-                                    socket = new WebSocket("wss://instatech.org/Widgets/Package_Builder.cshtml");
+                                    socket = new WebSocket("wss://instatech-test.azurewebsites.net/Widgets/Package_Builder.cshtml");
                                     socket.onopen = function () {
                                         addText("Connected.");
                                         var backgroundURL = null;
