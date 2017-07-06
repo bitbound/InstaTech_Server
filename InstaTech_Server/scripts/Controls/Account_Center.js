@@ -321,7 +321,14 @@ function populateAccountTable(e) {
     td.setAttribute("prop", "TempPassword");
     tr.appendChild(td);
     td = document.createElement("td");
-    td.innerHTML = parseNETDate(InstaTech.Tech_Accounts[e].LastBadLogin).toLocaleString();
+    var strDate;
+    try {
+        strDate = parseNETDate(InstaTech.Tech_Accounts[e].LastBadLogin).toLocaleString();
+    }
+    catch (ex) {
+        strDate = "";
+    }
+    td.innerHTML = strDate;
     td.setAttribute("prop", "LastBadLogin");
     tr.appendChild(td);
     td = document.createElement("td");
