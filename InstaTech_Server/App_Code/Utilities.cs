@@ -13,7 +13,7 @@ namespace InstaTech.App_Code {
     public static class Utilities
     {
         public static string App_Data { get; } = HttpContext.Current.Server.MapPath("~/App_Data/");
-        public static string Version { get; } = "1.8.3";
+        public static string Version { get; } = "1.8.4";
 
         public static List<Tech_Account> Tech_Accounts
         {
@@ -70,11 +70,8 @@ namespace InstaTech.App_Code {
         public static void WriteToLog(Exception ex)
         {
             var exception = ex;
-            var filePath = Path.Combine(Utilities.App_Data, "Errors", DateTime.Now.Year.ToString(), DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Day.ToString().PadLeft(2, '0') + ".txt");
-            if (!Directory.Exists(Path.GetDirectoryName(filePath)))
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-            }
+            var di = Directory.CreateDirectory(Path.Combine(Utilities.App_Data, "Errors", DateTime.Now.Year.ToString(), DateTime.Now.Month.ToString().PadLeft(2, '0')));
+            var filePath = Path.Combine(di.FullName, DateTime.Now.Day.ToString().PadLeft(2, '0') + ".txt");
             while (exception != null)
             {
                 var jsonError = new

@@ -907,7 +907,7 @@ namespace InstaTech.App_Code.Socket_Handlers
         {
             try
             {
-                var sender = Socket_Main.SocketCollection.Find(sm => sm.ConnectionType == Socket_Main.ConnectionTypes.Technician && sm.TechAccount.UserID == JsonData.FromID);
+                var sender = Socket_Main.SocketCollection.Find(sm => sm.ConnectionType == Socket_Main.ConnectionTypes.Technician && sm?.TechAccount?.UserID?.ToLower() == JsonData?.FromID?.ToLower());
                 if (sender != null)
                 {
                     sender.Send(Json.Encode(JsonData));
@@ -923,7 +923,7 @@ namespace InstaTech.App_Code.Socket_Handlers
         {
             try
             {
-                var sender = Socket_Main.SocketCollection.Find(sm => sm.ConnectionType == Socket_Main.ConnectionTypes.Technician && sm.TechAccount.UserID == JsonData.FromID);
+                var sender = Socket_Main.SocketCollection.Find(sm => sm.ConnectionType == Socket_Main.ConnectionTypes.Technician && sm?.TechAccount?.UserID?.ToLower() == JsonData?.FromID?.ToLower());
                 if (sender != null)
                 {
                     sender.Send(Json.Encode(JsonData));

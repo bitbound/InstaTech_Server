@@ -22,9 +22,9 @@
     <script src="~/scripts/Main_Model.js"></script>
     <script src="~/scripts/Utilities.js"></script>
     @{
-        if (Directory.Exists(Server.MapPath("~/Override/")))
+        if (Directory.Exists(Server.MapPath("~/Override/RemoteControl")))
         {
-            foreach (var file in Directory.GetFiles(Server.MapPath("~/Override/")))
+            foreach (var file in Directory.GetFiles(Server.MapPath("~/Override/RemoteControl")))
             {
                 if (file.ToLower().EndsWith(".css"))
                 {
