@@ -237,116 +237,7 @@ function addText(strMessage) {
     $("#textBuildMessages")[0].value += "\n" + strMessage;
     $("#textBuildMessages")[0].scrollTop = $("#textBuildMessages")[0].scrollHeight;
 };
-function checkVersion() {
-    var thisVersion = $('meta[name="version"]')[0].content;
-    $.get("https://instatech.azurewebsites.net/Services/Get_Server_Version.cshtml", function (data) {
-        if (data != thisVersion && data != "0.0.0") {
-            addNotification("New Version", function () {
-                var buttons = [
-                    {
-                        text: "OK",
-                        click: function (e) {
-                            $(e.currentTarget).parent().remove();
-                            $("#divBuildMessages").slideDown(function () {
-                                $("#textBuildMessages")[0].value = "";
-                                try {
-                                    $("#textBuildMessages")[0].value += "Connecting to build service.";
-                                    socket = new WebSocket("wss://instatech-test.azurewebsites.net/Widgets/Package_Builder.cshtml");
-                                    socket.onopen = function () {
-                                        addText("Connected.");
-                                        var backgroundURL = null;
-                                        var iconURL = null;
-                                        if ($("meta[name='itc-background']").length > 0) {
-                                            backgroundURL = atob($("meta[name='itc-background']")[0].content);
-                                        }
-                                        if ($("meta[name='favicon']").length > 0) {
-                                            iconURL = atob($("meta[name='favicon']")[0].content);
-                                        }
-                                        addText("Sending build information.");
-                                        this.send(JSON.stringify(request));
-                                        var request = {
-                                            "Type": "BuildInformation",
-                                            "CompanyName": $('meta[name="company-name"]')[0].content,
-                                            "HostName": location.host,
-                                            "Port": InstaTech.Socket_Port,
-                                            "SecurePort": InstaTech.Secure_Socket_Port,
-                                            "Background": backgroundURL,
-                                            "Icon": iconURL
-                                        }
-                                        this.send(JSON.stringify(request));
-                                        
-                                    }
-                                    socket.onclose = function () {
-                                        addText("Connection closed.");
-                                        $("#divBuildForm input").attr("disabled", false);
-                                        $("#divBuildForm button").attr("disabled", false);
-                                    }
-                                    socket.onerror = function (e) {
-                                        addText("WebSocket Error: " + e);
-                                    }
-                                    socket.onmessage = function (e) {
-                                        
-                                        var jsonData = JSON.parse(e.data);
-                                        switch (jsonData.Type) {
-                                            case "BuildInformation":
-                                                if (jsonData.Status == "ok") {
-                                                    addText("Build information received.");
-                                                }
-                                                else if (jsonData.Status == "invalid") {
-                                                    addText("\nInvalid characters in host name.  It must be the root of the website and not within a virtual folder.");
-                                                }
-                                                else if (jsonData.Status == "null") {
-                                                    addText("\nCompany name and host name are required.");
-                                                }
-                                                break;
-                                            case "QueueUpdate":
-                                                addText("Place in queue: " + jsonData.Place);
-                                                break;
-                                            case "StatusUpdate":
-                                                addText(jsonData.Message);
-                                                break;
-                                            case "BuildCompleted":
-                                                var link = document.createElement("a");
-                                                link.href = 'https://instatech.azurewebsites.net/Services/Downloader/?id=' + jsonData.DownloadID;
-                                                link.target = "_blank";
-                                                link.innerHTML = 'https://instatech.azurewebsites.net/Services/Downloader/?id=' + jsonData.DownloadID;
-                                                link.style.color = "highlight";
-                                                $("#divBuildCompleted h4").append(link);
-                                                $("#divBuildCompleted").fadeIn();
-                                                break;
-                                            default:
-                                        }
-                                    }
-                                }
-                                catch (ex) {
-                                    addText("Error: " + ex);
-                                }
-                            });
-                        }
-                    },
-                    {
-                        text: "Cancel",
-                        click: function () {
-                            $(this).dialog("close");
-                        }
-                    }
-                ];
-                var buildMessagesHTML = '<div id="divBuildMessages" style="margin-top: 10px;" hidden>\
-                    <textarea id="textBuildMessages" readonly style="width:100%; height:150px"></textarea>\
-                </div>\
-                <div id="divBuildCompleted" hidden>\
-                    <h4>\
-                        Build Completed!\
-                        <br /><br />\
-                        Download: \
-                    </h4>\
-                </div>\
-                '
-                showDialogEx("New Version Available", "A new version is available.  Would you like to download it now?<br/>" + buildMessagesHTML, buttons);
-            })
-        }
-    })
-}
+
 $(document).ready(function () {
     window.onerror = function (messageOrEvent, source, lineno, colno, error) {
         var ex = {};
@@ -383,5 +274,4 @@ $(document).ready(function () {
             showDialog("Connection Not Secure", "Your connection is not secure.  SSL isn't configured properly on this server.<br/><br/>See the Quick Start and Reference guides for helpful tips on configuring SSL.");
         })
     }
-    checkVersion();
 });
