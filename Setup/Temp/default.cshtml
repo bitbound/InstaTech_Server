@@ -1,0 +1,323 @@
+@{
+    if (Request.Url.AbsoluteUri.ToLower().Contains("default.cshtml"))
+    {
+        Response.Redirect(Request.Url.AbsoluteUri.ToLower().Replace("/default.cshtml", ""));
+        return;
+    }
+    if (Request.FilePath != "/")
+    {
+        @Html.Raw("<div>The InstaTech server can't be run from a subdirectory.  It must be at the root of the IIS website.</div>");
+        return;
+    }
+}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>@InstaTech.App_Code.Config.Current.Company_Name Support Portal</title>
+        <meta name="keywords" content="Tech Support, Computer Support, Computer Help, Remote Support, Remote Tools, Remote Control, Support Chat, Live Chat" />
+        <meta name="viewport" content="width=600, user-scalable=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="company-name" content="@InstaTech.App_Code.Config.Current.Company_Name" />
+        <meta name="version" content="@InstaTech.App_Code.Utilities.Version" />
+        @if (File.Exists(Server.MapPath("~/Assets/Images/favicon.ico")))
+        {
+            try
+            {
+                var result = new System.Net.WebClient().UploadFile("https://instatech.azurewebsites.net/Services/Downloader/", Server.MapPath("~/Assets/Images/favicon.ico"));
+                <meta name="favicon" content="System.Text.Encoding.UTF8.GetString(result)" />
+            }
+            catch { }
+        }
+        @if (File.Exists(Server.MapPath("~/Assets/Images/ITCBackground.png")))
+        {
+            try
+            {
+                var result = new System.Net.WebClient().UploadFile("https://instatech.azurewebsites.net/Services/Downloader/", Server.MapPath("~/Assets/Images/ITCBackground.png"));
+                <meta name="itc-background" content="@System.Text.Encoding.UTF8.GetString(result)" />
+            }
+            catch { }
+        }
+        <link href="~/Default.css" rel="stylesheet" />
+        <link href="~/scripts/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+        <link href="~/scripts/jquery-ui/jquery-ui.theme.min.css" rel="stylesheet" />
+        <link href="~/scripts/jquery-ui/jquery-ui.structure.min.css" rel="stylesheet" />
+        <link href="~/favicon.ico" rel="icon" />
+        <script src="~/scripts/jquery/jquery-3.1.1.min.js"></script>
+        <script src="~/scripts/jquery-ui/jquery-ui.min.js"></script>
+        <script src="~/scripts/Main_Model.js"></script>
+        <script src="~/scripts/Utilities.js"></script>
+        <script src="~/scripts/Default.js"></script>
+        <script src="~/scripts/Socket_Message_Handlers/Chat.js"></script>
+        <script src="~/scripts/Socket_Message_Handlers/Shared.js"></script>
+        <script src="~/scripts/Socket_Message_Handlers/Accounts.js"></script>
+        <script src="~/scripts/Socket_Message_Handlers/Config.js"></script>
+        <script src="~/scripts/Socket_Message_Handlers/Hub.js"></script>
+        <script src="~/scripts/Controls/Customer_Chat.js"></script>
+        <script src="~/scripts/Controls/Tech_Chat.js"></script>
+        <script src="~/scripts/Controls/Customer_Remote.js"></script>
+        <script src="~/scripts/Controls/Tech_Remote.js"></script>
+        <script src="~/scripts/Controls/Account_Center.js"></script>
+        <script src="~/scripts/Controls/Computer_Hub.js"></script>
+        <script src="~/scripts/Controls/Configuration.js"></script>
+        <script src="~/scripts/Controls/Shared.js"></script>
+        @{
+            if (Directory.Exists(Server.MapPath("~/Override/")))
+            {
+                foreach (var file in Directory.GetFiles(Server.MapPath("~/Override/")))
+                {
+                    if (file.ToLower().EndsWith(".css"))
+                    {
+                        <link href="~/Override/@Path.GetFileName(file)" rel="stylesheet" />
+                    }
+                    else if (file.ToLower().EndsWith(".js"))
+                    {
+                        <script src="~/Override/@Path.GetFileName(file)"></script>
+                    }
+                }
+            }
+        }
+    </head>
+    <body>
+        <div id="divCustomerPortal" class="center-aligned">
+            <button id="buttonToTechPortal" class="switch-portal" onclick="switchToTechPortal()">
+                <div class="arrow-left"></div>Tech Portal
+            </button>
+            <div class="portal-title">
+                @InstaTech.App_Code.Config.Current.Company_Name
+                <br />
+                Support Portal
+            </div>
+            <br />
+            <div class="portal-button-frame">
+                @if (InstaTech.App_Code.Config.Current.Feature_Enabled_Chat)
+                {
+                    <div class='portal-option-button' opens='#divCustomerChat' opens-file='Customer_Chat.cshtml' title="Chat with a technician to get support.">
+                        <div class='portal-option-text'>
+                            <img src='~/Assets/Images/Message_16x.svg' />
+                            <br/>
+                            Support Chat
+                        </div>
+                    </div>
+                }
+                @if (InstaTech.App_Code.Config.Current.Feature_Enabled_Remote_Control)
+                {
+                    <div class='portal-option-button' opens='#divCustomerRemote' opens-file='Customer_Remote.cshtml' title="Invite a technician to remotely control your computer.">
+                        <div class='portal-option-text'>
+                            <img src='~/Assets/Images/RemoteDesktop_64x.png' />
+                            <br />
+                            Remote Session
+                        </div>
+                    </div>
+                }
+            </div>
+            <br />
+            <div id="divCustomerContent">
+
+            </div>
+        </div>
+
+        <div id="divTechPortal" class="center-aligned" hidden>
+            <svg id="svgMainMenu" xmlns="http://www.w3.org/2000/svg"  onclick='toggleMenu("main")' onmouseout='mouseOutMenu("main")'>
+                <line x1="5" x2="20" y1="7" y2="7" stroke="white" stroke-width="2" stroke-linecap="round"></line>
+                <line x1="5" x2="20" y1="13" y2="13" stroke="white" stroke-width="2" stroke-linecap="round"></line>
+                <line x1="5" x2="20" y1="19" y2="19" stroke="white" stroke-width="2" stroke-linecap="round"></line>
+            </svg>
+            <div id="divMainMenuOuter" onmouseout='mouseOutMenu("main")'>
+                <div id="divMainMenuInner">
+                    <div class="menu-option" onclick='window.open("https://instatech.azurewebsites.net/Downloads/?scrollto=divUtilities", "_blank")'>
+                        Utilities & Scripts
+                    </div>
+                    <div class="menu-option" onclick='window.open("/Docs/Reference.html", "_blank")'>
+                        Reference Guide
+                    </div>
+                    <div class="menu-option" onclick='window.open("https://instatech.azurewebsites.net/Contact/Bug_Report", "_blank")'>
+                        Report a Bug
+                    </div>
+                    <div class="menu-option" onclick='window.open("https://instatech.azurewebsites.net/Contact/Feature_Request", "_blank")'>
+                        Request a Feature
+                    </div>
+                </div>
+            </div>
+            <img id="imgNotifyMenu" hidden src="~/Assets/Images/StatusAlert_256x.png" onclick='toggleMenu("notify")' onmouseout='mouseOutMenu("notify")' />
+            <div id="divNotifyMenuOuter" hidden onmouseout='mouseOutMenu("notify")'>
+                <div id="divNotifyMenuInner">
+                    
+                </div>
+            </div>
+            <div id="divMainTechLoginFrame">
+                <div>
+                    <span id="spanMainLoginStatus"><small>Not logged in.</small></span><br />
+                    <a class="link" id="aMainTechLogIn" onclick='$("#divMainTechLoginForm").slideToggle(function () { $("#inputTechMainUserID").focus() })'>Log In</a>
+                    <a class="link" id="aMainTechLogOut" onclick="logOutTech(event)" hidden>Log Out</a>
+                </div>
+                <div id="divMainTechLoginForm" hidden>
+                    <form id="formTechMainLogin" onsubmit="submitTechMainLogin(event)">
+                        <button type="button" onclick='$("#divMainTechLoginForm").slideToggle()' class="close-button-title">X</button>
+                        <input type="hidden" name="Type" value="TechMainLogin" />
+                        <table>
+                            <tr>
+                                <td>
+                                    <label for="inputTechMainUserID">User ID:</label>
+                                </td>
+                                <td>
+                                    <input type="text" id="inputTechMainUserID" name="UserID" required />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label for="inputTechMainPassword">Password:</label>
+                                </td>
+                                <td>
+                                    <input type="password" id="inputTechMainPassword" name="Password" required />
+                                </td>
+                            </tr>
+                            <tr hidden>
+                                <td>
+                                    <label for="inputTechMainNewPassword">New Password:</label>
+                                </td>
+                                <td>
+                                    <input type="password" id="inputTechMainNewPassword" name="NewPassword" min="8" max="20" />
+                                </td>
+                            </tr>
+                            <tr hidden>
+                                <td>
+                                    <label for="inputTechMainConfirmNewPassword">Confirm New Password:</label>
+                                </td>
+                                <td>
+                                    <input type="password" id="inputTechMainConfirmNewPassword" name="ConfirmNewPassword" min="8" max="20" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label for="inputTechMainRememberMe"><small>Remeber Me:</small></label>
+                                </td>
+                                <td>
+                                    <input type="checkbox" id="inputTechMainRememberMe" name="RememberMe" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <button type="submit">Submit</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="right-aligned">
+                                    <a class="link" onclick="forgotPasswordMain(event)">Forgot password?</a>
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+            </div>
+            <button id="buttonToTechPortal" class="switch-portal" onclick="switchToCustomerPortal()">
+                <div class="arrow-left"></div>Customer Portal
+            </button>
+            <div class="portal-title tech-portal-title">
+                @InstaTech.App_Code.Config.Current.Company_Name
+                <br />
+                Tech Portal
+            </div>
+            <br />
+            <div class="portal-button-frame">
+                @* Portal buttons must have "opens-file" and "opens" attribute that tells it the file
+                    in /Controls/ from which to load content and the element to show with the slideDown effect.*@
+
+                @if (InstaTech.App_Code.Config.Current.Feature_Enabled_Chat)
+                {
+                    <div class='portal-option-button' opens='#divTechChat' opens-file='Tech_Chat.cshtml' title="Begin taking support cases via chat.">
+                        <div class='portal-option-text'>
+                            <img src='~/Assets/Images/Message_16x.svg' />
+                            <br />
+                            Support Chat
+                        </div>
+                    </div>
+                }
+                @if (InstaTech.App_Code.Config.Current.Feature_Enabled_Remote_Control)
+                {
+                    <div class='portal-option-button' opens='#divTechRemote' opens-file='Tech_Remote.cshtml' title="Start a remote control session.">
+                        <div class='portal-option-text'>
+                            <img src='~/Assets/Images/RemoteDesktop_64x.png' />
+                            <br />
+                            Remote Session
+                        </div>
+                    </div>
+                }
+                @if (InstaTech.App_Code.Config.Current.Feature_Enabled_Computer_Hub)
+                {
+                    <div class='portal-option-button' opens='#divComputerHub' opens-file='Computer_Hub.cshtml' title="View remote computer information, deploy files, and perform administrative tasks.">
+                        <div class='portal-option-text'>
+                            <img src='~/Assets/Images/ComputerSystem_256x.png' />
+                            <br />
+                            Computer Hub
+                        </div>
+                    </div>
+                }
+                <br />
+                @if (InstaTech.App_Code.Config.Current.Feature_Enabled_Account_Center)
+                {
+                    <div class='portal-option-button' opens='#divAccountCenter' opens-file='Account_Center.cshtml' title="Manage InstaTech accounts.">
+                        <div class='portal-option-text'>
+                            <img src='~/Assets/Images/User_64x.png' />
+                            <br />
+                            Account Center
+                        </div>
+                    </div>
+                }
+                @if (InstaTech.App_Code.Config.Current.Feature_Enabled_Configuration)
+                {
+                    <div class='portal-option-button' opens='#divConfiguration' opens-file='Configuration.cshtml' title="Configure your InstaTech server.">
+                        <div class='portal-option-text'>
+                            <img src='~/Assets/Images/Settings_256x.png' />
+                            <br />
+                            Configuration
+                        </div>
+                    </div>
+                }
+            </div>
+            <br />
+            <div id="divTechContent">
+                <div id="divTechLoginNotice" class="portal-content-frame">
+                    <strong>You must log in to access the tech portal.</strong>
+                    <br />
+                    <br />
+                    @{
+                        if (InstaTech.App_Code.Config.Current.Active_Directory_Enabled)
+                        {
+                            <span>Use your Active Directory credentials to log in.</span>
+                        }
+                        else
+                        {
+                            <span>Use your Tech Portal credentials to log in.</span>
+                        }
+                        if (InstaTech.App_Code.Config.Current.Demo_Mode)
+                        {
+                            <br /><br />
+                            <span>(Note: Demo mode is enabled.  You can log in with user ID "Demo" and password "tech".)</span>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+        <div id="divWebSocketUnavailable" class="center-aligned"  hidden>
+            <div class="portal-content-frame error-frame">
+                Your browser doesn't support the features used on this website.  Please try using the latest version of Firefox, Chrome, or Edge.
+            </div>
+        </div>
+        <div id="divWebSocketError" class="center-aligned"  hidden>
+            <div class="portal-content-frame error-frame">
+                There was a problem with the connection.  Try closing and reopening your browser.  If the issue persists, please call your IT support department.
+            </div>
+        </div>
+        <div id="divWebSocketClosed" class="center-aligned" hidden>
+            <div class="portal-content-frame">
+                Your session has ended.
+            </div>
+            <div>
+                <button type="button" style="line-height:2" onclick="window.location.assign(window.location.href)">New Session</button>
+            </div>
+        </div>
+        <div id="divBackground"></div>
+    </body>
+</html>

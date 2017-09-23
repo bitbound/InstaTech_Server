@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>InstaTech Quick Start</title>
+    <meta name="viewport" content="width=600" />
+</head>
+<body>
+    <div class="body-frame">
+        <h1>InstaTech Quick Start Guide</h1>
+        <div>
+            Congratulations!  Your InstaTech server is installed.  But now what?  This guide contains the information you'll need to start using InstaTech.  For in-depth documentation, check out the <a href="Reference.html">Reference Guide</a>.
+        </div>
+        <h2>
+            Overview
+        </h2>
+        <div>
+            <strong>First Steps:</strong>
+            <ul>
+                <li>
+                    Install SSL certificate.
+                </li>
+                <li>
+                    Log into Tech Portal with "admin" account and set new password.
+                </li>
+                <li>
+                    Create a new account in Account Center, if desired.
+                </li>
+            </ul>
+            <strong>Starting a Remote Session:</strong>
+            <ul>
+                <li>
+                    Download client on remote computer (i.e. https://[yourhostname]/Downloads/InstaTech_Client.exe).
+                </li>
+                <li>
+                    Enter code on Remote Control page (i.e. https://[yourhostname]/Remote_Control/).
+                </li>
+                <li>
+                    Install service from client's menu, if unattended access is desired.
+                </li>
+            </ul>
+        </div>
+        <h2>
+            Configuring SSL
+        </h2>
+        <div>
+            The first thing you want to do is set up SSL on your website.  InstaTech will work without an SSL certificate, but it's very important that you have one installed properly before using it in production.
+            <br />
+            <br />
+            There are many options out there for SSL certificates, so you may want to do some research before committing to any one in particular.  If you're unfamiliar with SSL or IIS in general, I highly recommend doing some additional research to get comfortable using them.
+            <br />
+            <br />
+            The easiest (and free) way to install an SSL certificate is with <strong>Certify</strong>.
+            <br />
+            <br />
+            Powered by <a href="https://letsencrypt.org/" target="_blank">Let's Encrypt</a>, Certify will automatically register, install, and maintain a root certificate.  A root certificate means that it will be trusted by all major browsers.  Certify can even create a scheduled task to renew your certificate automatically before it expires.
+            <br />
+            <br />
+            Certify Page: <a href="https://certifytheweb.com" target="_blank">https://certifytheweb.com</a>
+            <br /><br />
+            For a more detailed guide on setting up SSL in IIS, here's a good article:
+            <a href="https://www.iis.net/learn/manage/configuring-security/how-to-set-up-ssl-on-iis" target="_blank">https://www.iis.net/learn/manage/configuring-security/how-to-set-up-ssl-on-iis</a>
+        </div>
+        <h2>
+            Logging In
+        </h2>
+        <div>
+            The first thing you'll want to do is set a password for the built-in admin account.  When you open InstaTech Server, the main page is the Customer Portal.  Click the "Tech Portal" link at the top left, then click "Log In" at the top right.  The username is simply "admin", and the password is "password".  When you log in for the first time, it will prompt you to set a new password.  Passwords must be at least 8 characters long.
+            <br />
+            <br />
+            Once you're logged in, you can change the default admin username in Configuration and delete "admin", if you'd like.
+        </div>
+        <h2>
+            Navigating
+        </h2>
+        <div>
+            The customer portal is where customers can initiate a support chat session or download the remote control client to allow someone into their computer.  It's the main page so it's the easiest for customers to find.
+            <br /><br />
+            The website is a Single-Page Application, so you don't actually navigate to a new page when you switch portals.  However, you can still create a direct link to the Tech Portal by adding "?user=tech" to the end of the URL (e.g. "https://demo.instatech.org/?user=tech").
+            <br />
+            <br />
+            Here are the key areas you'll want to know:
+            <ul>
+                <li>
+                    <strong>https://[yourhostname]/?user=tech</strong>  Takes you directly to the Tech Portal.
+                </li>
+                <li>
+                    <strong>https://[yourhostname]/Docs/Quick_Start.html</strong>  This Quick Start guide.
+                </li>
+                <li>
+                    <strong>https://[yourhostname]/Docs/Reference.html</strong>  The full reference guide.
+                </li>
+                <li>
+                    <strong>https://[yourhostname]/Remote_Control/</strong>  Direct link to the remote control web app.
+                </li>
+                <li>
+                    <strong>https://[yourhostname]/Downloads/InstaTech_Client.exe</strong>  Direct download link for the Windows client.
+                </li>
+            </ul>
+        </div>
+        <h2>
+            Using the Remote Control
+        </h2>
+        <div>
+            There are two ways to initiate a remote session.  The first is by opening the client on the customer's computer, then entering the randomly-generated Session ID into the remote control on the technician's computer.
+            <br />
+            <br />
+            The other way is by connecting to a computer that has the InstaTech service installed.  When the service is installed, the computer will show up in the Computer Hub and on the search utility in the remote control's Unattended mode.  Admins will see all computers, while standard technicians only see computers they have access to.  See the full reference guide to learn more about Access Levels.
+            <br />
+            <br />
+            Once connected, the things you can do are limited by the type of client to which you're connected.  If the client was opened by a standard (non-admin) Windows account, you won't be able to open anything as an admin or interact with any windows that are open in an "elevated" process.  You also can't interact with UAC prompts or the lock screen.
+            <br />
+            <br />
+            If the client was opened by an admin Windows account, you'll be able to interact with elevated processes.  To interact with UAC prompts and the lock screen, you can do a one-time service upgrade via the client's menu.
+            <br />
+            <br />
+            If you're connected to the service, you'll have unrestricted access to everything.
+            <br />
+            <br />
+            Note:  While you can technically remote into your own computer, it's not recommended.  You'll get an "infinite loop tunnel" that's difficult to explain and even more difficult to look at, and moving your cursor over the remote control window will make your mouse cursor jump to the edges of your monitor.
+        </div>
+        <h2>
+            Installing the Service
+        </h2>
+        <div>
+            The service can be installed via the menu in InstaTech_Client.exe or using the "-install" switch on the command line.  Both the client and the service EXEs will accept the -install switch.
+            <br /><br />
+            If you don't have a current method available for deploying the service to remote machines, you can try the deployer script I created at <a href="https://instatech.azurewebsites.net/Downloads/?scrollto=divUtilities" target="_blank">https://instatech.azurewebsites.net/Downloads/?scrollto=divUtilities</a>
+        </div>
+        <h2>
+            Shared Hosting
+        </h2>
+        <div>
+            If you extracted the files for shared hosting, you should have a ZIP file on your desktop.  The ZIP file contains everything that needs to be put into the root of your website.
+        </div>
+        <br />
+        <div>
+            You will need to go through your hosting provider to install an SSL certificate.  You'll also need to make sure they have the following features enabled:
+            <ul>
+                <li>ASP.NET 4.5</li>
+                <li>Web Socket Protocol</li>
+                <li>Request Filtering</li>
+            </ul>
+        </div>
+        <h2>
+            Going Forward
+        </h2>
+        <div>
+            For in-depth documentation on all aspects of the InstaTech Server and Client, please see the full reference guide.  If you have any questions, feel free to email me at <a href="mailto:translucency@outlook.com">translucency@outlook.com</a>.
+            <br /><br />
+            Thank you for choosing InstaTech!
+            <br /><br />
+            <span style="margin-left: 20px">- Jared Goodwin</span>
+        </div>
+    </div>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .body-frame {
+            margin: 5px 20px 5px 20px;
+            background-color: rgb(230, 230, 230);
+            padding: 5px 20px 20px 20px;
+        }
+        h2 {
+            margin-bottom: 5px;
+        }
+    </style>
+</body>
+</html>

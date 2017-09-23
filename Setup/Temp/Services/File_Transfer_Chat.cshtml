@@ -1,0 +1,36 @@
+﻿@{
+    var di = Directory.CreateDirectory(Server.MapPath("~/App_Data/File_Transfers_Chat/"));
+
+    if (Request.RequestType == "GET")
+    {
+        var fileName = Request.QueryString[0];
+        Response.AddHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+        Response.ContentType = MimeMapping.GetMimeMapping(fileName);
+        Response.WriteFile(di.FullName + fileName);
+    }
+    else if (Request.RequestType == "POST")
+    {
+        foreach (var key in Request.Files.AllKeys)
+        {
+            var file = Request.Files[key];
+            var filName = Path.GetFileNameWithoutExtension(file.FileName);
+            var extName = Path.GetExtension(file.FileName);
+            var count = 0;
+            while (File.Exists(di.FullName + filName + extName))
+            {
+                filName = Path.GetFileNameWithoutExtension(file.FileName) + count.ToString();
+                count++;
+            }
+            file.SaveAs(di.FullName + filName + extName);
+            Response.Write(filName + extName);
+        }
+    }
+    // Delete files older than a day.
+    foreach (var file in di.GetFiles())
+    {
+        if (DateTime.Now - file.CreationTime > TimeSpan.FromDays(1))
+        {
+            file.Delete();
+        }
+    }
+}

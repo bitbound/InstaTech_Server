@@ -1,0 +1,164 @@
+﻿@{ }
+<div id="divTechChat" hidden onload="initTechChat()">
+    <div class="portal-content-frame">
+        <div class="frame-title">
+            <small>Support Chat</small>
+            <button onclick="$('#divTechChat').slideToggle()">X</button>
+        </div>
+        <div id="divTechChatEnterFrame">
+            Click Enter to begin taking support cases.
+            <br />
+            <br />
+            <button type="button" onclick="enterTechChat()">Enter</button>
+        </div>
+        <div id="divQueueFrame" hidden>
+            <div class="right-aligned">
+                <button onclick="exitTechChat()">Exit Chat</button>
+            </div>
+            <div id="divQueueTable">
+                <div class="col1" style="width:150px">
+                    <div class="queue-title">
+                        Queues
+                        <div class="arrow-down"></div>
+                    </div>
+                    <div class="queue-list">
+                        <div id="divQueueAll" class="queue-block" queue="All">All (<span class="queue-volume"></span>)</div>
+                    </div>
+                </div>
+                <div class="col2" style="width:0">
+                    <div class="queue-title">
+                        Cases
+                        <div class="arrow-down"></div>
+                    </div>
+                    <div class="queue-list"></div>
+                </div>
+                <div class="col3" style="width:0; height:0;">
+                    <div class="queue-title">
+                        Details
+                        <div class="arrow-down"></div>
+                    </div>
+                    <div class="queue-list">
+                        <table>
+                            <tr>
+                                <td>
+                                    <label>Case ID:</label>
+                                </td>
+                                <td>
+                                    <input id="inputTechQueueCaseID" readonly type="text" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>First Name:</label>
+                                </td>
+                                <td colspan="2">
+                                    <input id="inputTechQueueFirstName" readonly type="text" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>Last Name:</label>
+                                </td>
+                                <td colspan="2">
+                                    <input id="inputTechQueueLastName" readonly type="text" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>User ID:</label>
+                                </td>
+                                <td colspan="2">
+                                    <input id="inputTechQueueUserID" readonly type="text" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>Computer Name:</label>
+                                </td>
+                                <td colspan="2">
+                                    <input id="inputTechQueueComputerName" readonly type="text" />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <label>Phone:</label>
+                                </td>
+                                <td colspan="2">
+                                    <input id="inputTechQueuePhone" readonly type="tel" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>Email:</label>
+                                </td>
+                                <td colspan="2">
+                                    <input id="inputTechQueueEmail" readonly type="email" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>Category:</label>
+                                </td>
+                                <td colspan="2">
+                                    <input id="inputTechQueueCategory" readonly />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>Type:</label>
+                                </td>
+                                <td colspan="2">
+                                    <input id="inputTechQueueType" readonly />
+                                </td>
+                            </tr>
+                            <tr><td><br /></td></tr>
+                            <tr>
+                                <td colspan="3">
+                                    <label>Details of Problem or Request:</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="3">
+                                    <textarea  id="textTechQueueDetails" readonly ></textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="left-aligned">
+                                    <button title="Transfer the case to another queue by reassigning the category and type." onclick='moveCase(event)'>Move</button>
+                                </td>
+                                <td class="center-aligned">
+                                    <button title="Lock the case for 20 seconds so no one else can take it, giving you time to prep." onclick='lockCase(event)'>Lock</button>
+                                </td>
+                                <td class="right-aligned">
+                                    <button id="buttonTake" title="Take the case and begin chatting with the customer." onclick="takeCase(event)">Take</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="divChatBoxTech" class="left-aligned chat-frame" ondragover="dragOverTechChat(event)" ondrop="dropOnTechChat(event)" hidden>
+            <div>
+                <div id="divTechMessages" class="chat-messages">
+                </div>
+                <div id="divTechChatSidebar" class="chat-sidebar">
+                    <button title="Transfer files.  You can also drag-and-drop files onto the chat window." onclick='$("#inputTechFile").click()'>Transfer File</button>
+                    <br />
+                    <button title="Send the case back to the queue." onclick="sendToQueue(event)">Send to Queue</button>
+                    <br />
+                    <button title="Close this session and mark it as resolved." onclick="closeTechSession(event)">Close Session</button>
+                    <br />
+                    <input id="inputTechFile" type="file" hidden multiple onchange='transferFileTech(this.files);' />
+                </div>
+            </div>
+            <div id="divTechStatus" class="chat-status"> </div>
+            <div id="divTechInput" class="chat-input-frame">
+                <textarea id="textTechInput" placeholder="Type your message here." onkeydown='techKeyDown(event)' />
+                <button id="buttonTechSend" onclick="submitTechMessage(event)">Send</button>
+            </div>
+            <div id="divCustomerStatusBar"></div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,36 @@
+﻿@{ }
+<div id="divAccountCenter" hidden onload="initAccountCenter()">
+    <div class="portal-content-frame" style="width: 90vw;">
+        <div class="frame-title">
+            <small>Account Center</small>
+            <button onclick="$('#divAccountCenter').slideToggle()">X</button>
+        </div>
+        <div style="height:40px;">
+            <input id="inputSearchTechs" type="text" placeholder="Search..." style="float:left; margin-top: 10px; margin-left: 10px" onchange="searchTechs()" oninput="searchTechs()" />
+            <img id="accountSaveOK" src="~/Assets/Images/Checkmark_64x.png" title="Save account." onclick="saveTechAccount()" style="float:left; height:25px; width:25px; margin-left: 15px; margin-top: 10px; cursor: pointer; display:none" />
+            <img id="accountSaveCancel" src="~/Assets/Images/Cancel_48x.png" title="Cancel editing." onclick="cancelEditing()" style="float:left; height:25px; width:25px; margin-left: 15px; margin-top: 10px; cursor: pointer; display:none" />
+            <button style="float:right; margin-left: 15px;" onclick="refreshAccountCenter()">Refresh</button>
+            <button style="float:right; margin-left: 15px;" onclick="editTechAccount()">Edit</button>
+            <button style="float:right; margin-left: 15px;" onclick="deleteTechAccount()">Delete</button>
+            <button style="float:right;" onclick="newTechAccount()">New</button>
+        </div>
+        <div style="max-height:80vh; overflow:auto">
+            <table id="tableAccountCenter" class="data-grid">
+                <thead>
+                    <tr>
+                        <td>User ID</td>
+                        <td>First Name</td>
+                        <td>Last Name</td>
+                        <td>Email</td>
+                        <td>Temp Password</td>
+                        <td>Last Bad Login</td>
+                        <td>Bad Login Count</td>
+                        <td>Computer Groups</td>
+                        <td>Access Level</td>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>

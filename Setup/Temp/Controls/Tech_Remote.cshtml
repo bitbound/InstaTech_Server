@@ -1,0 +1,39 @@
+﻿@{
+    var clientList = new List<SelectListItem>()
+    {
+        new SelectListItem() { Value = "Windows", Text = "Windows"},
+        new SelectListItem() { Value = "Windows Service", Text = "Windows Service"},
+        new SelectListItem() { Value = "Mac", Text = "Mac"},
+        new SelectListItem() { Value = "Linux", Text = "Linux"},
+    };
+    var defaultItem = clientList.Find(sli => sli.Value == InstaTech.App_Code.Config.Current.Default_RC_Download);
+    if (defaultItem != null)
+    {
+        defaultItem.Selected = true;
+    }
+}
+<div id="divTechRemote" onload="initTechRemote()" class="remote-frame-div" style="display: none;">
+    <div class="draggable-title">
+        <small>Hint: This window is draggable!</small>
+        <button onclick='$("#divTechRemote").remove()'>X</button>
+    </div>
+    <div class="center-aligned">
+        <strong>Client Download</strong>
+        <hr />
+    </div>
+    <div class="center-aligned">
+        <button onclick="downloadTechClient(event, @Json.Encode(InstaTech.App_Code.Config.Current.RC_Download_Paths))">Download</button>
+        
+        @Html.DropDownList("selectTechClientVersion", clientList)
+    </div>
+    <br />
+    <div class="center-aligned">
+        <strong>Web Remote</strong>
+        <hr />
+    </div>
+    <div class="center-aligned">
+        <a href="~/Remote_Control/" target="_blank">
+            <img src="~/Assets/Images/WebRemoteScreenshot.jpg" />
+        </a>
+    </div>
+</div>

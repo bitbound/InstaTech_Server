@@ -1,0 +1,247 @@
+﻿@{}
+<div id="divConfiguration" hidden onload="initConfiguration()">
+    <div class="portal-content-frame">
+        <div class="frame-title">
+            <small>Configuration</small>
+            <button onclick="$('#divConfiguration').slideToggle()">X</button>
+        </div>
+        <table id="tableConfiguration">
+            <tr>
+                <td>
+                </td>
+                <td>
+                    <small>Server Version: @InstaTech.App_Code.Utilities.Version</small>
+                </td>
+            </tr>
+            <tr style="height: 10px">
+                <!-- Spacer row. -->
+            </tr>
+            <tr>
+                <td>
+                    Company Name:
+                </td>
+                <td>
+                    <input id="inputCompanyName" type="text" prop="Company_Name" onchange="changeStringProperty(event)" title="The company name that will appear on the main pages." />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Default Admin:
+                </td>
+                <td>
+                    <input id="inputDefaultAdmin" type="text" prop="Default_Admin" onchange="changeStringProperty(event)" title='The username of the default administrator account.  The initial password will be set to "password".' />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Demo Mode:
+                </td>
+                <td>
+                    <div id="toggleDemoMode" class="switch-outer" prop="Demo_Mode" onclick="toggleProperty(event)" title="Enables the demo tech account and demo bots.">
+                        <div class="switch-inner"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    File Encryption:
+                </td>
+                <td>
+                    <div id="toggleFileEncryption" class="switch-outer" prop="File_Encryption" onclick="toggleProperty(event)" title="Toggles file encryption for sensitive data files in App_Data, such as tech account information.">
+                        <div class="switch-inner"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Session Recording:
+                </td>
+                <td>
+                    <div id="toggleSessionRecording" class="switch-outer" prop="Session_Recording" onclick="toggleProperty(event)" title="Toggles video recording of remote control sessions.">
+                        <div class="switch-inner"></div>
+                    </div>
+                </td>
+            </tr>
+            @*<tr>
+                <td>
+                    AD Enabled:
+                </td>
+                <td>
+                    <div id="toggleADEnabled" class="switch-outer" prop="Active_Directory_Enabled" onclick="toggleProperty(event)" title="Toggles Active Directory authentication, which replaces the built-in account system.">
+                        <div class="switch-inner"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    AD Tech Group:
+                </td>
+                <td>
+                    <input id="inputADTechGroup" type="text" prop="AD_Tech_Group" onchange="changeStringProperty(event)" title="The Active Directory group used to determine if an account has technician-level access." />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    AD Admin Group:
+                </td>
+                <td>
+                    <input id="inputADAdminGroup" type="text" prop="AD_Admin_Group" onchange="changeStringProperty(event)" title="The Active Directory group used to determine if an account has admin-level access." />
+                </td>
+            </tr>*@
+            <tr>
+                <td>
+                    Feature - Chat:
+                </td>
+                <td>
+                    <div id="toggleFeatureChat" class="switch-outer" prop="Feature_Chat" onclick="toggleProperty(event)" title="Toggles the chat feature.  If disabled, the chat button will not appear on the main page.">
+                        <div class="switch-inner"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Feature - Remote Control:
+                </td>
+                <td>
+                    <div id="toggleFeatureRemoteControl" class="switch-outer" prop="Feature_Remote_Control" onclick="toggleProperty(event)" title="Toggles the remote control feature.  If disabled, the remote control button will not appear on the main page.">
+                        <div class="switch-inner"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Feature - Account Center:
+                </td>
+                <td>
+                    <div id="toggleFeatureAccountCenter" class="switch-outer" prop="Feature_Account_Center" onclick="toggleProperty(event)" title="Toggles the account center feature.  If disabled, the account center button will not appear on the main page.">
+                        <div class="switch-inner"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Feature - Computer Hub:
+                </td>
+                <td>
+                    <div id="toggleFeatureComputerHub" class="switch-outer" prop="Feature_Computer_Hub" onclick="toggleProperty(event)" title="Toggles the computer hub feature.  If disabled, the computer hub button will not appear on the main page.">
+                        <div class="switch-inner"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Feature - Configuration:
+                </td>
+                <td>
+                    <div id="toggleFeatureConfiguration" class="switch-outer" prop="Feature_Configuration" onclick="toggleProperty(event)" title="Toggles the configuration feature.  If disabled, the configuration button will not appear on the main page.">
+                        <div class="switch-inner"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Email SMTP Server:
+                </td>
+                <td>
+                    <input id="inputEmailServer" type="text" prop="Email_Server" onchange="changeStringProperty(event)" title="The SMTP server host name to use for system-generated emails, such as for password resets." />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Email SMTP Port:
+                </td>
+                <td>
+                    <input id="inputEmailPort" type="text" prop="Email_Port" onchange="changeStringProperty(event)" title="The SMTP port to use."/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Email Username:
+                </td>
+                <td>
+                    <input id="inputEmailUsername" type="text" prop="Email_Username" onchange="changeStringProperty(event)" title="The username to use for sending emails." />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Email Password:
+                </td>
+                <td>
+                    <input id="inputEmailPassword" type="text" prop="Email_Password" onchange="changeStringProperty(event)" title="The password for the above account." />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Default RC Download:
+                </td>
+                <td>
+                    <select id="selectDefaultRCDownload" prop="Default_RC_Download" onchange="changeStringProperty(event)" title="The default download that will be selected in the remote control client drop-down list.">
+                        @{ 
+                            foreach (var option in InstaTech.App_Code.Config.Current.RC_Download_Paths)
+                            {
+                                <option value="@option.Key">@option.Key</option>
+                            }
+                        }
+                    </select>
+                </td>
+            </tr>
+            <tr style="height: 20px">
+                <!-- Spacer row. -->
+            </tr>
+            <tr>
+                <td>
+                </td>
+                <td>
+                    <a class="tooltip-anchor" title='Support Categories are major categories of support that customers will be able to choose from when starting support chat.  Support Types are subcategories that fall within a major category.  The Support Queue determines where the Category/Type combination will appear in the technician view when taking cases.'>?</a>
+                </td>
+            </tr>
+            <tr>
+                <td>Support Categories:</td>
+                <td>
+                    <select id="selectSupportCategories" onchange="changeConfigSupportCategory(event)"></select>
+                    <img src="~/Assets/Images/Add_grey_16x.svg" title="Add Category" onclick="addSupportCategory(event)" style="height: 15px; width: 15px; cursor: pointer" />
+                    <img src="~/Assets/Images/Cancel_48x.png" title="Delete Category" onclick="deleteSupportCategory(event)" style="height: 15px; width: 15px; cursor:pointer" />
+                </td>
+            </tr>
+            <tr>
+                <td>Support Types:</td>
+                <td>
+                    <select id="selectSupportTypes" onchange="changeConfigSupportType(event)"></select>
+                    <img src="~/Assets/Images/Add_grey_16x.svg" title="Add Type" onclick="addSupportType(event)" style="height: 15px; width: 15px; cursor: pointer" />
+                    <img src="~/Assets/Images/Cancel_48x.png" title="Delete Type" onclick="deleteSupportType(event)" style="height: 15px; width: 15px; cursor:pointer" />
+                </td>
+            </tr>
+            <tr>
+                <td>Support Queue:</td>
+                <td>
+                    <select id="selectSupportQueues" onchange="changeConfigSupportQueue(event)" disabled></select>
+                    <img src="~/Assets/Images/Add_grey_16x.svg" title="Add Queue" onclick="addSupportQueue(event)" style="height: 15px; width: 15px; cursor: pointer" />
+                    <img src="~/Assets/Images/Cancel_48x.png" title="Delete Queue" onclick="deleteSupportQueue(event)" style="height: 15px; width: 15px; cursor:pointer" />
+                </td>
+            </tr>
+            <tr style="height: 20px">
+                <!-- Spacer row. -->
+            </tr>
+            <tr>
+                <td>Computer Groups:</td>
+                <td>
+                    <select id="selectComputerGroups" title="Groups of computers that can be used to control unattended access.  A tech must be assigned to a particular group to access computers within it.">
+                    </select>
+                    <img src="~/Assets/Images/Add_grey_16x.svg" title="Add Group" onclick="addComputerGroup(event)" style="height: 15px; width: 15px; cursor: pointer"/>
+                    <img src="~/Assets/Images/Cancel_48x.png" title="Delete Group" onclick="deleteComputerGroup(event)" style="height: 15px; width: 15px; cursor:pointer" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<style>
+    #tableConfiguration {
+        text-align: left;
+        padding-left: 20px;
+        padding-right: 20px
+    }
+    #tableConfiguration select {
+        min-width: 150px;
+        width: auto;
+    }
+</style>

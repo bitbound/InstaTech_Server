@@ -1,0 +1,11 @@
+﻿@{
+    if (File.Exists(Server.MapPath("/Downloads/InstaTech_CP.exe")))
+    {
+        var version = System.Diagnostics.FileVersionInfo.GetVersionInfo(Server.MapPath(Server.MapPath("/Downloads/InstaTech_CP.exe"))).FileVersion.ToString();
+        Response.Write(version);
+    }
+    else
+    {
+        Response.Write("0.0.0.0");
+    }
+}

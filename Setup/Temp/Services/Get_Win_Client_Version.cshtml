@@ -1,0 +1,11 @@
+﻿@{
+    if (File.Exists(Server.MapPath(InstaTech.App_Code.Config.Current.RC_Download_Paths["Windows"])))
+    {
+        var version = System.Diagnostics.FileVersionInfo.GetVersionInfo(Server.MapPath(InstaTech.App_Code.Config.Current.RC_Download_Paths["Windows"])).FileVersion.ToString();
+        Response.Write(version);
+    }
+    else
+    {
+        Response.Write("0.0.0.0");
+    }
+}

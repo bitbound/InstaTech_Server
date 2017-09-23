@@ -1,0 +1,191 @@
+﻿@{ }
+<div id="divComputerHub" hidden onload="initComputerHub()">
+    <div class="portal-content-frame" style="width: 90vw;">
+        <div class="frame-title">
+            <small>Computer Hub</small>
+            <button onclick="$('#divComputerHub').slideToggle()">X</button>
+        </div>
+        <div style="overflow:auto">
+            <table>
+                <tr style="vertical-align:top">
+                    <td>
+                        <div>
+                            <table class="left-aligned" style="table-layout: fixed">
+                                <tr>
+                                    <td></td>
+                                    <td>
+                                        Search By:
+                                    </td>
+                                    <td>
+                                        Computer Group:
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-right: 15px">
+                                        <input id="inputSearchComputers" type="text" placeholder="Search..." title="Enter a search term, or leave blank for all." style="width:100%" onchange="searchTechs()" onkeydown="if (event.key.toLowerCase() == 'enter') { searchComputerHub() }" />
+                                    </td>
+                                    <td style="padding-right: 15px">
+                                        <select id="selectSearchBy">
+                                            <option value="Computer">Computer</option>
+                                            <option value="User">User</option>
+                                        </select>
+                                    </td>
+                                    <td style="padding-right: 15px">
+                                        <select id="selectComputerHubGroups" onfocus="populateHubComputerGroups()">
+                                            <option value="">Any</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <button onclick="searchComputerHub()">Search</button>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div style="max-height:80vh; overflow:auto">
+                            <table id="tableComputerHub" class="data-grid">
+                                <thead>
+                                    <tr>
+                                        <td>Computer Name</td>
+                                        <td>Last Reboot</td>
+                                        <td>Current User</td>
+                                        <td>Last User</td>
+                                        <td>Computer Group</td>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </td>
+                    <td id="tdHubActions" style="padding-top:30px; padding-left:10px;">
+                        <div class="center-aligned" style="text-decoration: underline; margin-bottom:10px">
+                            Actions
+                        </div>
+                        <button onclick='$("#tableComputerHub tbody tr").addClass("selected")'>Select All</button>
+                        <hr style="width: 90%" />
+                        <button onclick="remoteControlComputerHub()">Remote Control</button>
+                        <br />
+                        <button onclick='openDeployerTool()'>Deploy File</button>
+                        <br />
+                        <button onclick="openHubConsole()">Interactive Console</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="divDeployFile" class="hub-action-frame" hidden>
+            <div class="hub-action-title">
+                Deployer Tool
+                <button onclick="$('#divDeployFile').slideToggle()">X</button>
+            </div>
+            <div class="hub-action-content">
+                <div class="link" onclick="$(this).next().slideToggle()">Click for info.</div>
+                <div hidden>
+                    <div>
+                        Deploy scripts and files to the selected computer(s).  Currently supported file formats are BAT, PS1, and EXE.
+                    </div>
+                    <div>
+                        <small>
+                            Note: Remote processes are run non-interactively under the System account.  The end-user, if present, will not be able to see or interact with anything.
+                        </small>
+                    </div>
+                </div>
+                <br />
+                <table>
+                    <tr>
+                        <td>
+                            <label for="inputDeployFile">Deploy File: </label>
+                        </td>
+                        <td>
+                            <input id="inputDeployFile" type="file" name="inputDeployFile" title="Browse or drop files here." placeholder="Browse or drop files here." ondragover="inputDeployDragOver(event)" ondrop="inputDeployDrop(event)" />
+                            <input id="inputDeployFile2" type="text" readonly hidden name="inputDeployFile2" title="Drop files here." placeholder="Drop files here." ondragover="inputDeployDragOver(event)" ondrop="inputDeployDrop(event)" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="inputDeployArguments">Command Line Arguments:</label>
+                        </td>
+                        <td>
+                            <input id="inputDeployArguments" placeholder="Command line arguments..." />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td class="right-aligned">
+                            <button onclick="deployFiles()">Deploy</button>
+                        </td>
+                    </tr>
+                </table>
+                <div style="margin-top: 10px">
+                    Results:
+                    <br />
+                    <textarea id="textDeployResults" style="width:100%; height:200px" readonly></textarea>
+                    <br />
+                    <div style="margin-top: 5px">
+                        <button style="float:right" onclick='clearDeployResults()'>Clear Results</button>
+                        <button style="float:right; margin-right: 15px" onclick="convertResultsToJSON()">Convert to JSON</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="divHubConsole" class="hub-action-frame" hidden>
+            <div class="hub-action-title">
+                Interactive Scripting Console
+                <button onclick="$('#divHubConsole').slideToggle()">X</button>
+            </div>
+            <div class="hub-action-content">
+                    <div class="link" onclick="$(this).next().slideToggle()">Click for info.</div>
+                    <div hidden>
+                        <div>
+                            This interactive console will let you execute PowerShell and batch commands on the selected computer(s).
+                        </div>
+                        <div>
+                            <small>
+                                Note: Remote processes are run non-interactively under the System account.  The end-user, if present, will not be able to see or interact with anything launched by your commands.
+                            </small>
+                        </div>
+                    </div>
+                    <br />
+                    <table>
+                        <tr>
+                            <td style="width:150px">
+                                Console Mode:
+                            </td>
+                            <td>
+                                <input id="radioConsoleModePS" type="radio" form="consoleMode" name="mode" checked style="vertical-align:middle" />
+                                <label for="radioConsoleModePS" form="consoleMode" style="vertical-align:middle">PowerShell</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>
+                                <input id="radioConsoleModeBAT" type="radio" form="consoleMode" name="mode" style="vertical-align:middle" />
+                                <label for="radioConsoleModeBAT" form="consoleMode" style="vertical-align:middle">Batch (CMD)</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Output:</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <textarea id="textConsoleOutput" style="width:100%; height:200px" readonly></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <input id="inputHubConsole" type="text" placeholder="Enter your command..." style="width:calc(100% - 80px)" onkeydown="inputConsoleKeyDown(event)" onkeypress="inputConsoleKeyPress(event)" />
+                                <button type="button" style="float:right" onclick="hubConsoleSubmit(event)">Submit</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <button type="button" onclick='$("#textConsoleOutput").val("")'>Clear Output</button>
+                            </td>
+                            <td>
+                                <button type="button" onclick='sendNewConsole()'>New Session</button>
+                            </td>
+                        </tr>
+                    </table>
+            </div>
+        </div>
+    </div>
+</div>

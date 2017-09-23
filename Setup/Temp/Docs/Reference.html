@@ -1,0 +1,646 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>InstaTech Reference Guide</title>
+    <meta name="viewport" content="width=600" />
+</head>
+<body>
+    <div class="body-frame">
+        <h1>InstaTech Reference Guide</h1>
+        <div>
+            Looking for the <a href="Quick_Start.html">Quick Start Guide</a>?
+        </div>
+        <h2>
+            Table of Contents
+        </h2>
+        <ol>
+            <li>
+                <a href="#h2Building">Building</a>
+                <ul>
+                    <li>
+                        Using the Package Builder
+                    </li>
+                    <li>
+                        Building from Source
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#h2IIS">IIS Setup</a>
+                <ul>
+                    <li>
+                        Required Features
+                    </li>
+                    <li>
+                        Firewalls
+                    </li>
+                    <li>
+                        SSL Certificates
+                    </li>
+                    <li>
+                        Shared Hosting
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#h2Customizing">Customizing InstaTech</a>
+            </li>
+            <li>
+                <a href="#h2CustomerPortal">The Customer Portal</a>
+                <ul>
+                    <li>
+                        Support Chat
+                    </li>
+                    <li>
+                        Remote Session
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#h2TechPortal">The Technician Portal</a>
+                <ul>
+                    <li>
+                        Support Chat
+                    </li>
+                    <li>
+                        Remote Session
+                    </li>
+                    <li>
+                        Computer Hub
+                    </li>
+                    <li>
+                        Account Center
+                    </li>
+                    <li>
+                        Configuration
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#h2RemoteControl">The Remote Control</a>
+                <ul>
+                    <li>
+                        A Note About UAC and Windows Logon
+                    </li>
+                    <li>
+                        Interactive vs. Unattended
+                    </li>
+                    <li>
+                        Menu Options
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#h2Clients">The Client Applications</a>
+                <ul>
+                    <li>
+                        Windows Client
+                    </li>
+                    <li>
+                        Windows Service
+                    </li>
+                    <li>
+                        Cross-Platform Client (Electron Version)
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#h2Recording">Session Recording</a>
+            </li>
+            <li>
+                <a href="#h2LogFiles">Log Files</a>
+            </li>
+            <li>
+                <a href="#h2Utilities">Utilities and Scripts</a>
+            </li>
+        </ol>
+        <br />
+        <hr />
+        <br />
+
+
+        <h2 id="h2Building">
+            1. Building
+        </h2>
+        <h3>Using the Package Builder</h3>
+        <p>
+            The Package Builder, which can be found at <a target="_blank" href="https://instatech.azurewebsites.net/Downloads">https://instatech.azurewebsites.net/Downloads</a>, is the easiest way to get an InstaTech server running.  It has a form that consists of two fields.  The company name is used for the title on the Customer and Tech Portals, and the host name should be the server where InstaTech will be installed.  The clients will be modified to connect to that host, then recompiled and packaged in the installer.
+        </p>
+        <p>
+            The InstaTech server must be installed in its own IIS site.  It can't be in a virtual directory of another site.  You can use a subdomain, though.
+        </p>
+        <p>
+            Once finished, you'll be provided a download link for the installer.  The installer needs to be run on the server using administrator credentials.  Follow the prompts through the installation.  After it's finished, you may be prompted to reboot, then you can move down to the IIS Setup section.
+        </p>
+        <h3>
+            Building from Source
+        </h3>
+        <p>
+            When building from source, you'll be working with two solutions: InstaTech_Server and InstaTech_Client.  First, go into InstaTech_Server and find /App_Code/Config.cs.  This file contains all the configuration properties.  The main thing you want to change is the Company Name.  Afterward, build and deploy the site.
+        </p>
+        <p>
+            Next, go into InstaTech_Client, which has multiple projects within it.  You need to change the host name that each client will connect to and replace it with your server name.  In the .NET clients, there's a preprocessor directive at the top of the file that will say "#define Deploy" or "#define DEBUG".
+        </p>
+        <p>
+            Make sure the preprocessor directive reads "#define Deploy", and modify the appropriate variable later in the file.
+        </p>
+        <p>
+            Host names are defined in the following files and need to be changed:
+        </p>
+        <ul>
+            <li>
+                /InstaTech_Client/MainWindow.xaml.cs
+            </li>
+            <li>
+                /InstaTech_Service/Socket.cs
+            </li>
+            <li>
+                /InstaTech_CP/app/main.js
+            </li>
+        </ul>
+        <p>
+            Once the host names are changed, recompile the clients.  The cross-platform clients are built with <a target="_blank" href="http://electron.atom.io">Electron</a> and packaged with <a target="_blank" href="https://github.com/electron-userland/electron-builder">electron-builder</a>.  See their sites for documentation.  You will need Node.js tools installed to work with the Electron project in Visual Studio.  Each version (Windows/Mac/Linux) needs to be built on its respective OS.
+        </p>
+        <p>
+            Create a folder named "Downloads" at the root of the website, then put your clients within it.
+        </p>
+
+
+
+        <h2 id="h2IIS">
+            2. IIS Setup
+        </h2>
+        <h3>
+            Required Features
+        </h3>
+        <p>
+            The following features must be installed on your IIS server:
+        </p>
+        <ul>
+            <li>ASP.NET 4.5</li>
+            <li>Web Socket Protocol</li>
+            <li>Request Filtering</li>
+        </ul>
+        <p>
+            The Package Builder installer will install these features for you.
+        </p>
+        <p>
+            If you have the Linux or Mac versions available for download, you must also set a MIME type of "application/octet-stream" for the file type.  For example, you can use the following PowerShell command to set the MIME type for AppImage files:
+        </p>
+        <p>
+            Add-WebConfigurationProperty -Filter //staticContent  -Name Collection -Value @{fileExtension='.AppImage'; mimeType='application/octet-stream'}
+        </p>
+        <h3>
+            Firewalls
+        </h3>
+        <p>
+            Inbound traffic for HTTP (port 80) and HTTPS (port 443) must be allowed through the firewall.  There are built-in rules for these within Windows Firewall that can be enabled.  The ports must also be opened/forwarded in any other firewalls or routers between the server and the internet.
+        </p>
+        <p>
+            The Package Builder installer will configure Windows Firewall for you.
+        </p>
+        <h3>
+            SSL Certificates
+        </h3>
+        <p>
+            It's highly recommended that you have an SSL certificate installed before using InstaTech in production.  You must have a domain or subdomain pointing at your server's IP address.  A very fast and easy way of install an SSL certificate is a program called Certify, which can be found here: <a target="_blank" href="https://certifytheweb.com">https://certifytheweb.com</a>
+        </p>
+        <p>
+            Certify will automatically acquire a Let's Encrypt SSL certificate and install it for you.  There are other Let's Encrypt clients available as well.
+        </p>
+        <p>
+            You can use online SSL tests to make sure your SSL certificate is installed properly, such as the one at <a target="_blank" href="https://www.digicert.com/help/">https://www.digicert.com/help/</a>
+        </p>
+        <h3>
+            Shared Hosting
+        </h3>
+        <p>
+            InstaTech should work on shared hosting, provided all the above requirements are met.  The installer provides an option to extract the files instead of installing them locally.  It will place a ZIP file on your desktop that contains all the files that need to be uploaded to your website.
+        </p>
+
+
+        <h2 id="h2Customizing">
+            3. Customizing InstaTech
+        </h2>
+        <p>
+            Use the Package Builder at <a href="https://instatech.azurewebsites.net/Downloads/">https://instatech.azurewebsites.net/Downloads/</a> to customize the icons, background images, and WebSocket ports.
+        </p>
+        <p>
+            You can add custom CSS and JavaScript files to the server by adding them to "Override" folder at the root of the site.  They will be loaded after all other CSS/JS files, and they will persist through updates.  For customizing the remote control, add a sub-folder in Override named "RemoteControl" and add the files in there.
+        </p>
+
+        <h2 id="h2CustomerPortal">
+            4. The Customer Portal
+        </h2>
+        <p>
+            The Customer Portal is the main page on the InstaTech Server.  You can switch back and forth between the Customer and Technician portals using the button at the top-left.
+        </p>
+        <h3>
+            Support Chat
+        </h3>
+        <p>
+            Customers can start a support chat session by filling out and submitting this form.  The Category and Type fields are pulled from the Support_Categories property in Config.cs.  To add, change, or remove categories, you can directly edit Config.cs or use the Configuration section in the tech portal.
+        </p>
+        <p>
+            Once logged in, the customer will be placed in queue to wait for a technician to pick up the support case.
+        </p>
+        <h3>
+            Remote Control
+        </h3>
+        <p>
+            The Remote Control button displays instructions for starting a remote session.  The default download is the Windows WPF client.  Once downloaded and run, the customer would give the session code to the technician, who can then connect.
+        </p>
+
+
+
+        <h2 id="h2TechPortal">
+            5. The Technician Portal
+        </h2>
+        <p>
+            The Technician Portal can be accessed by clicking the button at the top-left of the main page, or by appending "?user=tech" to the site's URL (e.g. https://[yourhostname]/?user=tech).  You will need to log in before any options will be available.  Admin accounts will have more options than technician accounts.
+        </p>
+        <h3>
+            Support Chat
+        </h3>
+        <p>
+            On the technician side, this is where you'd view and respond to customer cases.  After clicking the Enter button, you'll see a list of all cases, sorted into their respective queues.  The Exit Chat button at the top-right will remove you from the list of available techs and close the chat interface.
+        </p>
+        <p>
+            Click on a queue to see the cases within it, then click a case to see the details.  The following buttons are available from the case details:
+        </p>
+        <ul>
+            <li>
+                <strong>Move</strong> - If the case is in the wrong queue, you can use this to put it into a different one.
+            </li>
+            <li>
+                <strong>Lock</strong> - Temporarily lock the case, which prevents other techs from taking it.  This is used to give you time to read the details before taking it.
+            </li>
+            <li>
+                <strong>Take</strong> - Assign yourself to the case and begin chatting with the customer.
+            </li>
+        </ul>
+        <p>
+            Once you take the case, you will begin chatting with the customer, and the following buttons will be available:
+        </p>
+        <ul>
+            <li>
+                <strong>Transfer File</strong> - Send a file to the customer.  It will appear as a link in the chat window.
+            </li>
+            <li>
+                <strong>Send to Queue</strong> - Take yourself off the case and send it back to the queue.
+            </li>
+            <li>
+                <strong>Close Session</strong> - Mark the case as resolved and close the chat session.
+            </li>
+        </ul>
+        <h3>
+            Remote Session
+        </h3>
+        <p>
+            Remote Session has a download link for the clients, in case you need them, and a shortcut to the remote control page.  The remote control is discussed later.
+        </p>
+        <h3>
+            Computer Hub
+        </h3>
+        <p>
+            The Computer Hub is where you can search for and interact with computers that have the InstaTech Service installed.  You can search by computer or user name, or leave it blank to search for all computers.  You can select a specific computer group to narrow your search.
+        </p>
+        <p>
+            Once you have results in the table, you can select one or more computers.  Hold Ctrl or Shift while clicking to select multiple computers, or click Select All to select all in the results table.  You can only Remote Control one computer at a time, but Deploy File and Interactive Console can be used on multiple computers at once.
+        </p>
+        <p>
+            You can also change a computer's group via the drop-down menu.  Computer groups are talked about more in the Configuration section.
+        </p>
+        <ul>
+            <li>
+                <strong>Remote Control</strong> - Opens the remote control page in a new tab and immediately connects to the selected computer.  Can only be used on one computer at a time.
+            </li>
+            <li>
+                <strong>Deploy File</strong> - Deploy a BAT, PS1, or EXE file to all selected computers.  The process will be run under the System account in session 0.
+            </li>
+            <li>
+                <strong>Interactive Console</strong> - This allows you to send PowerShell and CMD commands interactively to all selected computers.
+            </li>
+        </ul>
+        <h3>
+            Account Center
+        </h3>
+        <p>
+            This is where you can create, delete, and edit accounts for the InstaTech Server.
+        </p>
+        <p>
+            Set the temp password if you need to reset an account's password.  Afterward, when you log in with the temp password, you'll be prompted to create a new one.
+        </p>
+        <p>
+            An account can be assigned to one or more computer groups.  Hold Ctrl while clicking to select multiple.  For admins, this doesn't do anything.  For technicians, this determines which computers they'll be able to control in the Computer Hub.
+        </p>
+        <p>
+            Access Level determines what the account has access to.  Admins have access to everything.  Technicians will not have access to the Account Center or Configuration, and they can only interact with computers that are in one of their computer groups.
+        </p>
+        <h3>
+            Configuration
+        </h3>
+        <p>
+            This is where you can configure various aspects of the server.  The configuration data is saved in "/App_Data/Config.json".  Below are the details for each option.
+        </p>
+        <ul>
+            <li>
+                <strong>Company Name</strong> - Determines the name that appears in the title area of the customer and tech portals.
+            </li>
+            <li>
+                <strong>Default Admin</strong> - The name of the first administrator account that gets created automatically on first run.
+            </li>
+            <li>
+                <strong>Demo Mode</strong> - Do not use in production.  When enabled, a demo admin account will be available for anyone to use.  When logging into the support chat, simple bots will interact with you.
+            </li>
+            <li>
+                <strong>File Encryption</strong> - Files related to accounts and cases will be encrypted using System.IO.File.Encrypt method.
+            </li>
+            <li>
+                <strong>Session Recording</strong> - Remote control sessions will be recorded and saved to "/App_Data/Logs/Recordings/".  The ITR files can be played back with the InstaTech Player, which is available on the <a target="_blank" href="https://instatech.azurewebsites.net/Downloads/?scrollto=divUtilities">InstaTech Downloads page</a>.
+            </li>
+            <li>
+                <strong>Feature - XYZ</strong> - Determines which main buttons appear on the customer and tech portals.
+            </li>
+            <li>
+                <strong>Email Settings</strong> - These settings will be used to send automated emails, such as for the "Forgot Password" system.
+            </li>
+            <li>
+                <strong>Default RC Download</strong> - The remote control client that's selected by default in the Remote Session window.
+            </li>
+            <li>
+                <strong>Support Categories, Types, and Queues</strong> - These are the categories available to customers when starting a support chat session.  Categories are the first selection.  Types are sub-categories that fall within a major category.  The queue is where the category/type combination will be grouped into in the technician view.
+            </li>
+            <li>
+                <strong>Computer Groups</strong> - Computers that have the service installed can be organized into groups.  The groups in this list will be available in the Computer Hub when assigning computers to a group.
+            </li>
+        </ul>
+
+
+
+        <h2 id="h2RemoteControl">
+            6. The Remote Control
+        </h2>
+        <p>
+            The Remote Control can be found at https://[yourhostname]/Remote_Control/.  There's also a link to it from the Remote Session button in the tech portal.
+        </p>
+        <h3>
+            A Note About UAC and Windows Logon
+        </h3>
+        <p>
+            The actions you're able to perform while connected to a remote computer is limited by the privilege level of the client process.  Most people are familiar with UAC and elevating a process by choosing "Run as administrator."  However, when determining if an application is allowed to simulate keystrokes and mouse input in various situations, it gets more complicated.
+        </p>
+        <p>
+            See the below bullet points for the short version.  Here are the details, for those who are interested.  The environment in which a process is run within Windows consists of three layers: the session, the window station, and the desktop.  That is, each session can contain window stations, each window station can contain desktops, and each desktop can have processes running in it.
+        </p>
+        <p>
+            Starting with Windows Vista, all services are run in session 0.  This is called session 0 isolation.  When a user logs into Windows, they get a new session.  It starts with session 1 and increments for each new logon.
+        </p>
+        <p>
+            You can see the session number by adding the Session ID column to Task Manager under Details tab.  The desktop you're used to seeing and where you launch applications is in Session[>0]\WinSta0\Default.  That's some session greater than 0, window station 0, Default desktop.
+        </p>
+        <p>
+            There are also Winlogon and Secure desktops.  There can only be one active desktop at a time.  When the fullscreen UAC window appears (if it's set to "dim" your desktop), or when you switch to the logon screen, your default desktop gets set to inactive, and the other desktop becomes active.
+        </p>
+        <p>
+            Applications running in one desktop can't interact with a different desktop.  It must switch desktops, or close and be re-launched in the new desktop.
+        </p>
+        <p>
+            Moreover, an application requires special privileges to interact with the Windows logon desktop or the secure desktop.  The required privileges are higher than simply "Running as administrator".  In fact, only services have the necessary privileges to do so.
+        </p>
+        <p>
+            The catch is, services (which run in session 0), can't interact with the UI at all unless they have a special certificate purchased from Microsoft.  These are typically reserved for accessibility applications, such as screen readers.
+        </p>
+        <p>
+            The way around this is to have a service launch another process in the user's session, in the active desktop, with the necessary rights.  That is why you'll see two instances of InstaTech_Service.exe running when you're connected, with one in session 0 and the other in the user's session.
+        </p>
+        <p>
+            All this leads up to the below behaviors and restrictions, depending on how the InstaTech Client is launched.  The Windows client will attempt to launch with administrative rights if the user's account is an administrator.  Otherwise, it will launch as a standard user without prompting.
+        </p>
+        <ul>
+            <li>
+                <strong>Standard Process</strong> - This would be if a standard user ran the Windows client without administrative rights.  When connected, you wouldn't be able to perform any tasks requiring elevation, interact with UAC or logon screens, or upgrade to service.  If a UAC prompt appears, you be stuck until the user closes it.
+            </li>
+            <li>
+                <strong>Elevated Process</strong> - If the process was "Run as administrator", you would be able to perform certain administrative tasks, depending on the UAC level.  If UAC is set to prompt, you won't be able to interact with the prompt.  By default, the client will automatically close the UAC window and advise that you upgrade to a service.  If UAC is set to not prompt, you will be able to perform all administrative tasks.  You still can't interact with UAC windows or the logon screen, however.
+            </li>
+            <li>
+                <strong>Service Process</strong> - If connected via Unattended Mode to an installed service, or if you performed a one-time upgrade, you will be able to interact with everything.
+            </li>
+        </ul>
+        <h3>
+            Interactive vs. Unattended
+        </h3>
+        <p>
+            Interactive Mode is selected by default on the remote control page.  In this mode, it expects a session ID that the client will automatically generate when opened.  As such, a user must be present at the remote computer.
+        </p>
+        <p>
+            With Unattended Mode selected, a computer name is expected.  Only computers with the service installed can be connected to in this way.  The input box will autocomplete with available computer names once you start typing, if a match is found.
+        </p>
+        <h3>
+            Menu Options
+        </h3>
+        <p>
+            The slide-down menu at the top of the remote control screen contains additional features.
+        </p>
+        <ul>
+            <li>
+                <stronng>Refresh Screen</stronng> - If there's a rendering error in the browser, partial frames can sometimes get left behind.  Refresh Screen will redraw the entire screen to clear things up.
+            </li>
+            <li>
+                <strong>Scale to Fit</strong> - The image will be scaled to fit your browser window, both horizontally and vertically.  Turning this off will cause the image to be rendered at the actual resolution of the remote desktop.
+            </li>
+            <li>
+                <strong>Follow Cursor</strong> - If Scale to Fit is off, and the image is larger than the browser window, the browser will scroll automatically when the cursor nears the edges of the window.
+            </li>
+            <li>
+                <strong>File Transfer</strong> - Transfers a file and opens the parent directory.  You can also drag-and-drop files onto the remote control window.
+            </li>
+            <li>
+                <strong>Send Ctrl + Alt + Del (Service Only)</strong> - Sends the Ctrl + Alt + Del command.  Only available when connected to the service.
+            </li>
+            <li>
+                <strong>Uninstall Service (Service Only)</strong> - Uninstalls the service on the remote computer.
+            </li>
+            <li>
+                <strong>Send Clipboard</strong> - Paste text into the box, which will be transferred to the remote computer's clipboard.
+            </li>
+            <li>
+                <strong>Disconnect</strong> - End the remote session.
+            </li>
+        </ul>
+
+
+        <h2 id="h2Clients">
+            7. The Client Applications
+        </h2>
+        <h3>
+            Windows Client
+        </h3>
+        <p>
+            The Windows client is compatible with Windows 7, 8, and 10.  When launched, it provides a 6-digit code that can be entered into the remote control to connect.  The Windows service is embedded in the EXE and can be installed from this client.
+        </p>
+        <p>
+            <strong>Command Line Arguments:</strong>
+        </p>
+        <ul>
+            <li>
+                -install = Extracts the Windows service and installs (or upgrades) it.
+            </li>
+            <li>
+                -uninstall = Removes the Windows service, if installed.
+            </li>
+        </ul>
+        <p>
+            <strong>Main Interface:</strong>
+        </p>
+        <ul>
+            <li>
+                Session ID: A randomly generated code that can be used to connect to the client from the remote control.  Click to copy it to the clipboard.
+            </li>
+            <li>
+                Agent Status: Shows whether a technician is connected.  Click to disconnect a technician, if present.
+            </li>
+            <li>
+                Files Transferred: The number of files transferred this session.  Click to open folder and view files.
+            </li>
+        </ul>
+        <p>
+            <strong>Menu Options:</strong>
+        </p>
+        <ul>
+            <li>
+                Upgrade to Service: Only available if a technician is connected.  Performs a one-time installation of the service and reconnects the remote control to it, allowing for interaction with UAC and logon screens.  After the session is over, the service is uninstalled.
+            </li>
+            <li>
+                Open Viewer: Opens the remote control web page in the computer's default browser.
+            </li>
+            <li>
+                Unattended Access: Opens another window that allows you to install, start, stop, and remove the service.
+            </li>
+            <li>
+                Handle UAC: If enabled, UAC prompts will be closed automatically if they come up.  Otherwise, you wouldn't be able to get rid of it.  Upgrade to a service to interact with UAC prompts.
+            </li>
+            <li>
+                About: View more information about InstaTech Client.
+            </li>
+        </ul>
+        <h3>
+            Windows Service
+        </h3>
+        <p>
+            The Windows service is compatible with Windows 7, 8, and 10.  It's embedded in the Windows client, but can be installed on its own as well.  It must be installed from an elevated command prompt or process.
+        </p>
+        <p>
+            <strong>Command Line Arguments:</strong>
+        </p>
+        <ul>
+            <li>
+                -install = Extracts the Windows service and installs (or upgrades) it.
+            </li>
+            <li>
+                -uninstall = Removes the Windows service, if installed.
+            </li>
+        </ul>
+        <h3>
+            Cross-Platform Client (Electron Version)
+        </h3>
+        <p>
+            The cross-platform client is built with Electron and runs on Windows, Mac, or Linux.  It must be built from the OS that it targets.  While it can be used on Windows, the native Windows client is recommended.  This client does not contain the Windows service.
+        </p>
+        <p>
+            <strong>Main Interface:</strong>
+        </p>
+        <ul>
+            <li>
+                Session ID: A randomly generated code that can be used to connect to the client from the remote control.  Click to copy it to the clipboard.
+            </li>
+            <li>
+                Agent Status: Shows whether a technician is connected.  Click to disconnect a technician, if present.
+            </li>
+            <li>
+                Files Transferred: The number of files transferred this session.  Click to open folder and view files.
+            </li>
+        </ul>
+        <p>
+            <strong>Menu Options:</strong>
+        </p>
+        <ul>
+            <li>
+                Open Viewer: Opens the remote control web page in the computer's default browser.
+            </li>
+            <li>
+                About: View more information about InstaTech Client.
+            </li>
+        </ul>
+        <h2 id="h2Recording">
+            8. Session Recording
+        </h2>
+        <p>
+            Session recording can be enabled in the Configuration window in the tech portal.  If enabled, remote control sessions will be saved in "/App_Data/Logs/Recordings/" as an ITR file.  These files can be played back using the InstaTech Player, which is available on the <a target="_blank" href="https://instatech.azurewebsites.net/Downloads/?scrollto=divUtilities">InstaTech Downloads page</a>.
+        </p>
+
+
+        <h2 id="h2LogFiles">
+            9. Log Files
+        </h2>
+        <p>
+            Numerous log files are kept by the clients and the server.  They can be useful for diagnosing issues or for general information.  Below are the locations of various logs.
+        </p>
+        <ul>
+            <li>
+                InstaTech Client (Windows and Cross-Platform): %temp%\InstaTech_Client_Logs.txt
+            </li>
+            <li>
+                InstaTech Service: C:\Users\Public\Documents\InstaTech_Service_Logs.txt
+            </li>
+            <li>
+                Support Cases: /App_Data/Cases/
+            </li>
+            <li>
+                Computer Accounts: /App_Data/Computer_Accounts/
+            </li>
+            <li>
+                Unhandled Server Errors: /App_Data/Errors/
+            </li>
+            <li>
+                Remote Sessions (where connection between client and remote control completed): /App_Data/Logs/Connections/
+            </li>
+            <li>
+                Remote Session Recordings: /App_Data/Logs/Recordings/
+            </li>
+            <li>
+                Remote Sessions (where client initially connected): /App_Data/Logs/Sessions/
+            </li>
+            <li>
+                Technician Accounts: /App_Data/Tech_Accounts/
+            </li>
+            <li>
+                Errors Related to WebSockets: /App_Data/WebSocket_Errors/
+            </li>
+        </ul>
+
+        <h2 id="h2Utilities">
+            10. Utilities and Scripts
+        </h2>
+        <p>
+            As new utilities and scripts related to InstaTech are developed, they'll be published on the <a target="_blank" href="https://instatech.azurewebsites.net/Downloads/?scrollto=divUtilities">InstaTech Downloads page</a>.
+        </p>
+    </div>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .body-frame {
+            margin: 5px 20px 5px 20px;
+            background-color: rgb(230, 230, 230);
+            padding: 5px 20px 20px 20px;
+        }
+
+        h2 {
+            margin-bottom: 5px;
+        }
+    </style>
+</body>
+</html>

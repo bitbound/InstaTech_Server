@@ -1,0 +1,411 @@
+﻿@{
+    if (Request.Url.AbsoluteUri.ToLower().Contains("default.cshtml"))
+    {
+        Response.Redirect(Request.Url.AbsoluteUri.ToLower().Replace("/default.cshtml", ""));
+    }
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>InstaTech Remote Control</title>
+    <link href="~/favicon.ico" rel="icon" />
+    <link href="~/scripts/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/scripts/jquery-ui/jquery-ui.theme.min.css" rel="stylesheet" />
+    <link href="~/scripts/jquery-ui/jquery-ui.structure.min.css" rel="stylesheet" />
+    <meta name="viewport" content="width=600" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script src="~/scripts/jquery/jquery-3.1.1.min.js"></script>
+    <script src="~/scripts/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/scripts/Utilities.js"></script>
+    <script src="~/scripts/Remote_Control.js"></script>
+    <script src="~/scripts/Main_Model.js"></script>
+    <script src="~/scripts/Utilities.js"></script>
+    @{
+        if (Directory.Exists(Server.MapPath("~/Override/RemoteControl")))
+        {
+            foreach (var file in Directory.GetFiles(Server.MapPath("~/Override/RemoteControl")))
+            {
+                if (file.ToLower().EndsWith(".css"))
+                {
+                    <link href="~/Override/@Path.GetFileName(file)" rel="stylesheet" />
+                }
+                else if (file.ToLower().EndsWith(".js"))
+                {
+                    <script src="~/Override/@Path.GetFileName(file)"></script>
+                }
+            }
+        }
+    }
+</head>
+<body>
+    <div id="divMainTechLoginFrame">
+        <div>
+            <span id="spanMainLoginStatus"><small>Not logged in.</small></span>
+            <a class="link" id="aMainTechLogIn" onclick='$("#divMainTechLoginForm").slideToggle(function () { $("#inputTechMainUserID").focus() })'>Log In</a>
+            <a class="link" id="aMainTechLogOut" onclick="logOutTech(event)" hidden><small>Log Out</small></a>
+        </div>
+        <div id="divMainTechLoginForm" hidden>
+            <form id="formTechMainLogin" onsubmit="submitTechMainLogin(event)">
+                <button type="button" onclick='$("#divMainTechLoginForm").slideToggle()' class="close-button-title">X</button>
+                <input type="hidden" name="Type" value="TechMainLogin" />
+                <table>
+                    <tr>
+                        <td>
+                            <label for="inputTechMainUserID">User ID:</label>
+                        </td>
+                        <td>
+                            <input type="text" id="inputTechMainUserID" name="UserID" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="inputTechMainPassword">Password:</label>
+                        </td>
+                        <td>
+                            <input type="password" id="inputTechMainPassword" name="Password" required />
+                        </td>
+                    </tr>
+                    <tr hidden>
+                        <td>
+                            <label for="inputTechMainNewPassword">New Password:</label>
+                        </td>
+                        <td>
+                            <input type="password" id="inputTechMainNewPassword" name="NewPassword" min="8" max="20" />
+                        </td>
+                    </tr>
+                    <tr hidden>
+                        <td>
+                            <label for="inputTechMainConfirmNewPassword">Confirm New Password:</label>
+                        </td>
+                        <td>
+                            <input type="password" id="inputTechMainConfirmNewPassword" name="ConfirmNewPassword" min="8" max="20" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="inputTechMainRememberMe"><small>Remeber Me:</small></label>
+                        </td>
+                        <td>
+                            <input type="checkbox" id="inputTechMainRememberMe" name="RememberMe" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <button type="submit">Submit</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="right-aligned">
+                            <a class="link" onclick="forgotPasswordMain(event)">Forgot password?</a>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
+    <div id="divConnect" style="margin-left: -8px; margin-top: -8px; width:100%; height:100%; position: fixed">
+        <div style="position:absolute; top: 50%; left:50%; transform:translate(-50%, -50%); border:5px inset white; background-color:lightsteelblue; border-radius: 10%; width:275px; height: 250px">
+            <div style="text-align:center; font-family: monospace; font-size: 2em; font-weight: bold; position:relative; transform:translateY(-110%); color:white">
+                @InstaTech.App_Code.Config.Current.Company_Name<br />
+                Remote Control
+            </div>
+            <div style="position:absolute; top: 50%; left:50%; transform:translate(-50%, -50%);font-family: sans-serif">
+                <div><strong>Connect to client:</strong></div>
+                <input id="inputSessionID" class="ui-autocomplete-input" placeholder="Enter client's session ID." type="text" value='@Request.QueryString["Computer"]' pattern="[0-9 ]*" onkeypress="if (event.keyCode == 13) { connectToClient() }" style="margin: 5px 0; width:175px" />
+                <br />
+                <div style="text-align:right">
+                    <button id="buttonConnect" onclick="connectToClient()">Connect</button>
+                </div>
+                <div id="divStatus" style="font-family: sans-serif; margin-top:10px; font-size:.8em"></div>
+                <div style="margin-top:30px">
+                    <div><strong style="font-size:small">Mode:</strong></div>
+                    <div id="divInteractive" class="toggle-box selected" title="Connect with a user who is at their computer and able to give you a session ID.">Interactive</div><!--
+                    --><div id="divUnattended" class="toggle-box" title="Connect to a computer that has the service running in the background.">Unattended</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="divMain" hidden>
+        <div id="divMenuButtonWrapper" onclick="toggleMenu()">
+            <img id="imgMenu" src="/Assets/Images/MenuDown.png" />
+        </div>
+        <div id="divMenu">
+            <div style="font-weight: bold; margin: -5px -10px 15px -10px; padding: 5px 0 5px 0; text-align:center; background-color:rgb(25,25,25); color:white">Options</div>
+            <div>
+                <span>Refresh Screen:</span>
+                <button id="buttonRefresh" title="Refresh the entire screen." onclick="sendRefreshRequest()">
+                    <img src="/Assets/Images/Refresh_16x.svg" style="height:20px; width:20px" />
+                </button>
+            </div>
+            <div style="margin-top: 20px;">
+                <span>Scale to Fit:</span>
+                <div id="divScaleToFit" status="on" class="switch-outer" onclick="toggleScaleToFit()" title="Scales the images to fit the width of your browser.">
+                    <div class="switch-inner"></div>
+                </div>
+            </div>
+            <div style="margin-top: 20px;">
+                <span>Follow Cursor:</span>
+                <div id="divFollowCursor" status="on" class="switch-outer" onclick="toggleFollowCursor()" title="When the cursor is moved to the edge of the browser window, the screen will scroll to follow it.">
+                    <div class="switch-inner"></div>
+                </div>
+            </div>
+            <div style="margin-top: 20px;">
+                <span style="margin-bottom:5px;">File Transfer:</span>
+                <button type="button" style="float:right;"  title="Transfer files to the remote computer." onclick='$("#inputFile").click()'>Upload...</button>
+                <div id="divUploadHint" style="font-size: .8em; font-family:sans-serif; color:dodgerblue; cursor:pointer" onclick='showTooltip(this, "bottom", "black", "You can also drag-and-drop files onto the window to upload them.");'>(Hint!)</div>
+                <input id="inputFile" type="file" hidden multiple onchange='transferFiles(this.files)' />
+            </div>
+            <div id="divSendCtrlAltDel" style="margin-top: 10px; display:none">
+                <span>Send Ctrl+Alt+Del:</span>
+                <button type="button" style="float:right" onclick="sendCtrlAltDel()" title="Send the Ctrl+Alt+Del key combination.">Send</button>
+            </div>
+            <div id="divUninstallService" style="margin-top: 20px; display:none">
+                <span>Uninstall Service:</span>
+                <button type="button" style="float:right" onclick="sendUninstall()" title="Uninstall the service on the remote computer.">Uninstall</button>
+            </div>
+            <div style="margin-top: 20px; height: 40px;">
+                <span style="margin-bottom:5px;">Send Clipboard:</span>
+                <textarea id="textClipboard" placeholder="Paste text here." style="float:right; margin-left: 10px; width:100px; resize: none;" oninput="sendClipboard(event)"></textarea>
+            </div>
+            <button type="button" onclick="disconnect()" style="margin-top: 20px; float:right; clear:both;">Disconnect</button>
+        </div>
+
+        <canvas id="canvasRemoteControl" class="input-surface" oncontextmenu="return false"></canvas>
+        <video id="videoRemoteControl" class="input-surface" autoplay oncontextmenu="return false"></video>
+    </div>
+    <div id="divBackground"></div>
+    <style>
+        #divBackground {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: -3;
+            min-height: 99vh;
+            background: linear-gradient(to bottom left, rgb(20,20,20), rgb(100,100,100), rgb(50,50,50), rgb(100,100,100), rgb(20,20,20));
+        }
+        button {
+            border: .1vw solid lightgray;
+            background: radial-gradient(rgb(75,75,75) 0%, rgb(35,35,35) 100%);
+            cursor: pointer;
+            color: white;
+            padding: 5px 10px;
+        }
+        button:hover {
+            border: .1vw solid white;
+            background: radial-gradient(rgb(200,200,200) 0%, rgb(100,100,100) 100%);
+        }
+        td label {
+            margin-right: 10px;
+        }
+
+        form {
+            display: inline-block;
+            text-align: left;
+        }
+        form table {
+            display: block;
+        }
+        form button[type="submit"] {
+            float: right;
+        }
+        .left-aligned {
+            text-align: left;
+        }
+
+        .center-aligned {
+            text-align: center;
+        }
+
+        .right-aligned {
+            text-align: right;
+        }
+        #divMainTechLoginFrame {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            text-align: right;
+            color: white;
+            z-index: 1;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        #divMainTechLoginFrame form {
+            background-color: dimgray;
+            padding: 10px;
+            border-radius: 5px;
+            border: 2px solid white;
+        }
+        .close-button-title {
+            float: right;
+            font-size: xx-small;
+            padding: 2px 5px;
+            margin-bottom: 5px;
+        }
+        .link {
+            font-size: .8em;
+            color: steelblue;
+            cursor: pointer;
+        }
+        #divSearchComputers {
+            display: inline-block;
+            position: absolute;
+            transform: translate(180px, 50px);
+            top: 0;
+            right: 0;
+        }
+        #imgSearchComputers {
+            height: 20px;
+            width: 20px;
+            position: absolute;
+            margin-left: 5px;
+            transform: translate(25px, 22px);
+            top: 0;
+            right: 0;
+        }
+        #divMenu {
+            position: fixed;
+            background-color: lightsteelblue;
+            border: 1px solid gray;
+            min-width: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 40px;
+            display: none;
+            padding: 0 10px 20px 10px;
+            z-index: 1;
+            overflow-y: auto;
+        }
+        .toggle-box {
+            display: inline-block;
+            width: 70px;
+            height: 25px;
+            line-height: 25px;
+            background-color: gray;
+            border: 1px solid gray;
+            text-align: center;
+            cursor: pointer;
+            font-family: sans-serif;
+            font-size: .75em;
+            margin-top: 5px;
+            margin-left: 0;
+            margin-right: 0;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .toggle-box:hover {
+            background-color: lightgray;
+        }
+        .toggle-box.selected {
+            background-color: whitesmoke;
+            border: 1px solid dimgray;
+        }
+        #imgMenu {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 25px;
+            cursor: pointer;
+            transition-property: transform;
+            transition-duration: .4s;
+        }
+        #divMenuButtonWrapper {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: pointer;
+            width: 100px;
+            height: 28px;
+            background-color: lightsteelblue;
+            border-left: 1px solid white;
+            border-bottom: 1px solid white;
+            border-right: 1px solid white;
+        }
+        #divMenuButtonWrapper:hover {
+            border-left: 1px groove deepskyblue;
+            border-bottom: 1px groove deepskyblue;
+            border-right: 1px groove deepskyblue;
+            background-color: paleturquoise;
+        }
+        #imgMenu.rotated180 {
+            transform: translateX(-50%) rotateZ(180deg) rotateY(180deg);
+            transition-property: transform;
+            transition-duration: .4s;
+        }
+        .input-surface {
+            width: 100%;
+            height: calc(100vh - 55px);
+            margin-top: 30px;
+            border: 1px groove gray;
+            background-color: lightgray;
+            display: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        #buttonRefresh {
+            margin-left: 10px;
+            cursor: pointer;
+            height: 25px;
+            width: 25px;
+            padding: 0;
+            vertical-align: bottom;
+            background: transparent;
+            border-color: transparent;
+            float:right;
+        }
+
+        #buttonRefresh:hover {
+            border-color: lightblue;
+        }
+
+        .switch-outer {
+            height: 25px;
+            width: 45px;
+            float: right;
+            border-radius: 10px;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .switch-outer[status="on"] {
+            background-color: steelblue;
+            transition: .5s;
+        }
+
+        .switch-outer[status="off"] {
+            background-color: lightgray;
+            transition: .5s;
+        }
+
+        .switch-inner {
+            border-radius: 100%;
+            background-color: white;
+            height: 20px;
+            width: 20px;
+            cursor: pointer;
+            position: relative;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .switch-outer[status="on"] .switch-inner {
+            margin-left: 24%;
+            transition: .5s;
+        }
+
+        .switch-outer[status="off"] .switch-inner {
+            margin-left: -24%;
+            transition: .5s;
+        }
+    </style>
+</body>
+</html>
