@@ -230,10 +230,11 @@ $Index = $Content.IndexOf(($Content | Where-Object {$_ -like "*Services by*"})) 
 $Content[$Index] = "            <TextBlock Text=`"Services by $CompanyName`" FontSize=`"10`" FontStyle=`"Italic`" Margin=`"0,0,0,10`"></TextBlock>"
 Set-Content -Value $Content -Path "$InstallRoot\InstaTech_Client\Notifier\MainWindow.xaml" -Force
 Write-Host "Compiling Notifier..."
-$Proc = Start-Process -FilePath "$Bin\MSBuild\MSBuild.exe" -ArgumentList "/property:Configuration=Release $InstallRoot\InstaTech_Client\Notifier\Notifier.csproj" -PassThru -WindowStyle Hidden
+$Proc = Start-Process -FilePath "$Bin\MSBuild\MSBuild.exe" -ArgumentList "/property:Configuration=Release $InstallRoot\InstaTech_Client\Notifier\Notifier.csproj /fl /flp:logfile=NotifierBuildOutput.log" -PassThru -WindowStyle Hidden
 while ($Proc.HasExited -eq $false) {
     Start-Sleep -Seconds 1
 }
+[System.IO.Directory]::CreateDirectory("$InstallRoot\InstaTech_Client\Notifier\bin\Release")
 Copy-Item -Path "$InstallRoot\InstaTech_Client\Notifier\bin\Release\Notifier.exe" -Destination "$InstallRoot\InstaTech_Client\InstaTech_Service\Resources\Notifier.exe" -Force
 
 # Rebuild Service EXE.
@@ -243,10 +244,11 @@ Write-Host "Compiling service client..."
 $Index = $Content.IndexOf(($Content | Where-Object {$_ -like "*const string hostName =*"})) + 1
 $Content[$Index] = $Content[$Index].Split("=")[0] + "= `"$HostName`";"
 Set-Content -Value $Content -Path "$InstallRoot\InstaTech_Client\InstaTech_Service\Socket.cs" -Force
-$Proc = Start-Process -FilePath "$Bin\MSBuild\MSBuild.exe" -ArgumentList "/property:Configuration=Release $InstallRoot\InstaTech_Client\InstaTech_Service\InstaTech_Service.csproj" -PassThru -WindowStyle Hidden
+$Proc = Start-Process -FilePath "$Bin\MSBuild\MSBuild.exe" -ArgumentList "/property:Configuration=Release $InstallRoot\InstaTech_Client\InstaTech_Service\InstaTech_Service.csproj /fl /flp:logfile=ServiceBuildOutput.log" -PassThru -WindowStyle Hidden
 while ($Proc.HasExited -eq $false) {
     Start-Sleep -Seconds 1
 }
+[System.IO.Directory]::CreateDirectory("$InstallRoot\InstaTech_Client\InstaTech_Service\bin\Release");
 Copy-Item -Path "$InstallRoot\InstaTech_Client\InstaTech_Service\bin\Release\InstaTech_Service.exe" -Destination "$Bin\Temp\Downloads\InstaTech_Service.exe" -Force
 Copy-Item -Path "$InstallRoot\InstaTech_Client\InstaTech_Service\bin\Release\InstaTech_Service.exe" -Destination "$InstallRoot\InstaTech_Client\InstaTech_Client\Resources\InstaTech_Service.exe" -Force
 
@@ -261,10 +263,11 @@ Set-Content -Value $Content -Path "$InstallRoot\InstaTech_Client\InstaTech_Clien
 $Index = $Content.IndexOf(($Content | Where-Object {$_ -like "*const string hostName =*"})) + 1
 $Content[$Index] = $Content[$Index].Split("=")[0] + "= `"$HostName`";"
 Set-Content -Value $Content -Path "$InstallRoot\InstaTech_Client\InstaTech_Client\MainWindow.xaml.cs"
-$Proc = Start-Process -FilePath "$Bin\MSBuild\MSBuild.exe" -ArgumentList "/property:Configuration=Release $InstallRoot\InstaTech_Client\InstaTech_Client\InstaTech_Client.csproj" -PassThru -WindowStyle Hidden
+$Proc = Start-Process -FilePath "$Bin\MSBuild\MSBuild.exe" -ArgumentList "/property:Configuration=Release $InstallRoot\InstaTech_Client\InstaTech_Client\InstaTech_Client.csproj /fl /flp:logfile=ClientBuildOutput.log" -PassThru -WindowStyle Hidden
 while ($Proc.HasExited -eq $false) {
     Start-Sleep -Seconds 1
 }
+[System.IO.Directory]::CreateDirectory("$InstallRoot\InstaTech_Client\InstaTech_Client\bin\Release")
 Copy-Item -Path "$InstallRoot\InstaTech_Client\InstaTech_Client\bin\Release\InstaTech_Client.exe" -Destination "$Bin\Temp\Downloads\InstaTech_Client.exe" -Force
 
 
