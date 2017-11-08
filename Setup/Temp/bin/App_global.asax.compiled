@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="8" virtualPath="/InstaTech_Server/global.asax" hash="ffffffffe30a5838" filehash="2f8ecfc7c559" flags="150000" assembly="App_global.asax" type="ASP.global_asax">
+    <filedeps>
+        <filedep name="/InstaTech_Server/global.asax" />
+    </filedeps>
+</preserve>
