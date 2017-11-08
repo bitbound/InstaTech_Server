@@ -6,7 +6,7 @@
 .AUTHOR
    Jared Goodwin (https://invis.me)
 .UPDATED
-   September 23, 2017
+   November 8, 2017
 #>
 $ErrorActionPreference = "Suspend"
 $Host.UI.RawUI.WindowTitle = "InstaTech Setup"
@@ -226,29 +226,37 @@ New-Item -Path "$Bin\Temp\Downloads" -ItemType "Directory" -Force | Out-Null
 # Rebuild Notifier EXE.
 Write-Host
 [string[]]$Content = Get-Content -Path "$InstallRoot\InstaTech_Client\Notifier\MainWindow.xaml"
-$Index = $Content.IndexOf(($Content | Where-Object {$_ -like "*Services by*"})) + 1
-$Content[$Index] = "            <TextBlock Text=`"Services by $CompanyName`" FontSize=`"10`" FontStyle=`"Italic`" Margin=`"0,0,0,10`"></TextBlock>"
+$Index = $Content.IndexOf(($Content | Where-Object {$_ -like "*<TextBlock Text=`"Services by*"}))
+$Content[$Index] = "  <TextBlock Text=`"Services by $CompanyName`" FontSize=`"10`" FontStyle=`"Italic`" Margin=`"0,0,0,10`"></TextBlock>"
 Set-Content -Value $Content -Path "$InstallRoot\InstaTech_Client\Notifier\MainWindow.xaml" -Force
 Write-Host "Compiling Notifier..."
 $Proc = Start-Process -FilePath "$Bin\MSBuild\MSBuild.exe" -ArgumentList "/property:Configuration=Release $InstallRoot\InstaTech_Client\Notifier\Notifier.csproj /fl /flp:logfile=NotifierBuildOutput.log" -PassThru -WindowStyle Hidden
 while ($Proc.HasExited -eq $false) {
     Start-Sleep -Seconds 1
 }
-[System.IO.Directory]::CreateDirectory("$InstallRoot\InstaTech_Client\Notifier\bin\Release")
+if ((Test-Path "$InstallRoot\InstaTech_Client\Notifier\bin\Release\Notifier.exe") -eq $false){
+    Wrap-Host -Text "Failed to compile Notifier." -ForegroundColor Red
+    Read-Host "Press Enter to exit"
+    return
+}
 Copy-Item -Path "$InstallRoot\InstaTech_Client\Notifier\bin\Release\Notifier.exe" -Destination "$InstallRoot\InstaTech_Client\InstaTech_Service\Resources\Notifier.exe" -Force
 
 # Rebuild Service EXE.
 Write-Host
 Write-Host "Compiling service client..."
 [string[]]$Content = Get-Content -Path "$InstallRoot\InstaTech_Client\InstaTech_Service\Socket.cs"
-$Index = $Content.IndexOf(($Content | Where-Object {$_ -like "*const string hostName =*"})) + 1
+$Index = $Content.IndexOf(($Content | Where-Object {$_ -like "*const string hostName =*"} | Select-Object -Last 1))
 $Content[$Index] = $Content[$Index].Split("=")[0] + "= `"$HostName`";"
 Set-Content -Value $Content -Path "$InstallRoot\InstaTech_Client\InstaTech_Service\Socket.cs" -Force
 $Proc = Start-Process -FilePath "$Bin\MSBuild\MSBuild.exe" -ArgumentList "/property:Configuration=Release $InstallRoot\InstaTech_Client\InstaTech_Service\InstaTech_Service.csproj /fl /flp:logfile=ServiceBuildOutput.log" -PassThru -WindowStyle Hidden
 while ($Proc.HasExited -eq $false) {
     Start-Sleep -Seconds 1
 }
-[System.IO.Directory]::CreateDirectory("$InstallRoot\InstaTech_Client\InstaTech_Service\bin\Release");
+if ((Test-Path "$InstallRoot\InstaTech_Client\InstaTech_Service\bin\Release\InstaTech_Service.exe") -eq $false){
+    Wrap-Host -Text "Failed to compile InstaTech Service." -ForegroundColor Red
+    Read-Host "Press Enter to exit"
+    return
+}
 Copy-Item -Path "$InstallRoot\InstaTech_Client\InstaTech_Service\bin\Release\InstaTech_Service.exe" -Destination "$Bin\Temp\Downloads\InstaTech_Service.exe" -Force
 Copy-Item -Path "$InstallRoot\InstaTech_Client\InstaTech_Service\bin\Release\InstaTech_Service.exe" -Destination "$InstallRoot\InstaTech_Client\InstaTech_Client\Resources\InstaTech_Service.exe" -Force
 
@@ -256,18 +264,22 @@ Copy-Item -Path "$InstallRoot\InstaTech_Client\InstaTech_Service\bin\Release\Ins
 Write-Host
 Write-Host "Compiling WPF client..."
 [string[]]$Content = Get-Content -Path "$InstallRoot\InstaTech_Client\InstaTech_Client\MainWindow.xaml"
-$Index = $Content.IndexOf(($Content | Where-Object {$_ -like "*Services by*"})) + 1
-$Content[$Index] = "                    <TextBlock Text=`"Services by $CompanyName`" FontStyle=`Italic` VerticalAlignment=`Top` HorizontalAlignment=`Left`></TextBlock>"
+$Index = $Content.IndexOf(($Content | Where-Object {$_ -like "*<TextBlock Text=`"Services by*"}))
+$Content[$Index] = "                    <TextBlock Text=`"Services by $CompanyName`" FontStyle=`"Italic`" VerticalAlignment=`"Top`" HorizontalAlignment=`"Left`"></TextBlock>"
 Set-Content -Value $Content -Path "$InstallRoot\InstaTech_Client\InstaTech_Client\MainWindow.xaml" -Force
 [string[]]$Content = Get-Content -Path "$InstallRoot\InstaTech_Client\InstaTech_Client\MainWindow.xaml.cs"
-$Index = $Content.IndexOf(($Content | Where-Object {$_ -like "*const string hostName =*"})) + 1
+$Index = $Content.IndexOf(($Content | Where-Object {$_ -like "*const string hostName =*"} | Select-Object -Last 1))
 $Content[$Index] = $Content[$Index].Split("=")[0] + "= `"$HostName`";"
 Set-Content -Value $Content -Path "$InstallRoot\InstaTech_Client\InstaTech_Client\MainWindow.xaml.cs"
 $Proc = Start-Process -FilePath "$Bin\MSBuild\MSBuild.exe" -ArgumentList "/property:Configuration=Release $InstallRoot\InstaTech_Client\InstaTech_Client\InstaTech_Client.csproj /fl /flp:logfile=ClientBuildOutput.log" -PassThru -WindowStyle Hidden
 while ($Proc.HasExited -eq $false) {
     Start-Sleep -Seconds 1
 }
-[System.IO.Directory]::CreateDirectory("$InstallRoot\InstaTech_Client\InstaTech_Client\bin\Release")
+if ((Test-Path "$InstallRoot\InstaTech_Client\InstaTech_Client\bin\Release\InstaTech_Client.exe") -eq $false){
+    Wrap-Host -Text "Failed to compile InstaTech Client." -ForegroundColor Red
+    Read-Host "Press Enter to exit"
+    return
+}
 Copy-Item -Path "$InstallRoot\InstaTech_Client\InstaTech_Client\bin\Release\InstaTech_Client.exe" -Destination "$Bin\Temp\Downloads\InstaTech_Client.exe" -Force
 
 
