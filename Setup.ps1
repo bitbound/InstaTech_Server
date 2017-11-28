@@ -511,7 +511,9 @@ foreach ($File in $Files) {
         }
     }
 }
-
+if (!(Test-Path -Path "$InstallPath\App_Data")) {
+    New-Item -Path "$InstallPath\App_Data" -ItemType Directory | Out-Null
+}
 ### Set ACL on website folders and files ###
 Wrap-Host
 Wrap-Host "Setting ACLs..." -ForegroundColor Green
