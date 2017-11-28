@@ -149,9 +149,22 @@ else {
 }
 #endregion
 
+### Building Requirements ###
+Wrap-Host
+Wrap-Host "**********************************"
+Wrap-Host "           IMPORTANT" -ForegroundColor Green
+Wrap-Host "**********************************"
+Wrap-Host
+Wrap-Host "In order to build the InstaTech clients, you must have the .NET 4.5.2 developer pack installed (or Visual Studio)."
+Wrap-Host
+Wrap-Host "If you have not already done so, please download and install it from the following link:"
+Wrap-Host
+Wrap-Host "https://www.microsoft.com/net/download/thank-you/net452-developer-pack"
+Wrap-Host
+Read-Host "Press Enter to continue"
+Clear-Host
 
 ### License Agreement ###
-
 Wrap-Host
 Wrap-Host "**********************************"
 Wrap-Host "        License Agreement" -ForegroundColor Green
@@ -207,6 +220,9 @@ Clear-Host
 
 ### Download Client Files ###
 try {
+    if ((Test-Path -Path "$ParentFolder\InstaTech_Client\")){
+        Remove-Item -Path "$ParentFolder\InstaTech_Client\" -Recurse -Force
+    }
     Wrap-Host "Downloading client files..."
     Invoke-WebRequest -Uri "https://api.github.com/repos/Jay-Rad/InstaTech_Client/zipball/master" -OutFile "$ParentFolder\InstaTech_Client.zip"
     Wrap-Host "Extracting client files..."
@@ -311,7 +327,7 @@ $Option = $null
 while ($Option -eq $null) {
     Clear-Host
     Wrap-Host
-    Wrap-Host "Building complete.  The compiled website can be found in $PSScriptHost\Setup\Temp\."
+    Wrap-Host "Building complete.  The compiled website can be found in $PSSCriptRoot\Setup\Temp\."
     Wrap-Host
     Wrap-Host
     Wrap-Host "Do you want to manually copy the files somewhere or install them on this machine?"
@@ -325,7 +341,7 @@ while ($Option -eq $null) {
         $Option = $null
     }
     elseif ($Option -eq "0") {
-        Start-Process -FilePath "$PSScriptHost\Setup\Temp\"
+        Start-Process -FilePath "$PSSCriptRoot\Setup\Temp\"
         return
     }
 }
