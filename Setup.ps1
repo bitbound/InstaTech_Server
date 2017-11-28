@@ -327,7 +327,7 @@ $Option = $null
 while ($Option -eq $null) {
     Clear-Host
     Wrap-Host
-    Wrap-Host "Building complete.  The compiled website can be found in $PSSCriptRoot\Setup\Temp\."
+    Wrap-Host "Building complete.  The compiled website can be found in $PSScriptRoot\Setup\Temp\."
     Wrap-Host
     Wrap-Host
     Wrap-Host "Do you want to manually copy the files somewhere or install them on this machine?"
@@ -341,7 +341,7 @@ while ($Option -eq $null) {
         $Option = $null
     }
     elseif ($Option -eq "0") {
-        Start-Process -FilePath "$PSSCriptRoot\Setup\Temp\"
+        Start-Process -FilePath "$PSScriptRoot\Setup\Temp\"
         return
     }
 }
