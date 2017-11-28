@@ -4,9 +4,9 @@
 .DESCRIPTION
    Installs the InstaTech Server and all its dependencies.
 .AUTHOR
-   Jared Goodwin (https://invis.me)
+   Jared Goodwin (http://invis.me)
 .UPDATED
-   November 8, 2017
+   November 28, 2017
 #>
 $ErrorActionPreference = "Suspend"
 $Host.UI.RawUI.WindowTitle = "InstaTech Setup"
@@ -153,9 +153,9 @@ Wrap-Host "**********************************"
 Wrap-Host
 Wrap-Host "By continuing this installation, you're agreeing to the license terms published at:" -ForegroundColor Cyan
 Wrap-Host
-Wrap-Host "https://instatech.invis.me/Docs/InstaTech_Server_License.html" -ForegroundColor Cyan
+Wrap-Host "http://instatech.invis.me/Docs/InstaTech_Server_License.html" -ForegroundColor Cyan
 Wrap-Host
-Wrap-Host "If the web page is unavailable for any reason, please contact translucency@outlook.com for a copy before proceeding." -ForegroundColor Cyan
+Wrap-Host "If the web page is unavailable for any reason, please contact Translucency_Software@outlook.com for a copy before proceeding." -ForegroundColor Cyan
 Wrap-Host
 Wrap-Host "If you do not accept the agreement, please close this window now.  Otherwise, press Enter to agree and continue." -ForegroundColor Cyan
 Wrap-Host
@@ -191,6 +191,9 @@ $HostName = Read-Host "What will be the host name of your site, minus the protoc
 Wrap-Host
 Wrap-Host
 Wrap-Host "Okay.  The apps will be recompiled using the company name of $CompanyName and will connect to the server at $HostName." -ForegroundColor Green
+Wrap-Host
+Wrap-Host
+Wrap-Host "Build logs for each client application can be found in the InstaTech_Server root folder."
 Wrap-Host
 Wrap-Host
 Read-Host "Press Enter to begin installation."
@@ -282,7 +285,16 @@ if ((Test-Path "$InstallRoot\InstaTech_Client\InstaTech_Client\bin\Release\Insta
 }
 Copy-Item -Path "$InstallRoot\InstaTech_Client\InstaTech_Client\bin\Release\InstaTech_Client.exe" -Destination "$Bin\Temp\Downloads\InstaTech_Client.exe" -Force
 
-
+Clear-Host
+Wrap-Host
+Wrap-Host
+Wrap-Host "Building complete.  The compiled website can be found in \InstaTech_Server\Setup\Temp\."
+Wrap-Host
+Wrap-Host
+Wrap-Host "You can deploy the files to a remote server, or press Enter to continue installation on this machine."
+Wrap-Host
+Wrap-Host
+Read-Host "Press Enter to continue installation"
 
 ### Automatic IIS Setup ###
 if ($ServerCmdlets) {
