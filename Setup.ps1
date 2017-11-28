@@ -25,6 +25,7 @@ if ($PSScriptRoot -eq ""){
 }
 $InstallRoot = (Get-Item -Path $PSScriptRoot).Parent.FullName
 $Bin = "$PSScriptRoot\Setup"
+$ParentFolder = (New-Object System.IO.DirectoryInfo $PSScriptRoot).Parent
 #endregion
 
 #region Functions
@@ -81,8 +82,6 @@ function Wrap-Host
     {
     }
 }
-#endregion
-
 function Retry-Block ($ScriptBlock, $TryCount, $ErrorVar) {
     Start-Sleep -Seconds 2
     Write-Host
@@ -108,6 +107,7 @@ function Retry-Block ($ScriptBlock, $TryCount, $ErrorVar) {
         }
     }
 }
+#endregion
 
 
 #region Prerequisite Tests
@@ -119,10 +119,17 @@ if ((New-Object Security.Principal.WindowsPrincipal $User).IsInRole([Security.Pr
     Read-Host "Press Enter to exit"
     return
 }
-### Check for project files. ###
-if ((Test-Path -Path "InstaTech_Server.sln") -eq $false -or (Test-Path -Path "..\InstaTech_Client\InstaTech_Client.sln") -eq $false) {
+### Check Script Root ###
+if (!$PSScriptRoot) {
     Wrap-Host
-    Wrap-Host "Error: Could not find the solution files.  Please make sure you run this script from the same directory as the InstaTech_Server.sln file, and that the InstaTech Client solution file is at ..\InstaTech_Client\InstaTech_Client.sln, relative to this location." -ForegroundColor Red
+    Wrap-Host "Error: Unable to determine working directory.  Please make sure you're running the full script and not just a section." -ForegroundColor Red
+    Read-Host "Press Enter to exit"
+    return
+}
+### Check for project files. ###
+if ((Test-Path -Path "$PSScriptRoot\InstaTech_Server.sln") -eq $false) {
+    Wrap-Host
+    Wrap-Host "Error: Could not find the InstaTech_Server solution file.  Please make sure you run this script from the same directory as the InstaTech_Server.sln file." -ForegroundColor Red
     Read-Host "Press Enter to exit"
     return
 }
@@ -134,7 +141,7 @@ if ($OS.Name.ToLower().Contains("home") -or $OS.Caption.ToLower().Contains("home
     Read-Host "Press Enter to exit"
     return
 }
-### Test if PowerShell cmdlets are available. ###
+### Test if Windows Feature cmdlets are available. ###
 if ((Get-Command -Name "Add-WindowsFeature" -ErrorAction Ignore) -eq $null) {
     $ServerCmdlets = $false
 }
@@ -170,9 +177,9 @@ Wrap-Host "**********************************"
 Wrap-Host
 Wrap-Host "Hello, and thank you for trying out InstaTech!" -ForegroundColor Green
 Wrap-Host
-Wrap-Host "This setup script will install InstaTech on this machine.  Please make sure you've already created a website in IIS where InstaTech will be installed." -ForegroundColor Green
+Wrap-Host "This setup script will install InstaTech on this machine, or provide the files for deployment to a remote server.  If installing to this machine, please make sure you've already created a website in IIS where InstaTech will be installed." -ForegroundColor Green
 Wrap-Host
-Wrap-Host "If you encounter any problems or have any questions, please contact translucency@outlook.com." -ForegroundColor Green
+Wrap-Host "If you encounter any problems or have any questions, please contact Translucency_Software@outlook.com." -ForegroundColor Green
 Wrap-Host
 Read-Host "Press Enter to continue"
 Clear-Host
@@ -199,7 +206,14 @@ Wrap-Host
 Read-Host "Press Enter to begin installation."
 Clear-Host
 
-
+### Download Client Files ###
+Wrap-Host "Downloading client files..."
+Invoke-WebRequest -Uri "https://api.github.com/repos/Jay-Rad/InstaTech_Client/zipball/master" -OutFile "$ParentFolder\InstaTech_Client.zip"
+Wrap-Host "Extracting client files..."
+Expand-Archive -Path "$ParentFolder\InstaTech_Client.zip" -DestinationPath "$ParentFolder\InstaTech_Client\"
+Get-ChildItem -Path (Get-ChildItem -Path "$ParentFolder\InstaTech_Client\").FullName | ForEach-Object {
+    Move-Item -Path $_.FullName -Destination "$ParentFolder\InstaTech_Client\$($_.Name)"
+}
 
 ### Compiling ASP.NET Site ###
 if ((Test-Path -Path "$Bin\Temp")){
@@ -285,16 +299,28 @@ if ((Test-Path "$InstallRoot\InstaTech_Client\InstaTech_Client\bin\Release\Insta
 }
 Copy-Item -Path "$InstallRoot\InstaTech_Client\InstaTech_Client\bin\Release\InstaTech_Client.exe" -Destination "$Bin\Temp\Downloads\InstaTech_Client.exe" -Force
 
-Clear-Host
-Wrap-Host
-Wrap-Host
-Wrap-Host "Building complete.  The compiled website can be found in \InstaTech_Server\Setup\Temp\."
-Wrap-Host
-Wrap-Host
-Wrap-Host "You can deploy the files to a remote server, or press Enter to continue installation on this machine."
-Wrap-Host
-Wrap-Host
-Read-Host "Press Enter to continue installation"
+$Option = $null
+while ($Option -eq $null) {
+    Clear-Host
+    Wrap-Host
+    Wrap-Host "Building complete.  The compiled website can be found in $PSScriptHost\Setup\Temp\."
+    Wrap-Host
+    Wrap-Host
+    Wrap-Host "Do you want to manually copy the files somewhere or install them on this machine?"
+    Wrap-Host
+    Wrap-Host
+    Wrap-Host "[0] - Open the folder so I can copy them manually."
+    Wrap-Host "[1] - Install on this machine."
+    Wrap-Host
+    $Option = Read-Host "Choose an option"
+    if ($Option -ne "0" -and $Option -ne "1") {
+        $Option = $null
+    }
+    elseif ($Option -eq "0") {
+        Start-Process -FilePath "$PSScriptHost\Setup\Temp\"
+        return
+    }
+}
 
 ### Automatic IIS Setup ###
 if ($ServerCmdlets) {
