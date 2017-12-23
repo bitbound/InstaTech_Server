@@ -6,7 +6,7 @@
 .AUTHOR
    Jared Goodwin (http://invis.me)
 .UPDATED
-   November 28, 2017
+   December 23, 2017
 #>
 $ErrorActionPreference = "Suspend"
 $Host.UI.RawUI.WindowTitle = "InstaTech Setup"
@@ -226,7 +226,8 @@ try {
     Wrap-Host "Downloading client files..."
     Invoke-WebRequest -Uri "https://api.github.com/repos/Jay-Rad/InstaTech_Client/zipball/master" -OutFile "$ParentFolder\InstaTech_Client.zip"
     Wrap-Host "Extracting client files..."
-    Expand-Archive -Path "$ParentFolder\InstaTech_Client.zip" -DestinationPath "$ParentFolder\InstaTech_Client\"
+	[System.Reflection.Assembly]::LoadWithPartialName("System.IO.Compression.FileSystem") | Out-Null
+	[System.IO.Compression.ZipFile]::ExtractToDirectory("$ParentFolder\InstaTech_Client.zip", "$ParentFolder\InstaTech_Client\")
     Get-ChildItem -Path (Get-ChildItem -Path "$ParentFolder\InstaTech_Client\").FullName | ForEach-Object {
         Move-Item -Path $_.FullName -Destination "$ParentFolder\InstaTech_Client\$($_.Name)"
     }
