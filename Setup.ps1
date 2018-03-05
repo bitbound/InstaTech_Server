@@ -224,6 +224,7 @@ try {
         Remove-Item -Path "$ParentFolder\InstaTech_Client\" -Recurse -Force
     }
     Wrap-Host "Downloading client files..."
+	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     Invoke-WebRequest -Uri "https://api.github.com/repos/Jay-Rad/InstaTech_Client/zipball/master" -OutFile "$ParentFolder\InstaTech_Client.zip"
     Wrap-Host "Extracting client files..."
 	[System.Reflection.Assembly]::LoadWithPartialName("System.IO.Compression.FileSystem") | Out-Null
