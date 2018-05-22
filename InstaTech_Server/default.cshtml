@@ -21,24 +21,6 @@
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="company-name" content="@InstaTech.App_Code.Config.Current.Company_Name" />
         <meta name="version" content="@InstaTech.App_Code.Utilities.Version" />
-        @if (File.Exists(Server.MapPath("~/Assets/Images/favicon.ico")))
-        {
-            try
-            {
-                var result = new System.Net.WebClient().UploadFile("https://instatech.azurewebsites.net/Services/Downloader/", Server.MapPath("~/Assets/Images/favicon.ico"));
-                <meta name="favicon" content="System.Text.Encoding.UTF8.GetString(result)" />
-            }
-            catch { }
-        }
-        @if (File.Exists(Server.MapPath("~/Assets/Images/ITCBackground.png")))
-        {
-            try
-            {
-                var result = new System.Net.WebClient().UploadFile("https://instatech.azurewebsites.net/Services/Downloader/", Server.MapPath("~/Assets/Images/ITCBackground.png"));
-                <meta name="itc-background" content="@System.Text.Encoding.UTF8.GetString(result)" />
-            }
-            catch { }
-        }
         <link href="~/Default.css" rel="stylesheet" />
         <link href="~/scripts/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
         <link href="~/scripts/jquery-ui/jquery-ui.theme.min.css" rel="stylesheet" />
@@ -126,16 +108,16 @@
             </svg>
             <div id="divMainMenuOuter" onmouseout='mouseOutMenu("main")'>
                 <div id="divMainMenuInner">
-                    <div class="menu-option" onclick='window.open("https://instatech.azurewebsites.net/Downloads/?scrollto=divUtilities", "_blank")'>
+                    <div class="menu-option" onclick='window.open("https://instatech.lucent.rocks/Downloads/?scrollto=divUtilities", "_blank")'>
                         Utilities & Scripts
                     </div>
                     <div class="menu-option" onclick='window.open("/Docs/Reference.html", "_blank")'>
                         Reference Guide
                     </div>
-                    <div class="menu-option" onclick='window.open("https://instatech.azurewebsites.net/Contact/Bug_Report", "_blank")'>
+                    <div class="menu-option" onclick='window.open("https://instatech.lucent.rocks/Contact/Bug_Report", "_blank")'>
                         Report a Bug
                     </div>
-                    <div class="menu-option" onclick='window.open("https://instatech.azurewebsites.net/Contact/Feature_Request", "_blank")'>
+                    <div class="menu-option" onclick='window.open("https://instatech.lucent.rocks/Contact/Feature_Request", "_blank")'>
                         Request a Feature
                     </div>
                 </div>

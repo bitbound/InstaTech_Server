@@ -680,13 +680,13 @@ text-align: center;
 /*** Account Center ***/
 .data-grid {
     vertical-align: bottom;
-    border: 3px groove black;
     border-radius: 5px;
+    background-color: white;
+    border-collapse: collapse;
 }
 
 .data-grid thead {
     font-weight: bold;
-    background-color: lightsteelblue;
     padding: 5px;
 }
 
@@ -707,11 +707,11 @@ text-align: center;
 }
 
 .data-grid tbody tr:hover {
-    background-color: lightskyblue;
+    background-color: rgb(200, 200, 200);
 }
 
 .data-grid tbody tr.selected {
-    background-color: lightgreen;
+    background-color: lightblue;
 }
 
 .data-grid select {

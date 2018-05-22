@@ -13,7 +13,7 @@ namespace InstaTech.App_Code {
     public static class Utilities
     {
         public static string App_Data { get; } = HttpContext.Current.Server.MapPath("~/App_Data/");
-        public static string Version { get; } = "1.8.4";
+        public static string Version { get; } = "1.9.0";
 
         public static List<Tech_Account> Tech_Accounts
         {

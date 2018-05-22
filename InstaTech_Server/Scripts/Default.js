@@ -20,6 +20,7 @@ function switchToTechPortal() {
     $("#divCustomerPortal").fadeOut(function () {
         $("#divTechPortal").fadeIn();
     });
+    window.location.href = location.origin + "#tech";
 }
 function submitTechMainLogin(e) {
     if (e) {
@@ -143,6 +144,7 @@ function switchToCustomerPortal() {
     $("#divTechPortal").fadeOut(function () {
         $("#divCustomerPortal").fadeIn();
     });
+    location.href = location.origin + "#customer";
 }
 // Sets the onclick event handler for .portal-option-button elements.  The element
 // must have attributes "opens" and "opens-file".  "Opens-file" must be the name of the file
@@ -239,7 +241,7 @@ function addText(strMessage) {
 };
 //function checkVersion() {
 //    var thisVersion = $('meta[name="version"]')[0].content;
-//    $.get("https://instatech.azurewebsites.net/Services/Get_Server_Version.cshtml", function (data) {
+//    $.get("https://instatech.lucent.rocks/Services/Get_Server_Version.cshtml", function (data) {
 //        if (data != thisVersion && data != "0.0.0") {
 //            addNotification("New Version", function () {
 //                var buttons = [
@@ -307,9 +309,9 @@ function addText(strMessage) {
 //                                                break;
 //                                            case "BuildCompleted":
 //                                                var link = document.createElement("a");
-//                                                link.href = 'https://instatech.azurewebsites.net/Services/Downloader/?id=' + jsonData.DownloadID;
+//                                                link.href = 'https://instatech.lucent.rocks/Services/Downloader/?id=' + jsonData.DownloadID;
 //                                                link.target = "_blank";
-//                                                link.innerHTML = 'https://instatech.azurewebsites.net/Services/Downloader/?id=' + jsonData.DownloadID;
+//                                                link.innerHTML = 'https://instatech.lucent.rocks/Services/Downloader/?id=' + jsonData.DownloadID;
 //                                                link.style.color = "highlight";
 //                                                $("#divBuildCompleted h4").append(link);
 //                                                $("#divBuildCompleted").fadeIn();
@@ -373,7 +375,7 @@ $(document).ready(function () {
         removeLoading();
     });
     setPortalButtonHandlers();
-    if (window.location.search.toLocaleLowerCase().search("user=tech") > -1) {
+    if (window.location.href.toLocaleLowerCase().search("#tech") > -1) {
         $("#divCustomerPortal").hide();
         $("#divTechPortal").show();
     }

@@ -4,9 +4,9 @@
 .DESCRIPTION
    Installs the InstaTech Server and all its dependencies.
 .AUTHOR
-   Jared Goodwin (http://invis.me)
+   Jared Goodwin (https://lucent.rocks)
 .UPDATED
-   December 23, 2017
+   May 21, 2018
 #>
 $ErrorActionPreference = "Suspend"
 $Host.UI.RawUI.WindowTitle = "InstaTech Setup"

@@ -7,6 +7,7 @@ using System.Web.Helpers;
 using InstaTech.App_Code.Models;
 using System.IO;
 using System.Text;
+using System.Timers;
 
 namespace InstaTech.App_Code.Socket_Handlers
 {
@@ -26,6 +27,9 @@ namespace InstaTech.App_Code.Socket_Handlers
         public int BadLoginAttempts { get; set; } = 0;
         public Tech_Account TechAccount { get; set; }
         public ConnectionTypes? ConnectionType { get; set; }
+        private Timer PingTimer { get; } = new Timer();
+        private DateTime LastHeartbeatReceived { get; set; } = DateTime.Now;
+
         public enum ConnectionTypes
         {
             ClientApp,
@@ -458,6 +462,25 @@ namespace InstaTech.App_Code.Socket_Handlers
                     }
                     Load();
                     Save();
+                    PingTimer.Interval = 30000;
+                    PingTimer.Elapsed += (sender, args) =>
+                    {
+                        if (!SocketCollection.Contains(this))
+                        {
+                            Close();
+                            return;
+                        }
+                        if (DateTime.Now - LastHeartbeatReceived > TimeSpan.FromMinutes(1))
+                        {
+                            Close();
+                            return;
+                        }
+                        var ping = new
+                        {
+                            Type = "Ping"
+                        };
+                        Send(Json.Encode(ping));
+                    };
                 }
                 else if (ConnectionType == ConnectionTypes.ClientServiceOnce)
                 {
@@ -478,6 +501,12 @@ namespace InstaTech.App_Code.Socket_Handlers
         {
             try
             {
+                if (!SocketCollection.Contains(this))
+                {
+                    Close();
+                    return;
+                }
+                LastHeartbeatReceived = DateTime.Now;
                 ComputerName = JsonData?.ComputerName?.ToString()?.Trim()?.ToLower() ?? ComputerName ?? "";
                 CurrentUser = JsonData?.CurrentUser?.ToString()?.Trim()?.ToLower() ?? "";
                 if (JsonData.LastReboot != null) {

@@ -75,7 +75,8 @@ function handleFileDeploy(e) {
     else if (e.Status == "ok") {
         InstaTech.Temp.DeployResults = InstaTech.Temp.DeployResults || [];
         InstaTech.Temp.DeployResults.push(e);
-        $("#textDeployResults")[0].value += "[SUCCESS]\nComputer: " + e.TargetComputer + "\nExit Code: " + e.ExitCode + "\nOutput: " + e.Output;
+        $("#textDeployResults")[0].value += "[SUCCESS]\nComputer: " + e.TargetComputer + "\nExit Code: " + e.ExitCode
+            + "\nOutput: " + e.Output + "\Errors: " + e.Error;
     }
     $("#textDeployResults")[0].value += "\n-------------------------\n\n";
     $("#textDeployResults")[0].scrollTop = $("#textDeployResults")[0].scrollHeight;

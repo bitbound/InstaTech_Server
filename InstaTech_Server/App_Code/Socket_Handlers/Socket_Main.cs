@@ -323,7 +323,8 @@ namespace InstaTech.App_Code.Socket_Handlers
                     TargetComputer = JsonData.TargetComputer,
                     FromID = JsonData.FromID,
                     ExitCode = JsonData.ExitCode,
-                    Output = JsonData.Output
+                    Output = JsonData.Output,
+                    Error = JsonData.Error
                 };
                 File.AppendAllText(filePath, Json.Encode(entry) + Environment.NewLine);
             }
