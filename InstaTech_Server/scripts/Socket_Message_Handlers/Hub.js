@@ -91,7 +91,6 @@ function handleConsoleCommand(e) {
     else if (e.Status == "ok") {
         $("#textConsoleOutput")[0].value += "[" + e.TargetComputer + "]: " + e.Output + "\n";
     }
-    //$("#textConsoleOutput")[0].value += "\n-------------------------\n\n";
     $("#textConsoleOutput")[0].scrollTop = $("#textConsoleOutput")[0].scrollHeight;
 }
 function handleNewConsole(e) {
@@ -104,6 +103,5 @@ function handleNewConsole(e) {
     else if (e.Status == "ok") {
         $("#textConsoleOutput")[0].value += "[" + e.TargetComputer + "]: New console session started.\n";
     }
-    //$("#textConsoleOutput")[0].value += "\n-------------------------\n\n";
     $("#textConsoleOutput")[0].scrollTop = $("#textConsoleOutput")[0].scrollHeight;
 }
