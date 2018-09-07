@@ -2,7 +2,7 @@
 An ASP.NET server for remote control, live support chat, and workstation management.
 
 Client Repo: https://github.com/Jay-Rad/InstaTech_Client  
-Website: http://instatech.lucent.rocks
+Website: https://instatech.lucency.co
 
 ### Building
 You can use the Setup.ps1 script to install InstaTech.  You must run the script on the Windows computer that will be hosting InstaTech.  The script will ask you for a company name and hostname, then recompile all apps with those variables.
