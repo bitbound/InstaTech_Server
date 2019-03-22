@@ -1,4 +1,5 @@
 # InstaTech Server
+## InstaTech has been discontinued.  Please see the new project, Remotely, at https://github.com/jay-rad/remotely.
 An ASP.NET server for remote control, live support chat, and workstation management.
 
 Client Repo: https://github.com/Jay-Rad/InstaTech_Client  
